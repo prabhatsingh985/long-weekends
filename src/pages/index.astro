@@ -1,11 +1,325 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import "../styles/global.css";
+import Navbar from "../components/Navbar.astro";
+import Hero from "../components/Hero.astro";
+import AiOptimizer from "../components/AiOptimizer.astro";
+import MonthTabs from "../components/MonthTabs.astro";
+import Footer from "../components/Footer.astro";
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Long Weekendai — Dynamic Leave Math & Long Weekend Solver (2026)</title>
+  <meta name="description" content="Dynamically calculate maximum continuous days off for exact leave budgets. Verified DoPT & RBI Gazetted Holiday Solver." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-[#fafafa] text-[#171717] font-sans antialiased min-h-screen flex flex-col">
+
+  <Navbar />
+  <Hero />
+  <AiOptimizer />
+  <MonthTabs />
+
+  <main class="flex-1 py-10 px-6 max-w-[1200px] mx-auto w-full">
+
+    <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-xs font-bold px-3 py-1 bg-[#171717] text-white rounded-full" id="resultsBadge">0 Plans</span>
+        <span class="text-xs text-[#666666] font-medium" id="resultsSubtext">Calculated live by dynamic vacation solver</span>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs text-[#666666] font-medium">
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#0070f3]"></span><span>Weekend</span></div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#10b981]"></span><span>Public Holiday</span></div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#f5a623]"></span><span>Apply Leave (PTO)</span></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
+
+    <div class="hidden text-center py-16 px-6 bg-white border border-[#ebebeb] rounded-2xl shadow-sm" id="emptyState">
+      <div class="text-4xl mb-3">🏖️</div>
+      <h3 class="font-bold text-lg text-[#171717] mb-1">No exact long weekend found for this specific month & leave count</h3>
+      <p class="text-xs text-[#888888] max-w-md mx-auto">Try selecting "All Upcoming (Aug – Dec)" or adjusting your leave budget count.</p>
+    </div>
+
+  </main>
+
+  <Footer />
+
+  <script>
+    import { solveVacationPlans, CURRENT_DATE_REF } from "../data/vacation-solver";
+
+    let state = {
+      selectedRegion: "ALL",
+      workWeek: 5,
+      selectedLeaves: 0,
+      selectedMonth: "ALL"
+    };
+
+    function init() {
+      bindEvents();
+      render();
+    }
+
+    function bindEvents() {
+      const regionSelect = document.getElementById("navRegionSelector");
+      const btn5D = document.getElementById("btnWorkweek5");
+      const btn6D = document.getElementById("btnWorkweek6");
+      const chips = document.querySelectorAll(".chip-btn");
+      const customChipWrapper = document.getElementById("customChipWrapper");
+      const customInput = document.getElementById("customLeavesInput");
+      const btnInc = document.getElementById("btnIncLeave");
+      const btnDec = document.getElementById("btnDecLeave");
+      const tabs = document.querySelectorAll(".month-tab-btn");
+      const aiInput = document.getElementById("aiPromptInput");
+      const btnAi = document.getElementById("btnAskAi");
+
+      if (regionSelect) {
+        regionSelect.addEventListener("change", (e) => {
+          state.selectedRegion = e.target.value;
+          render();
+        });
+      }
+
+      if (btn5D && btn6D) {
+        btn5D.addEventListener("click", () => {
+          btn5D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white";
+          btn6D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]";
+          state.workWeek = 5;
+          render();
+        });
+        btn6D.addEventListener("click", () => {
+          btn6D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white";
+          btn5D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]";
+          state.workWeek = 6;
+          render();
+        });
+      }
+
+      chips.forEach((chip) => {
+        if (chip.id === "customChipWrapper") return;
+        chip.addEventListener("click", () => {
+          chips.forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          state.selectedLeaves = parseInt(chip.dataset.leaves || "0", 10);
+          render();
+        });
+      });
+
+      if (customChipWrapper && customInput) {
+        customChipWrapper.addEventListener("click", () => {
+          chips.forEach((c) => c.classList.remove("active"));
+          customChipWrapper.classList.add("active");
+          const val = parseInt(customInput.value || "4", 10);
+          state.selectedLeaves = Math.max(val, 4);
+          render();
+        });
+
+        if (btnInc) {
+          btnInc.addEventListener("click", (e) => {
+            e.stopPropagation();
+            chips.forEach((c) => c.classList.remove("active"));
+            customChipWrapper.classList.add("active");
+            let val = parseInt(customInput.value || "4", 10);
+            if (val < 15) val += 1;
+            customInput.value = String(val);
+            state.selectedLeaves = val;
+            render();
+          });
+        }
+
+        if (btnDec) {
+          btnDec.addEventListener("click", (e) => {
+            e.stopPropagation();
+            chips.forEach((c) => c.classList.remove("active"));
+            customChipWrapper.classList.add("active");
+            let val = parseInt(customInput.value || "4", 10);
+            if (val > 4) val -= 1;
+            customInput.value = String(val);
+            state.selectedLeaves = val;
+            render();
+          });
+        }
+
+        customInput.addEventListener("input", () => {
+          chips.forEach((c) => c.classList.remove("active"));
+          customChipWrapper.classList.add("active");
+          const val = parseInt(customInput.value || "4", 10);
+          state.selectedLeaves = Math.max(val, 1);
+          render();
+        });
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          state.selectedMonth = tab.dataset.month || "ALL";
+          render();
+        });
+      });
+
+      if (btnAi && aiInput) {
+        btnAi.addEventListener("click", () => handleAiQuery(aiInput.value));
+        aiInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") handleAiQuery(aiInput.value);
+        });
+      }
+    }
+
+    function handleAiQuery(query) {
+      if (!query || !query.trim()) return;
+      const lower = query.toLowerCase();
+
+      if (lower.includes("october") || lower.includes("oct")) state.selectedMonth = "10";
+      else if (lower.includes("september") || lower.includes("sep")) state.selectedMonth = "09";
+      else if (lower.includes("november") || lower.includes("nov") || lower.includes("diwali")) state.selectedMonth = "11";
+      else if (lower.includes("december") || lower.includes("dec") || lower.includes("christmas") || lower.includes("new year")) state.selectedMonth = "12";
+      else if (lower.includes("august") || lower.includes("aug") || lower.includes("rakhi")) state.selectedMonth = "08";
+      else state.selectedMonth = "ALL";
+
+      const numMatch = lower.match(/(\d+)\s*leave/);
+      if (numMatch) {
+        state.selectedLeaves = parseInt(numMatch[1], 10);
+      } else if (lower.includes("no leave") || lower.includes("free") || lower.includes("zero leave")) {
+        state.selectedLeaves = 0;
+      }
+
+      const chips = document.querySelectorAll(".chip-btn");
+      const customChip = document.getElementById("customChipWrapper");
+      const customInput = document.getElementById("customLeavesInput");
+
+      chips.forEach((c) => c.classList.remove("active"));
+      if (state.selectedLeaves <= 3) {
+        const matchingChip = document.querySelector(`.chip-btn[data-leaves="${state.selectedLeaves}"]`);
+        if (matchingChip) matchingChip.classList.add("active");
+      } else {
+        if (customChip && customInput) {
+          customChip.classList.add("active");
+          customInput.value = String(state.selectedLeaves);
+        }
+      }
+
+      document.querySelectorAll(".month-tab-btn").forEach((t) => {
+        if ((t.dataset.month || "ALL") === state.selectedMonth) t.classList.add("active");
+        else t.classList.remove("active");
+      });
+
+      render();
+    }
+
+    function formatDateRange(startStr, endStr) {
+      const s = new Date(startStr + "T00:00:00");
+      const e = new Date(endStr + "T00:00:00");
+      return s.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + " – " + e.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    }
+
+    function render() {
+      const grid = document.getElementById("vacationGrid");
+      const empty = document.getElementById("emptyState");
+      const badge = document.getElementById("resultsBadge");
+      const subtext = document.getElementById("resultsSubtext");
+
+      const plans = solveVacationPlans({
+        leaves: state.selectedLeaves,
+        workWeek: state.workWeek,
+        region: state.selectedRegion,
+        month: state.selectedMonth,
+        fromDate: CURRENT_DATE_REF
+      });
+
+      if (badge) badge.textContent = plans.length + (plans.length === 1 ? " Plan" : " Plans");
+      if (subtext) subtext.textContent = "Showing options with " + state.selectedLeaves + (state.selectedLeaves === 1 ? " leave" : " leaves") + " (Min 3 days continuous off)";
+
+      if (!grid || !empty) return;
+
+      if (plans.length === 0) {
+        grid.innerHTML = "";
+        empty.classList.remove("hidden");
+        return;
+      }
+
+      empty.classList.add("hidden");
+
+      grid.innerHTML = plans.map((plan) => {
+        const pillsHtml = plan.days.map((d) => {
+          let bgClass = "bg-[#f5f5f5] text-[#4d4d4d] border-[#ebebeb]";
+          if (d.type === "weekend") bgClass = "bg-[#0070f3]/10 text-[#0070f3] border-[#0070f3]/30 font-semibold";
+          else if (d.type === "holiday") bgClass = "bg-[#10b981]/15 text-[#047857] border-[#10b981]/40 font-bold";
+          else if (d.type === "leave") bgClass = "bg-[#f5a623]/20 text-[#b45309] border-[#f5a623]/50 font-bold";
+
+          return `
+            <div class="flex-1 min-w-[46px] border rounded-lg p-2 flex flex-col items-center justify-center text-center transition-all ${bgClass}">
+              <span class="text-[10px] font-bold uppercase tracking-wider">${d.dayName}</span>
+              <span class="text-sm font-bold font-mono mt-0.5">${d.dayNum}</span>
+            </div>
+          `;
+        }).join("");
+
+        let strategyBoxHtml = "";
+        if (plan.leavesRequired === 0) {
+          strategyBoxHtml = `
+            <div class="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-3.5 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-full bg-[#10b981] text-white flex items-center justify-center text-xs font-bold shrink-0">✓</span>
+                <div>
+                  <div class="text-xs font-bold text-[#166534]">0 Leaves Required (Free Long Weekend)</div>
+                  <div class="text-[11px] text-[#15803d]">Direct natural holiday connected to the weekend.</div>
+                </div>
+              </div>
+              <span class="font-mono font-bold text-xs px-2.5 py-1 bg-white border border-[#bbf7d0] rounded-md text-[#15803d] shrink-0">${plan.totalDaysOff} Days Off</span>
+            </div>
+          `;
+        } else {
+          const leaveDays = plan.days.filter(d => d.type === "leave").map(d => `${d.dayName} ${d.dayNum}`).join(", ");
+          strategyBoxHtml = `
+            <div class="bg-[#fffbeb] border border-[#fde68a] rounded-xl p-3.5 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-full bg-[#f59e0b] text-white flex items-center justify-center text-xs font-bold shrink-0">🎯</span>
+                <div>
+                  <div class="text-xs font-bold text-[#92400e]">Apply ${plan.leavesRequired} ${plan.leavesRequired === 1 ? "Leave (PTO)" : "Leaves (PTO)"}: <span class="underline decoration-[#f59e0b]">${leaveDays}</span></div>
+                  <div class="text-[11px] text-[#b45309]">Bridges holidays with weekends to yield ${plan.totalDaysOff} continuous days off.</div>
+                </div>
+              </div>
+              <span class="font-mono font-bold text-xs px-2.5 py-1 bg-white border border-[#fde68a] rounded-md text-[#b45309] shrink-0">${plan.efficiencyMultiplier}</span>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="bg-white border border-[#ebebeb] hover:border-[#a1a1a1] rounded-2xl p-6 shadow-vercel hover:shadow-vercel-lg transition-all flex flex-col justify-between gap-5">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                <span class="caption-mono px-3 py-1 rounded-full bg-[#171717] text-white text-[11px] font-bold">${plan.efficiencyMultiplier}</span>
+                <span class="font-mono text-xs font-bold text-[#0070f3]">${plan.totalDaysOff} Days Off (${plan.leavesRequired === 0 ? "0 Leaves" : plan.leavesRequired + " PTO"})</span>
+              </div>
+              
+              <h3 class="font-bold text-xl text-[#171717] tracking-tight mb-1.5">${plan.title}</h3>
+              <div class="text-xs font-semibold text-[#666666] mb-4">${formatDateRange(plan.startDate, plan.endDate)}</div>
+              
+              <div>
+                <span class="caption-mono text-[#888888] block mb-2 text-[10px]">Day-by-Day Vacation Ribbon</span>
+                <div class="flex gap-2 overflow-x-auto pb-1">
+                  ${pillsHtml}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              ${strategyBoxHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>

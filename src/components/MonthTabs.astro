@@ -1,0 +1,53 @@
+---
+---
+<section class="py-4 px-6 bg-[#fafafa] border-b border-[#ebebeb] sticky top-16 z-40">
+  <div class="max-w-[1200px] mx-auto flex items-center justify-between gap-4 overflow-x-auto">
+    <!-- Month Navigation Tabs -->
+    <div class="flex items-center gap-2">
+      <button type="button" class="month-tab-btn active" data-month="ALL">
+        All Upcoming (Aug – Dec)
+      </button>
+      <button type="button" class="month-tab-btn" data-month="08">
+        August
+      </button>
+      <button type="button" class="month-tab-btn" data-month="09">
+        September
+      </button>
+      <button type="button" class="month-tab-btn" data-month="10">
+        October
+      </button>
+      <button type="button" class="month-tab-btn" data-month="11">
+        November
+      </button>
+      <button type="button" class="month-tab-btn" data-month="12">
+        December
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .month-tab-btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    background: transparent;
+    color: #666666;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .month-tab-btn:hover {
+    color: #171717;
+    background: #ffffff;
+    border-color: #ebebeb;
+  }
+  .month-tab-btn.active {
+    background: #171717;
+    color: #ffffff;
+    border-color: #171717;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+</style>

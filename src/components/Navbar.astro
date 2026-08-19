@@ -1,0 +1,44 @@
+---
+---
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#ebebeb]">
+  <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+    <!-- Brand Logo -->
+    <a href="/" class="flex items-center gap-3 group text-decoration-none">
+      <div class="w-9 h-9 rounded-md bg-[#171717] text-white flex items-center justify-center font-mono font-bold text-sm shadow-sm">
+        LW
+      </div>
+      <div class="flex flex-col">
+        <span class="font-semibold text-lg tracking-tight text-[#171717] flex items-center gap-1.5">
+          Long Weekendai <span class="text-xs">🇮🇳</span>
+        </span>
+        <span class="caption-mono text-[10px] text-[#888888] tracking-widest">longweekendai.com</span>
+      </div>
+    </a>
+
+    <!-- Nav Controls -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <!-- Region Selector -->
+      <div class="flex items-center gap-1.5">
+        <select id="navRegionSelector" class="bg-[#fafafa] border border-[#ebebeb] text-[#171717] text-xs font-semibold rounded-md px-3 py-1.5 outline-none focus:border-[#171717] cursor-pointer">
+          <option value="ALL" selected>🇮🇳 Pan-India IT</option>
+          <option value="SOUTH">🟢 South (Bangalore / Chennai / Hyd)</option>
+          <option value="WEST">🟠 West (Mumbai / Pune)</option>
+          <option value="NORTH">🔵 North (Delhi / NCR)</option>
+          <option value="EAST">🟡 East (Kolkata)</option>
+        </select>
+      </div>
+
+      <!-- Workweek Toggle -->
+      <div class="flex items-center gap-1 bg-[#f5f5f5] p-1 rounded-md border border-[#ebebeb]">
+        <button type="button" id="btnWorkweek5" class="px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white">5-Day</button>
+        <button type="button" id="btnWorkweek6" class="px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]">6-Day</button>
+      </div>
+
+      <!-- Country Badge -->
+      <span class="hidden sm:inline-flex items-center gap-1 text-xs font-mono px-2.5 py-1 rounded-full bg-[#f5f5f5] text-[#171717] border border-[#ebebeb]">
+        <span>🇮🇳 India</span>
+        <span class="text-[#888888]">(🇺🇸 USA Soon)</span>
+      </span>
+    </div>
+  </div>
+</header>

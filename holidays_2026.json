@@ -1,0 +1,468 @@
+{
+  "year": 2026,
+  "sources": [
+    "Department of Personnel and Training (DoPT), Govt of India Gazetted Holiday List",
+    "Reserve Bank of India (RBI) Negotiable Instruments Act (NI Act) Section 25 List",
+    "State Government Official Gazettes (Karnataka, Maharashtra, Delhi, West Bengal, Tamil Nadu, Telangana)"
+  ],
+  "national_holidays": [
+    {
+      "id": "rep-2026",
+      "name": "Republic Day",
+      "date": "2026-01-26",
+      "day": "Monday",
+      "type": "National",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "National Holiday celebrating the Constitution of India. Falls on Monday offering a direct 3-day weekend (Sat 24 - Mon 26 Jan)."
+    },
+    {
+      "id": "shivratri-2026",
+      "name": "Maha Shivratri",
+      "date": "2026-02-16",
+      "day": "Monday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "Major festival honoring Lord Shiva. Falls on Monday creating a direct 3-day weekend (Sat 14 - Mon 16 Feb)."
+    },
+    {
+      "id": "holi-2026",
+      "name": "Holi",
+      "date": "2026-03-04",
+      "day": "Wednesday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "bridge_2_leaves",
+      "description": "Festival of Colors. Falls on Wednesday. Taking Thursday (Mar 5) and Friday (Mar 6) off yields a continuous 5-day holiday."
+    },
+    {
+      "id": "eid-fitr-2026",
+      "name": "Id-ul-Fitr (Ramadan Eid)",
+      "date": "2026-03-21",
+      "day": "Saturday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "weekend",
+      "description": "Culmination of holy month of Ramadan. Falls on Saturday."
+    },
+    {
+      "id": "mahavir-2026",
+      "name": "Mahavir Jayanti",
+      "date": "2026-03-31",
+      "day": "Tuesday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "bridge_1_leave",
+      "description": "Birth anniversary of Lord Mahavira. Falls on Tuesday. Taking Monday (Mar 30) off yields a 4-day weekend."
+    },
+    {
+      "id": "good-friday-2026",
+      "name": "Good Friday",
+      "date": "2026-04-03",
+      "day": "Friday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "Christian holy day commemorating the crucifixion. Falls on Friday creating a direct 3-day weekend (Fri 3 - Sun 5 Apr)."
+    },
+    {
+      "id": "buddha-purnima-2026",
+      "name": "Buddha Purnima / May Day",
+      "date": "2026-05-01",
+      "day": "Friday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "Commemorates the birth of Lord Buddha / International Labour Day. Falls on Friday creating a direct 3-day weekend (Fri 1 - Sun 3 May)."
+    },
+    {
+      "id": "eid-zuha-2026",
+      "name": "Id-ul-Zuha (Bakrid)",
+      "date": "2026-05-27",
+      "day": "Wednesday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "bridge_2_leaves",
+      "description": "Feast of the Sacrifice. Falls on Wednesday."
+    },
+    {
+      "id": "muharram-2026",
+      "name": "Muharram",
+      "date": "2026-06-26",
+      "day": "Friday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "First month of the Islamic calendar. Falls on Friday offering a direct 3-day weekend (Fri 26 - Sun 28 Jun)."
+    },
+    {
+      "id": "ind-day-2026",
+      "name": "Independence Day",
+      "date": "2026-08-15",
+      "day": "Saturday",
+      "type": "National",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "weekend",
+      "description": "National Holiday celebrating Indian independence. Falls on Saturday."
+    },
+    {
+      "id": "milad-2026",
+      "name": "Milad-un-Nabi (Id-e-Milad)",
+      "date": "2026-08-26",
+      "day": "Wednesday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "bridge_2_leaves",
+      "description": "Observance of the birthday of Islamic Prophet Muhammad. Falls on Wednesday."
+    },
+    {
+      "id": "rakhi-2026",
+      "name": "Raksha Bandhan",
+      "date": "2026-08-28",
+      "day": "Friday",
+      "type": "National / Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "Festival celebrating sibling bond. Falls on Friday creating a direct 3-day weekend (Fri 28 - Sun 30 Aug)."
+    },
+    {
+      "id": "janmashtami-2026",
+      "name": "Janmashtami (Vaishnava)",
+      "date": "2026-09-04",
+      "day": "Friday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "Birth anniversary of Lord Krishna. Falls on Friday providing a direct 3-day weekend (Fri 4 - Sun 6 Sep)."
+    },
+    {
+      "id": "gandhi-2026",
+      "name": "Mahatma Gandhi's Birthday",
+      "date": "2026-10-02",
+      "day": "Friday",
+      "type": "National",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "National Holiday honoring Mahatma Gandhi. Falls on Friday providing a direct 3-day weekend (Fri 2 - Sun 4 Oct)."
+    },
+    {
+      "id": "dussehra-2026",
+      "name": "Dussehra (Vijayadashami)",
+      "date": "2026-10-20",
+      "day": "Tuesday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "bridge_1_leave",
+      "description": "Victory of good over evil. Falls on Tuesday. Taking Monday (Oct 19) off gives a 4-day weekend."
+    },
+    {
+      "id": "diwali-2026",
+      "name": "Diwali (Laxmi Pujan)",
+      "date": "2026-11-08",
+      "day": "Sunday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "weekend",
+      "description": "Festival of Lights. Falls on Sunday."
+    },
+    {
+      "id": "govardhan-2026",
+      "name": "Govardhan Puja / Balipratipada",
+      "date": "2026-11-09",
+      "day": "Monday",
+      "type": "Restricted",
+      "isGazetted": false,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "Day following Diwali. Falls on Monday extending Diwali celebrations into a 3-day weekend (Sat 7 - Mon 9 Nov)."
+    },
+    {
+      "id": "bhai-dooj-2026",
+      "name": "Bhai Dooj",
+      "date": "2026-11-10",
+      "day": "Tuesday",
+      "type": "Restricted",
+      "isGazetted": false,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "bridge_combo",
+      "description": "Celebration of sibling bond. Combined with Monday's Govardhan Puja, creates an automatic 4-day extended holiday (Sat 7 - Tue 10 Nov)."
+    },
+    {
+      "id": "guru-nanak-2026",
+      "name": "Guru Nanak Jayanti",
+      "date": "2026-11-24",
+      "day": "Tuesday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "bridge_1_leave",
+      "description": "Birth anniversary of Guru Nanak Dev Ji. Falls on Tuesday. Taking Monday (Nov 23) gives a 4-day weekend."
+    },
+    {
+      "id": "christmas-2026",
+      "name": "Christmas Day",
+      "date": "2026-12-25",
+      "day": "Friday",
+      "type": "Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "Christmas celebration. Falls on Friday providing a direct 3-day weekend (Fri 25 - Sun 27 Dec)."
+    },
+    {
+      "id": "new-year-2027",
+      "name": "New Year's Day",
+      "date": "2027-01-01",
+      "day": "Friday",
+      "type": "National / Gazetted",
+      "isGazetted": true,
+      "states": [
+        "ALL"
+      ],
+      "longWeekendType": "direct_3_day",
+      "description": "First day of the Gregorian year 2027. Falls on Friday providing a direct 3-day weekend (Fri 1 - Sun 3 Jan 2027) and enabling the 10-day Christmas to New Year vacation."
+    }
+  ],
+  "state_specific_holidays": {
+    "KA": [
+      {
+        "id": "ka-sankranti-2026",
+        "name": "Makar Sankranti",
+        "date": "2026-01-15",
+        "day": "Thursday",
+        "state": "Karnataka",
+        "longWeekendType": "bridge_1_leave",
+        "description": "Harvest festival in Karnataka. Taking Friday (Jan 16) gives a 4-day weekend."
+      },
+      {
+        "id": "ka-ugadi-2026",
+        "name": "Ugadi (Kannada New Year)",
+        "date": "2026-03-20",
+        "day": "Friday",
+        "state": "Karnataka",
+        "longWeekendType": "direct_3_day",
+        "description": "New Year celebration in Karnataka. Falls on Friday offering a direct 3-day weekend (Fri 20 - Sun 22 Mar)."
+      },
+      {
+        "id": "ka-ambedkar-2026",
+        "name": "Dr. B.R. Ambedkar Jayanti",
+        "date": "2026-04-14",
+        "day": "Tuesday",
+        "state": "Karnataka",
+        "longWeekendType": "bridge_1_leave",
+        "description": "Birth anniversary of Dr. Ambedkar. Taking Monday (Apr 13) yields a 4-day weekend."
+      },
+      {
+        "id": "ka-ganesh-2026",
+        "name": "Ganesh Chaturthi",
+        "date": "2026-09-14",
+        "day": "Monday",
+        "state": "Karnataka",
+        "longWeekendType": "direct_3_day",
+        "description": "Arrival of Lord Ganesha. Falls on Monday offering a direct 3-day weekend (Sat 12 - Mon 14 Sep)."
+      },
+      {
+        "id": "ka-ayudha-2026",
+        "name": "Maha Navami / Ayudha Puja",
+        "date": "2026-10-19",
+        "day": "Monday",
+        "state": "Karnataka",
+        "longWeekendType": "direct_4_day_combo",
+        "description": "Combined with Tuesday Dussehra (Oct 20), creates a 4-day weekend (Sat 17 - Tue 20 Oct) without taking any leaves!"
+      },
+      {
+        "id": "ka-rajyotsava-2026",
+        "name": "Kannada Rajyotsava",
+        "date": "2026-11-01",
+        "day": "Sunday",
+        "state": "Karnataka",
+        "longWeekendType": "weekend",
+        "description": "Karnataka State Formation Day. Falls on Sunday."
+      },
+      {
+        "id": "ka-kanakadasa-2026",
+        "name": "Kanakadasa Jayanti",
+        "date": "2026-11-27",
+        "day": "Friday",
+        "state": "Karnataka",
+        "longWeekendType": "direct_3_day",
+        "description": "Birth anniversary of saint Kanakadasa. Falls on Friday offering a direct 3-day weekend (Fri 27 - Sun 29 Nov)."
+      }
+    ],
+    "MH": [
+      {
+        "id": "mh-shivaji-2026",
+        "name": "Chhatrapati Shivaji Maharaj Jayanti",
+        "date": "2026-02-19",
+        "day": "Thursday",
+        "state": "Maharashtra",
+        "longWeekendType": "bridge_1_leave",
+        "description": "Birth anniversary of Shivaji Maharaj. Taking Friday (Feb 20) yields a 4-day weekend."
+      },
+      {
+        "id": "mh-gudi-padwa-2026",
+        "name": "Gudi Padwa (Marathi New Year)",
+        "date": "2026-03-20",
+        "day": "Friday",
+        "state": "Maharashtra",
+        "longWeekendType": "direct_3_day",
+        "description": "Traditional Marathi New Year. Falls on Friday providing a direct 3-day weekend (Fri 20 - Sun 22 Mar)."
+      },
+      {
+        "id": "mh-day-2026",
+        "name": "Maharashtra Day",
+        "date": "2026-05-01",
+        "day": "Friday",
+        "state": "Maharashtra",
+        "longWeekendType": "direct_3_day",
+        "description": "State formation day. Falls on Friday offering a direct 3-day weekend (Fri 1 - Sun 3 May)."
+      },
+      {
+        "id": "mh-ganesh-2026",
+        "name": "Ganesh Chaturthi",
+        "date": "2026-09-14",
+        "day": "Monday",
+        "state": "Maharashtra",
+        "longWeekendType": "direct_3_day",
+        "description": "Grand Ganesh festival. Falls on Monday offering a direct 3-day weekend (Sat 12 - Mon 14 Sep)."
+      }
+    ],
+    "DL": [
+      {
+        "id": "dl-guru-gobind-2026",
+        "name": "Guru Gobind Singh Jayanti",
+        "date": "2026-01-05",
+        "day": "Monday",
+        "state": "Delhi / NCR",
+        "longWeekendType": "direct_3_day",
+        "description": "Birth anniversary of 10th Sikh Guru. Falls on Monday (Sat 3 - Mon 5 Jan)."
+      },
+      {
+        "id": "dl-rakhi-2026",
+        "name": "Raksha Bandhan",
+        "date": "2026-08-28",
+        "day": "Friday",
+        "state": "Delhi / NCR",
+        "longWeekendType": "direct_3_day",
+        "description": "Festival of brother-sister bond. Falls on Friday giving a direct 3-day weekend (Fri 28 - Sun 30 Aug)."
+      },
+      {
+        "id": "dl-chhath-2026",
+        "name": "Chhath Puja",
+        "date": "2026-11-15",
+        "day": "Sunday",
+        "state": "Delhi / NCR",
+        "longWeekendType": "weekend",
+        "description": "Ancient Hindu Vedic festival dedicated to Sun God. Falls on Sunday."
+      }
+    ],
+    "WB": [
+      {
+        "id": "wb-netaji-2026",
+        "name": "Netaji Subhas Chandra Bose Jayanti",
+        "date": "2026-01-23",
+        "day": "Friday",
+        "state": "West Bengal",
+        "longWeekendType": "direct_3_day",
+        "description": "Birth anniversary of Netaji. Falls on Friday providing a direct 3-day weekend (Fri 23 - Sun 25 Jan)."
+      },
+      {
+        "id": "wb-poila-2026",
+        "name": "Poila Boishakh (Bengali New Year)",
+        "date": "2026-04-15",
+        "day": "Wednesday",
+        "state": "West Bengal",
+        "longWeekendType": "bridge_2_leaves",
+        "description": "First day of the Bengali calendar."
+      },
+      {
+        "id": "wb-durga-puja-2026",
+        "name": "Durga Puja (Maha Saptami to Vijaya Dashami)",
+        "date": "2026-10-18",
+        "endDate": "2026-10-21",
+        "day": "Sunday to Wednesday",
+        "state": "West Bengal",
+        "longWeekendType": "mega_carnival",
+        "description": "West Bengal's biggest festival. Taking Thu 22 & Fri 23 off yields a massive 9-day vacation!"
+      }
+    ],
+    "TN": [
+      {
+        "id": "tn-pongal-2026",
+        "name": "Pongal / Thiruvalluvar Day / Uzhavar Thirunal",
+        "date": "2026-01-14",
+        "endDate": "2026-01-16",
+        "day": "Wednesday to Friday",
+        "state": "Tamil Nadu",
+        "longWeekendType": "direct_5_day_combo",
+        "description": "Harvest festival in Tamil Nadu. 3 days continuous off (Wed 14 - Fri 16) + Weekend = 5 Days Continuous Holiday without taking any leaves!"
+      },
+      {
+        "id": "tn-puthandu-2026",
+        "name": "Tamil New Year (Puthandu)",
+        "date": "2026-04-14",
+        "day": "Tuesday",
+        "state": "Tamil Nadu",
+        "longWeekendType": "bridge_1_leave",
+        "description": "First day of traditional Tamil calendar. Taking Mon 13 off yields a 4-day weekend."
+      }
+    ]
+  }
+}
