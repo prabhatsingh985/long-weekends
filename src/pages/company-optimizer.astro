@@ -13,6 +13,9 @@ import Footer from "../components/Footer.astro";
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  
+  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body class="bg-[#fafafa] text-[#171717] font-sans antialiased min-h-screen flex flex-col">
 
@@ -32,12 +35,6 @@ import Footer from "../components/Footer.astro";
       </a>
 
       <div class="flex items-center gap-3">
-        <!-- Workweek Toggle -->
-        <div class="flex items-center gap-1 bg-[#f5f5f5] p-1 rounded-md border border-[#ebebeb]">
-          <button type="button" id="btnWorkweek5" class="px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white">5-Day</button>
-          <button type="button" id="btnWorkweek6" class="px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]">6-Day</button>
-        </div>
-
         <a 
           href="/" 
           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f5f5f5] hover:bg-[#ebebeb] text-[#171717] text-xs font-bold border border-[#d4d4d4] transition-all no-underline"
@@ -55,82 +52,68 @@ import Footer from "../components/Footer.astro";
       
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-4 shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Version 2.0: Personalized Company Leave Solver</span>
+        <span>Version 2.0: AI-Powered PDF & Image Holiday Parser</span>
       </div>
 
       <h1 class="display-xl text-[#171717] max-w-[850px] mb-3">
         Match Your Company Holidays
       </h1>
       <p class="text-base text-[#666666] max-w-[700px] mb-8 leading-relaxed">
-        Upload your company's holiday circular (PDF, Image, or Text). The dynamic solver will recalculate all 0, 1, 2, 3+ day leave bridges specifically for your company's dates in real-time!
+        Upload your company's holiday circular (PDF, Scanned Document, Image, or Text). The dynamic solver extracts your exact dates and recalculates all leave bridges in real-time!
       </p>
 
-      <!-- Multi-Format Uploader Box -->
       <div class="bg-[#fafafa] border border-[#ebebeb] rounded-2xl p-6 shadow-sm max-w-[950px]">
         
-        <!-- Tabs -->
         <div class="flex items-center gap-2 p-1 bg-[#ebebeb] rounded-xl mb-5 w-fit">
-          <button type="button" class="tab-btn active" data-tab="tab-upload">📄 PDF / Image Upload</button>
+          <button type="button" class="tab-btn active" data-tab="tab-upload">📄 Upload PDF / Image (Auto OCR)</button>
           <button type="button" class="tab-btn" data-tab="tab-text">📝 Paste Text / Email</button>
-          <button type="button" class="tab-btn" data-tab="tab-presets">⚡ 1-Click Company Presets</button>
         </div>
 
-        <!-- TAB 1: PDF / Image Drag & Drop -->
         <div id="tab-upload" class="tab-content active">
-          <div id="dropZone" class="border-2 border-dashed border-[#d4d4d4] hover:border-[#171717] rounded-2xl p-8 text-center cursor-pointer transition-all bg-white hover:bg-[#fafafa]">
-            <input type="file" id="fileUploadInput" accept=".pdf,.png,.jpg,.jpeg,.txt" class="hidden" />
-            <div class="text-4xl mb-3">📁</div>
-            <div class="text-sm font-bold text-[#171717] mb-1">Click to Upload or Drag & Drop Holiday Circular</div>
-            <div class="text-xs text-[#888888]">Supports PDF circulars, HR screenshots (PNG/JPG), and TXT schedules</div>
+          <div id="dropZone" class="border-2 border-dashed border-[#d4d4d4] hover:border-[#171717] rounded-2xl p-8 text-center cursor-pointer transition-all bg-white hover:bg-[#fafafa] relative">
+            <input type="file" id="fileUploadInput" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" class="hidden" />
+            <div class="text-4xl mb-3" id="dropZoneIcon">📁</div>
+            <div class="text-sm font-bold text-[#171717] mb-1" id="dropZoneTitle">Click to Upload PDF or Drop Image Screenshot</div>
+            <div class="text-xs text-[#888888]" id="dropZoneSub">Supports Digital PDFs, Scanned PDF documents (Built-in OCR), and JPG/PNG screenshots</div>
+            
+            <div id="uploadSpinner" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center p-6 z-10">
+              <div class="w-8 h-8 border-3 border-[#171717] border-t-transparent rounded-full animate-spin mb-3"></div>
+              <div class="text-xs font-bold text-[#171717]" id="spinnerText">Extracting dates from document...</div>
+              <div class="text-[10px] text-[#888888] mt-1" id="spinnerSub">Running client-side deep parser & OCR</div>
+            </div>
           </div>
+
           <div id="fileUploadStatus" class="hidden mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium flex items-center justify-between">
             <span id="fileUploadStatusText">File parsed successfully!</span>
             <span class="font-mono text-[10px] font-bold px-2 py-0.5 bg-emerald-100 rounded">Parsed</span>
           </div>
         </div>
 
-        <!-- TAB 2: Text Paste -->
         <div id="tab-text" class="tab-content hidden">
           <textarea 
             id="companyTextPaste" 
             rows="5" 
-            placeholder="Paste your company holiday list or HR email here...&#10;e.g.&#10;Republic Day: 2026-01-26&#10;Holi: 2026-03-04&#10;Diwali: 2026-11-08&#10;Year-End Shutdown: 2026-12-28, 2026-12-29, 2026-12-30, 2026-12-31" 
+            placeholder="Paste your company holiday list, email or table here...&#10;e.g.&#10;01st Jan - New Year&#10;26 Jan 2026 - Republic Day&#10;4 March 2026 - Holi&#10;8th-9th Nov - Diwali&#10;25 Dec 2026 - Christmas" 
             class="w-full bg-white border border-[#ebebeb] rounded-xl p-4 text-xs text-[#171717] font-mono outline-none focus:border-[#171717] shadow-inner"
           ></textarea>
         </div>
 
-        <!-- TAB 3: Company Presets -->
-        <div id="tab-presets" class="tab-content hidden">
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <button type="button" class="preset-card" data-company="tcs">
-              <span class="font-bold text-xs text-[#171717]">TCS India</span>
-              <span class="text-[10px] text-[#888888]">10 Fixed + 2 RH</span>
-            </button>
-            <button type="button" class="preset-card" data-company="infosys">
-              <span class="font-bold text-xs text-[#171717]">Infosys</span>
-              <span class="text-[10px] text-[#888888]">Bangalore / Pan-India</span>
-            </button>
-            <button type="button" class="preset-card" data-company="google">
-              <span class="font-bold text-xs text-[#171717]">Google / Microsoft</span>
-              <span class="text-[10px] text-[#888888]">Year-End Shutdown</span>
-            </button>
-            <button type="button" class="preset-card" data-company="wipro">
-              <span class="font-bold text-xs text-[#171717]">Wipro / Accenture</span>
-              <span class="text-[10px] text-[#888888]">Standard IT List</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Detected Dates Preview Container -->
         <div id="detectedDatesBox" class="mt-5 pt-4 border-t border-[#ebebeb] hidden">
-          <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-[#171717]">Detected Dates (<span id="detectedCount">0</span> Company Holidays):</span>
-              <span class="text-[10px] text-emerald-700 bg-emerald-100 font-bold px-2 py-0.5 rounded-full">Active In Solver</span>
+              <span class="text-xs font-bold text-[#171717]">Active Company Holidays (<span id="detectedCount">0</span>):</span>
+              <span class="text-[10px] text-emerald-700 bg-emerald-100 font-bold px-2 py-0.5 rounded-full" id="activeStatusPill">Live In Solver</span>
             </div>
-            <button type="button" id="btnClearDates" class="text-xs text-red-600 hover:underline font-semibold cursor-pointer">Clear Custom Dates</button>
+            <button type="button" id="btnClearDates" class="text-xs text-red-600 hover:underline font-semibold cursor-pointer">Clear All Dates</button>
           </div>
-          <div id="detectedPills" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 bg-white rounded-xl border border-[#ebebeb]"></div>
+          
+          <div id="detectedPills" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2.5 bg-white rounded-xl border border-[#ebebeb] mb-3"></div>
+
+          <div class="flex items-center gap-2 pt-2 border-t border-[#ebebeb]">
+            <span class="text-[11px] font-semibold text-[#666666] shrink-0">+ Add Date:</span>
+            <input type="date" id="manualDateInput" min="2026-01-01" max="2027-01-10" value="2026-01-01" class="bg-white border border-[#d4d4d4] text-[#171717] text-xs font-mono px-2.5 py-1 rounded-md outline-none" />
+            <button type="button" id="btnAddManualDate" class="px-3 py-1 bg-[#171717] hover:bg-[#333333] text-white text-xs font-bold rounded-md cursor-pointer transition-all">+ Add Date</button>
+          </div>
         </div>
 
       </div>
@@ -160,7 +143,6 @@ import Footer from "../components/Footer.astro";
           <span class="chip-desc">9-Day Festival</span>
         </button>
         
-        <!-- Custom Stepper -->
         <div class="chip-btn custom-chip" id="customChipWrapper">
           <div class="flex items-center justify-between w-full">
             <span class="chip-title">Custom</span>
@@ -174,7 +156,6 @@ import Footer from "../components/Footer.astro";
         </div>
       </div>
 
-      <!-- Month Filter Pills -->
       <div class="flex items-center gap-1.5 overflow-x-auto">
         <button type="button" class="month-tab-btn active" data-month="ALL">All Upcoming</button>
         <button type="button" class="month-tab-btn" data-month="08">Aug</button>
@@ -187,13 +168,13 @@ import Footer from "../components/Footer.astro";
     </div>
   </section>
 
-  <!-- Live Vacation Grid Calculated for User's Company -->
+  <!-- Vacation Grid / Empty Prompt Section -->
   <main class="flex-1 py-10 px-6 max-w-[1200px] mx-auto w-full">
     
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
         <span class="font-mono text-xs font-bold px-3 py-1 bg-[#171717] text-white rounded-full" id="resultsBadge">0 Plans</span>
-        <span class="text-xs text-[#666666] font-medium" id="resultsSubtext">Customized for your company holiday schedule</span>
+        <span class="text-xs text-[#666666] font-medium" id="resultsSubtext">Upload your company circular above to view custom bridges</span>
       </div>
       <div class="flex items-center gap-4 text-xs text-[#666666] font-medium">
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#0070f3]"></span><span>Weekend</span></div>
@@ -202,12 +183,16 @@ import Footer from "../components/Footer.astro";
       </div>
     </div>
 
+    <!-- Live Grid (Shown ONLY when company dates exist) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
 
-    <div class="hidden text-center py-16 px-6 bg-white border border-[#ebebeb] rounded-2xl shadow-sm" id="emptyState">
-      <div class="text-4xl mb-3">🏢</div>
-      <h3 class="font-bold text-lg text-[#171717] mb-1">No exact long weekend found for this leave count</h3>
-      <p class="text-xs text-[#888888] max-w-md mx-auto">Try adjusting your leave budget or testing with company presets.</p>
+    <!-- Empty State: Displayed when no company document is uploaded yet -->
+    <div class="text-center py-20 px-6 bg-white border border-[#ebebeb] rounded-2xl shadow-sm" id="emptyState">
+      <div class="w-16 h-16 rounded-full bg-[#f5f5f5] text-3xl flex items-center justify-center mx-auto mb-4 border border-[#ebebeb]">🏢</div>
+      <h3 class="font-bold text-lg text-[#171717] mb-2" id="emptyStateTitle">No Company Holidays Uploaded Yet</h3>
+      <p class="text-xs text-[#666666] max-w-md mx-auto leading-relaxed" id="emptyStateSub">
+        Please upload your company's holiday circular (PDF, Scanned Document, Image, or Paste Text) in the box above to generate your customized leave bridges!
+      </p>
     </div>
 
   </main>
@@ -216,7 +201,7 @@ import Footer from "../components/Footer.astro";
 
   <style>
     .tab-btn {
-      padding: 6px 12px;
+      padding: 6px 14px;
       font-size: 11px;
       font-weight: 600;
       border-radius: 8px;
@@ -230,23 +215,6 @@ import Footer from "../components/Footer.astro";
       background: #ffffff;
       color: #171717;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .preset-card {
-      padding: 10px 12px;
-      background: white;
-      border: 1px solid #ebebeb;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      text-align: left;
-    }
-    .preset-card:hover {
-      border-color: #171717;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
     .chip-btn {
       background: #fafafa;
@@ -294,11 +262,26 @@ import Footer from "../components/Footer.astro";
   <script>
     import { solveVacationPlans, CURRENT_DATE_REF } from "../data/vacation-solver";
 
-    const COMPANY_PRESETS = {
-      tcs: ["2026-01-26", "2026-03-04", "2026-04-03", "2026-05-01", "2026-08-15", "2026-08-28", "2026-10-02", "2026-10-20", "2026-11-08", "2026-12-25"],
-      infosys: ["2026-01-26", "2026-03-04", "2026-03-20", "2026-04-03", "2026-05-01", "2026-08-15", "2026-09-14", "2026-10-02", "2026-10-19", "2026-10-20", "2026-11-01", "2026-12-25"],
-      google: ["2026-01-26", "2026-03-04", "2026-04-03", "2026-05-01", "2026-08-15", "2026-08-28", "2026-10-02", "2026-10-20", "2026-11-08", "2026-12-25", "2026-12-28", "2026-12-29", "2026-12-30", "2026-12-31", "2027-01-01"],
-      wipro: ["2026-01-26", "2026-03-04", "2026-04-03", "2026-05-01", "2026-08-15", "2026-10-02", "2026-10-20", "2026-11-08", "2026-11-24", "2026-12-25"]
+    declare const pdfjsLib: any;
+    declare const Tesseract: any;
+
+    if (typeof pdfjsLib !== "undefined") {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
+    const MONTH_MAP: Record<string, string> = {
+      jan: "01", january: "01",
+      feb: "02", february: "02",
+      mar: "03", march: "03",
+      apr: "04", april: "04",
+      may: "05",
+      jun: "06", june: "06",
+      jul: "07", july: "07",
+      aug: "08", august: "08",
+      sep: "09", sept: "09", september: "09",
+      oct: "10", october: "10",
+      nov: "11", november: "11",
+      dec: "12", december: "12"
     };
 
     let state = {
@@ -306,77 +289,151 @@ import Footer from "../components/Footer.astro";
       workWeek: 5,
       selectedLeaves: 0,
       selectedMonth: "ALL",
-      customHolidays: []
+      customHolidays: [] as string[]
     };
 
     function init() {
-      try {
-        const saved = localStorage.getItem("lw_custom_holidays");
-        if (saved) state.customHolidays = JSON.parse(saved);
-        else state.customHolidays = COMPANY_PRESETS.google;
-      } catch (e) {
-        state.customHolidays = COMPANY_PRESETS.google;
-      }
-
+      state.customHolidays = [];
       bindEvents();
       renderDetectedDates(state.customHolidays);
       render();
     }
 
-    function parseDatesFromText(text) {
-      const matches = new Set();
-      const isoMatches = text.match(/202[6-7]-\d{2}-\d{2}/g) || [];
-      isoMatches.forEach(m => matches.add(m));
+    function parseUniversalDates(rawText: string): string[] {
+      const datesSet = new Set<string>();
+      if (!rawText) return [];
 
-      const ddmmyyyy = text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](202[6-7])\b/g) || [];
-      ddmmyyyy.forEach(m => {
-        const parts = m.split(/[\/-]/);
-        matches.add(`${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`);
-      });
+      let cleanText = rawText
+        .replace(/\r\n/g, " ")
+        .replace(/\n/g, " ")
+        .replace(/\t/g, " ")
+        .replace(/[*#~]/g, " ")
+        .replace(/\s+/g, " ");
 
-      return Array.from(matches).sort();
+      cleanText = cleanText
+        .replace(/\b[oO](\d)(?:st|nd|rd|th)?\b/g, "0$1")
+        .replace(/\b[lI](\d)(?:st|nd|rd|th)?\b/g, "1$1");
+
+      // 1. Date Ranges: "8th-9th Nov", "8-9 Nov", "18 to 21 Oct"
+      const rangeRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-–—to]+\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,]?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(202[6-7])?\b/gi;
+      let match;
+      while ((match = rangeRegex.exec(cleanText)) !== null) {
+        const startDay = parseInt(match[1], 10);
+        const endDay = parseInt(match[2], 10);
+        const monthKey = match[3].toLowerCase();
+        const mm = MONTH_MAP[monthKey];
+        const yyyy = match[4] || "2026";
+        if (mm && startDay <= endDay && (endDay - startDay <= 10)) {
+          for (let d = startDay; d <= endDay; d++) {
+            datesSet.add(`${yyyy}-${mm}-${String(d).padStart(2, "0")}`);
+          }
+        }
+      }
+
+      // 2. Named Month format: "01st Jan", "1st Jan", "26 Jan 2026", "26-Jan-2026", "26th January 2026", "04th March, Wed"
+      const namedMonthRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,]?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(202[6-7])?\b/gi;
+      while ((match = namedMonthRegex.exec(cleanText)) !== null) {
+        const dd = match[1].padStart(2, "0");
+        const monthKey = match[2].toLowerCase();
+        const mm = MONTH_MAP[monthKey];
+        const yyyy = match[3] || "2026";
+        if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
+      }
+
+      // 3. Reverse Named Month: "January 01, 2026" or "Jan 26 2026"
+      const revNamedMonthRegex = /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[,\s]?\s*(202[6-7])?\b/gi;
+      while ((match = revNamedMonthRegex.exec(cleanText)) !== null) {
+        const monthKey = match[1].toLowerCase();
+        const mm = MONTH_MAP[monthKey];
+        const dd = match[2].padStart(2, "0");
+        const yyyy = match[3] || "2026";
+        if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
+      }
+
+      // 4. ISO format: 2026-01-26, 2026-01-01
+      const isoRegex = /\b(202[6-7])[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g;
+      while ((match = isoRegex.exec(cleanText)) !== null) {
+        const yyyy = match[1];
+        const mm = match[2].padStart(2, "0");
+        const dd = match[3].padStart(2, "0");
+        datesSet.add(`${yyyy}-${mm}-${dd}`);
+      }
+
+      // 5. Indian Numeric format: 01/01/2026, 26/01/2026, 04-03-2026, 02.10.2026
+      const indianNumRegex = /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](202[6-7]|26|27)\b/g;
+      while ((match = indianNumRegex.exec(cleanText)) !== null) {
+        const dd = match[1].padStart(2, "0");
+        const mm = match[2].padStart(2, "0");
+        let yyyy = match[3];
+        if (yyyy.length === 2) yyyy = "20" + yyyy;
+        datesSet.add(`${yyyy}-${mm}-${dd}`);
+      }
+
+      // Guaranteed baseline 1st Jan rule
+      datesSet.add("2026-01-01");
+
+      return Array.from(datesSet).sort();
     }
 
-    function renderDetectedDates(dates) {
+    function renderDetectedDates(dates: string[]) {
       const box = document.getElementById("detectedDatesBox");
       const pills = document.getElementById("detectedPills");
       const count = document.getElementById("detectedCount");
 
       if (!box || !pills || !count) return;
+      count.textContent = String(dates.length);
+
       if (dates.length === 0) {
         box.classList.add("hidden");
         return;
       }
 
       box.classList.remove("hidden");
-      count.textContent = String(dates.length);
-      pills.innerHTML = dates.map(d => 
-        `<span class="px-2 py-0.5 text-[10px] font-mono font-bold bg-[#fafafa] border border-[#d4d4d4] text-[#171717] rounded-md shadow-xs">${d}</span>`
-      ).join("");
+
+      pills.innerHTML = dates.map(d => {
+        const dateObj = new Date(d + "T00:00:00");
+        const formatted = dateObj.toLocaleDateString("en-IN", { day: "numeric", month: "short", weekday: "short" });
+        return `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold bg-[#fafafa] border border-[#d4d4d4] text-[#171717] rounded-lg shadow-xs hover:border-[#171717] transition-all">
+            <span>${formatted} (${d})</span>
+            <button type="button" class="btn-remove-date text-red-500 hover:text-red-700 font-bold ml-1 cursor-pointer" data-date="${d}" title="Remove this date">✕</button>
+          </span>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".btn-remove-date").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const targetDate = (btn as HTMLElement).dataset.date;
+          state.customHolidays = state.customHolidays.filter(dt => dt !== targetDate);
+          renderDetectedDates(state.customHolidays);
+          render();
+        });
+      });
     }
 
     function bindEvents() {
       const dropZone = document.getElementById("dropZone");
-      const fileInput = document.getElementById("fileUploadInput");
-      const textArea = document.getElementById("companyTextPaste");
+      const fileInput = document.getElementById("fileUploadInput") as HTMLInputElement;
+      const textArea = document.getElementById("companyTextPaste") as HTMLTextAreaElement;
       const btnClear = document.getElementById("btnClearDates");
       const fileStatus = document.getElementById("fileUploadStatus");
       const fileStatusText = document.getElementById("fileUploadStatusText");
-      const btn5D = document.getElementById("btnWorkweek5");
-      const btn6D = document.getElementById("btnWorkweek6");
+      const spinner = document.getElementById("uploadSpinner");
+      const spinnerText = document.getElementById("spinnerText");
 
-      if (btn5D && btn6D) {
-        btn5D.addEventListener("click", () => {
-          btn5D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white";
-          btn6D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]";
-          state.workWeek = 5;
-          render();
-        });
-        btn6D.addEventListener("click", () => {
-          btn6D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white";
-          btn5D.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]";
-          state.workWeek = 6;
-          render();
+      const manualDateInput = document.getElementById("manualDateInput") as HTMLInputElement;
+      const btnAddManualDate = document.getElementById("btnAddManualDate");
+
+      if (btnAddManualDate && manualDateInput) {
+        btnAddManualDate.addEventListener("click", () => {
+          const val = manualDateInput.value;
+          if (val && !state.customHolidays.includes(val)) {
+            state.customHolidays.push(val);
+            state.customHolidays.sort();
+            renderDetectedDates(state.customHolidays);
+            render();
+          }
         });
       }
 
@@ -385,31 +442,18 @@ import Footer from "../components/Footer.astro";
           document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
           btn.classList.add("active");
           document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
-          const target = document.getElementById(btn.dataset.tab);
+          const target = document.getElementById((btn as HTMLElement).dataset.tab || "");
           if (target) target.classList.remove("hidden");
-        });
-      });
-
-      document.querySelectorAll(".preset-card").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const comp = btn.dataset.company;
-          const dates = COMPANY_PRESETS[comp] || [];
-          state.customHolidays = dates;
-          localStorage.setItem("lw_custom_holidays", JSON.stringify(dates));
-          renderDetectedDates(dates);
-          render();
         });
       });
 
       if (textArea) {
         textArea.addEventListener("input", () => {
-          const dates = parseDatesFromText(textArea.value);
-          if (dates.length > 0) {
-            state.customHolidays = dates;
-            localStorage.setItem("lw_custom_holidays", JSON.stringify(dates));
-            renderDetectedDates(dates);
-            render();
-          }
+          const text = textArea.value;
+          const dates = parseUniversalDates(text);
+          state.customHolidays = dates;
+          renderDetectedDates(dates);
+          render();
         });
       }
 
@@ -420,40 +464,86 @@ import Footer from "../components/Footer.astro";
         dropZone.addEventListener("drop", (e) => {
           e.preventDefault();
           dropZone.classList.remove("border-[#171717]");
-          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleFile(e.dataTransfer.files[0]);
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleCleanFileParsing(e.dataTransfer.files[0]);
           }
         });
 
         fileInput.addEventListener("change", (e) => {
-          if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+          const target = e.target as HTMLInputElement;
+          if (target && target.files && target.files[0]) {
+            handleCleanFileParsing(target.files[0]);
+          }
         });
       }
 
-      function handleFile(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          let dates = [];
-          if (typeof e.target.result === "string") {
-            dates = parseDatesFromText(e.target.result);
+      async function handleCleanFileParsing(file: File) {
+        if (!spinner || !spinnerText || !fileStatus || !fileStatusText) return;
+        spinner.classList.remove("hidden");
+        spinnerText.textContent = `Opening "${file.name}"...`;
+
+        let fullExtractedText = "";
+
+        try {
+          if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+            spinnerText.textContent = "Extracting text streams from PDF...";
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+              spinnerText.textContent = `Reading PDF Page ${pageNum} of ${pdf.numPages}...`;
+              const page = await pdf.getPage(pageNum);
+              const textContent = await page.getTextContent();
+              const pageStrings = textContent.items.map((item: any) => item.str).join(" ");
+              fullExtractedText += "\n" + pageStrings;
+
+              if (pageStrings.trim().length < 40 && typeof Tesseract !== "undefined") {
+                spinnerText.textContent = `Running OCR on Page ${pageNum}...`;
+                const viewport = page.getViewport({ scale: 1.8 });
+                const canvas = document.createElement("canvas");
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const ctx = canvas.getContext("2d");
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                
+                const ocrResult = await Tesseract.recognize(canvas, "eng");
+                fullExtractedText += "\n" + ocrResult.data.text;
+              }
+            }
+          } else if (file.type.startsWith("image/")) {
+            spinnerText.textContent = "Running OCR on Screenshot Image...";
+            const ocrResult = await Tesseract.recognize(file, "eng");
+            fullExtractedText = ocrResult.data.text;
+          } else {
+            fullExtractedText = await file.text();
           }
-          if (dates.length === 0) dates = COMPANY_PRESETS.google;
+
+          const dates = parseUniversalDates(fullExtractedText);
           state.customHolidays = dates;
-          localStorage.setItem("lw_custom_holidays", JSON.stringify(dates));
-          if (fileStatus && fileStatusText) {
-            fileStatus.classList.remove("hidden");
-            fileStatusText.textContent = `Extracted ${dates.length} holiday dates from "${file.name}"`;
+
+          fileStatus.classList.remove("hidden");
+          if (dates.length > 0) {
+            fileStatusText.textContent = `Successfully extracted ${dates.length} company holidays from "${file.name}"`;
+          } else {
+            fileStatusText.textContent = `Read "${file.name}". No standard dates detected. Use "+ Add Date" to add your dates.`;
           }
+
           renderDetectedDates(dates);
           render();
-        };
-        reader.readAsText(file);
+        } catch (err: any) {
+          console.error("Deep parsing error:", err);
+          fileStatus.classList.remove("hidden");
+          fileStatusText.textContent = `Parsing error on "${file.name}". You can paste text or add dates manually.`;
+          renderDetectedDates(state.customHolidays);
+          render();
+        } finally {
+          spinner.classList.add("hidden");
+        }
       }
 
       if (btnClear) {
         btnClear.addEventListener("click", () => {
           state.customHolidays = [];
-          localStorage.removeItem("lw_custom_holidays");
           if (textArea) textArea.value = "";
           if (fileStatus) fileStatus.classList.add("hidden");
           renderDetectedDates([]);
@@ -466,13 +556,13 @@ import Footer from "../components/Footer.astro";
         chip.addEventListener("click", () => {
           document.querySelectorAll(".chip-btn").forEach(c => c.classList.remove("active"));
           chip.classList.add("active");
-          state.selectedLeaves = parseInt(chip.dataset.leaves || "0", 10);
+          state.selectedLeaves = parseInt((chip as HTMLElement).dataset.leaves || "0", 10);
           render();
         });
       });
 
       const customWrapper = document.getElementById("customChipWrapper");
-      const customInput = document.getElementById("customLeavesInput");
+      const customInput = document.getElementById("customLeavesInput") as HTMLInputElement;
       const btnInc = document.getElementById("btnIncLeave");
       const btnDec = document.getElementById("btnDecLeave");
 
@@ -519,13 +609,13 @@ import Footer from "../components/Footer.astro";
         tab.addEventListener("click", () => {
           document.querySelectorAll(".month-tab-btn").forEach(t => t.classList.remove("active"));
           tab.classList.add("active");
-          state.selectedMonth = tab.dataset.month || "ALL";
+          state.selectedMonth = (tab as HTMLElement).dataset.month || "ALL";
           render();
         });
       });
     }
 
-    function formatDateRange(startStr, endStr) {
+    function formatDateRange(startStr: string, endStr: string) {
       const s = new Date(startStr + "T00:00:00");
       const e = new Date(endStr + "T00:00:00");
       return s.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + " – " + e.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -537,6 +627,22 @@ import Footer from "../components/Footer.astro";
       const badge = document.getElementById("resultsBadge");
       const subtext = document.getElementById("resultsSubtext");
 
+      // STRICT ZERO-DATA RULE: If no custom company dates are uploaded, show ONLY the empty state prompt
+      if (!state.customHolidays || state.customHolidays.length === 0) {
+        if (grid) grid.innerHTML = "";
+        if (empty) {
+          empty.classList.remove("hidden");
+          const emptyTitle = document.getElementById("emptyStateTitle");
+          const emptySub = document.getElementById("emptyStateSub");
+          if (emptyTitle) emptyTitle.textContent = "No Company Holidays Uploaded Yet";
+          if (emptySub) emptySub.textContent = "Please upload your company's holiday circular (PDF, Scanned Document, Image, or Paste Text) in the box above to generate your customized leave bridges!";
+        }
+        if (badge) badge.textContent = "0 Plans";
+        if (subtext) subtext.textContent = "Upload your company circular above to view custom bridges";
+        return;
+      }
+
+      // If company dates are uploaded, solve and render custom plans
       const plans = solveVacationPlans({
         leaves: state.selectedLeaves,
         workWeek: state.workWeek,
@@ -547,13 +653,17 @@ import Footer from "../components/Footer.astro";
       });
 
       if (badge) badge.textContent = plans.length + (plans.length === 1 ? " Plan" : " Plans");
-      if (subtext) subtext.textContent = "Calculated with " + state.selectedLeaves + (state.selectedLeaves === 1 ? " leave" : " leaves") + " using " + (state.customHolidays.length || 0) + " company dates";
+      if (subtext) subtext.textContent = "Calculated with " + state.selectedLeaves + (state.selectedLeaves === 1 ? " leave" : " leaves") + " using " + state.customHolidays.length + " company dates";
 
       if (!grid || !empty) return;
 
       if (plans.length === 0) {
         grid.innerHTML = "";
         empty.classList.remove("hidden");
+        const emptyTitle = document.getElementById("emptyStateTitle");
+        const emptySub = document.getElementById("emptyStateSub");
+        if (emptyTitle) emptyTitle.textContent = "No Long Weekend Found for this Leave Budget";
+        if (emptySub) emptySub.textContent = "Try selecting a different leave count (e.g. 1, 2, or 3 leaves) or check another month.";
         return;
       }
 
