@@ -17,8 +17,20 @@
 
     <!-- Nav Controls -->
     <div class="flex items-center gap-3 flex-wrap">
+      
+      <!-- v2 Feature: Dedicated Company Optimizer CTA -->
+      <a 
+        href="/company-optimizer" 
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#171717] hover:bg-[#333333] text-white text-xs font-bold shadow-sm transition-all no-underline"
+        title="Upload your company's holiday calendar PDF, image or text"
+      >
+        <span>🏢</span>
+        <span>Match My Company Holidays</span>
+        <span class="text-[10px] bg-emerald-500 text-white font-mono px-1.5 py-0.2 rounded-full">v2</span>
+      </a>
+
       <!-- Region Selector -->
-      <div class="flex items-center gap-1.5">
+      <div class="hidden sm:flex items-center gap-1.5">
         <select id="navRegionSelector" class="bg-[#fafafa] border border-[#ebebeb] text-[#171717] text-xs font-semibold rounded-md px-3 py-1.5 outline-none focus:border-[#171717] cursor-pointer">
           <option value="ALL" selected>🇮🇳 Pan-India IT</option>
           <option value="SOUTH">🟢 South (Bangalore / Chennai / Hyd)</option>
@@ -34,11 +46,6 @@
         <button type="button" id="btnWorkweek6" class="px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]">6-Day</button>
       </div>
 
-      <!-- Country Badge -->
-      <span class="hidden sm:inline-flex items-center gap-1 text-xs font-mono px-2.5 py-1 rounded-full bg-[#f5f5f5] text-[#171717] border border-[#ebebeb]">
-        <span>🇮🇳 India</span>
-        <span class="text-[#888888]">(🇺🇸 USA Soon)</span>
-      </span>
     </div>
   </div>
 </header>
