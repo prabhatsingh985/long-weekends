@@ -12,7 +12,7 @@ export const REGION_STATE_MAP: Record<RegionCode, string[]> = {
   EAST: ["WB"],
 };
 
-export const CURRENT_DATE_REF = "2026-08-19";
+export const CURRENT_DATE_REF = "2026-08-20";
 
 export interface SolverOptions {
   leaves: number;
@@ -185,11 +185,7 @@ export function solveVacationPlans(options: SolverOptions): VacationPlan[] {
 
       if (holidaysInWindow.length === 0) continue;
 
-      if (leaves < 4) {
-        if (leavesNeeded !== leaves) continue;
-      } else {
-        if (leavesNeeded < leaves) continue;
-      }
+      if (leavesNeeded !== leaves) continue;
 
       if (leavesNeeded > 0 && len / leavesNeeded < 1.3) continue;
 
