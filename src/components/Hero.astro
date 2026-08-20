@@ -7,10 +7,10 @@
 
   <div class="max-w-[1200px] mx-auto relative z-10">
     
-    <!-- 1. Alert Badge (Top Pill with soft emerald glow) -->
-    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold mb-5 shadow-xs hover:bg-emerald-100/80 transition-all">
-      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-      <span id="heroCountdownBadge">🌴 Next getaway in 9 days: Raksha Bandhan (3 Days Off · 0 Leaves Needed)</span>
+    <!-- 1. Alert Badge (Dynamically calculated based on real today date) -->
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-5 shadow-xs hover:bg-emerald-100/80 transition-all">
+      <span class="text-sm">🌴</span>
+      <span id="heroCountdownBadge">Next: Raksha Bandhan (3 Days Off · 0 Leaves Needed)</span>
     </div>
 
     <!-- 2. Main Headline & Tagline -->
@@ -51,3 +51,58 @@
 
   </div>
 </section>
+
+<script>
+  import { solveVacationPlans, getTodayIso } from "../data/vacation-solver";
+
+  function initDynamicHeroBadge() {
+    const badge = document.getElementById("heroCountdownBadge");
+    if (!badge) return;
+
+    const today = getTodayIso();
+
+    // Check starting with 0 leaves, then 1 leave, 2 leaves, up to 4 leaves
+    for (let l = 0; l <= 4; l++) {
+      const plans = solveVacationPlans({
+        leaves: l,
+        workWeek: 5,
+        region: "ALL",
+        month: "ALL",
+        fromDate: today
+      });
+
+      // User requirement: check upcoming where startDate > today (or startDate >= today)
+      let upcoming = plans.filter(p => p.startDate > today);
+      if (upcoming.length === 0) {
+        upcoming = plans.filter(p => p.startDate >= today);
+      }
+
+      if (upcoming.length > 0) {
+        upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate));
+        const nextPlan = upcoming[0];
+        
+        let label = nextPlan.title.split(":")[0].replace(/\(.*?\)/g, "").trim();
+        if (!label && nextPlan.days && nextPlan.days.length > 0) {
+          const hol = nextPlan.days.find(d => d.type === "holiday");
+          if (hol) label = hol.label;
+        }
+        
+        const daysOff = nextPlan.totalDaysOff || 3;
+        const leaves = typeof nextPlan.leavesRequired === "number" ? nextPlan.leavesRequired : l;
+        const leavesText = leaves === 0 ? "0 Leaves Needed" : `${leaves} ${leaves === 1 ? 'Leave' : 'Leaves'} Needed`;
+
+        badge.textContent = `Next: ${label} (${daysOff} Days Off · ${leavesText})`;
+        return;
+      }
+    }
+
+    // Fallback for year end
+    badge.textContent = "Year-End Getaways · 2027 Plans Available Soon";
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initDynamicHeroBadge);
+  } else {
+    initDynamicHeroBadge();
+  }
+</script>

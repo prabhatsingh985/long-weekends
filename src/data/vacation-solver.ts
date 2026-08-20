@@ -12,7 +12,16 @@ export const REGION_STATE_MAP: Record<RegionCode, string[]> = {
   EAST: ["WB"],
 };
 
-export const CURRENT_DATE_REF = "2026-08-20";
+export function getTodayIso(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const today = `${y}-${m}-${d}`;
+  return today >= "2026-01-01" ? today : "2026-08-20";
+}
+
+export const CURRENT_DATE_REF = getTodayIso();
 
 export interface SolverOptions {
   leaves: number;

@@ -22,11 +22,11 @@ import Footer from "../components/Footer.astro";
   <Hero />
 
   <!-- Interactive Filter Bar (Exact Favorite Layout) -->
-  <section class="py-8 px-6 bg-white border-b border-[#ebebeb] sticky top-16 z-40 shadow-xs">
+  <section class="py-5 px-6 bg-white border-b border-[#ebebeb] shadow-xs">
     <div class="max-w-[1200px] mx-auto">
       
       <!-- Filter Header -->
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <span class="text-base">🎯</span>
           <span class="font-bold text-sm text-[#171717]">Select Your Leave Budget</span>
@@ -35,7 +35,7 @@ import Footer from "../components/Footer.astro";
       </div>
 
       <!-- 5 Leave Budget Chips -->
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6" id="budgetChipsContainer">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4" id="budgetChipsContainer">
         <button type="button" class="chip-btn active" data-leaves="0">
           <span class="chip-title">0 Leaves</span>
           <span class="chip-desc">Free 3-Day Breaks</span>
@@ -148,32 +148,45 @@ import Footer from "../components/Footer.astro";
   <style>
     .chip-btn {
       background: #ffffff;
-      border: 1px solid #ebebeb;
+      border: 1px solid #e2e8f0;
       border-radius: 16px;
       padding: 12px 16px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       text-align: left;
       min-height: 76px;
       justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
     .chip-btn:hover {
-      border-color: #cbd5e1;
-      background: #f8fafc;
+      border-color: #94a3b8;
+      background: #ffffff;
+      transform: translateY(-2.5px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+    .chip-btn:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
     .chip-btn.active {
-      background: #171717;
-      border-color: #171717;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      background: #0f172a;
+      border-color: #0f172a;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+    }
+    .chip-btn.active:hover {
+      background: #1e293b;
+      border-color: #1e293b;
+      transform: translateY(-2.5px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
     }
     .chip-btn.active .chip-title { color: #ffffff; }
-    .chip-btn.active .chip-desc { color: #94a3b8; }
+    .chip-btn.active .chip-desc { color: #cbd5e1; }
     .chip-btn.active .stepper-box {
-      background: #262626;
-      border-color: #404040;
+      background: #1e293b;
+      border-color: #334155;
     }
     .chip-btn.active .stepper-btn {
       color: #ffffff;
@@ -181,24 +194,46 @@ import Footer from "../components/Footer.astro";
     .chip-btn.active .stepper-val {
       color: #ffffff;
     }
-    .chip-title { font-size: 0.95rem; font-weight: 700; color: #171717; }
-    .chip-desc { font-size: 0.72rem; color: #666666; margin-top: 2px; }
+    .chip-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; transition: color 0.15s ease; }
+    .chip-desc { font-size: 0.72rem; color: #64748b; margin-top: 2px; transition: color 0.15s ease; }
     
     .month-tab-btn {
-      padding: 6px 16px;
+      padding: 7px 18px;
       font-size: 0.82rem;
       font-weight: 600;
       border-radius: 9999px;
-      background: transparent;
-      color: #666666;
-      border: 1px solid transparent;
+      background: #ffffff;
+      color: #4b5563;
+      border: 1px solid #e5e7eb;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     }
-    .month-tab-btn:hover { color: #171717; background: #ffffff; border-color: #ebebeb; }
-    .month-tab-btn.active { background: #171717; color: #ffffff; border-color: #171717; }
-  </style>
+    .month-tab-btn:hover {
+      color: #0f172a;
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.07);
+    }
+    .month-tab-btn:active {
+      transform: translateY(0) scale(0.96);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .month-tab-btn.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.22);
+    }
+    .month-tab-btn.active:hover {
+      background: #1e293b;
+      border-color: #1e293b;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.28);
+    }
+</style>
 
   <script>
     import { solveVacationPlans, CURRENT_DATE_REF } from "../data/vacation-solver";
