@@ -1,52 +1,50 @@
 ---
 ---
-<section class="relative pt-14 pb-12 px-6 border-b border-[#ebebeb] mesh-gradient-bg overflow-hidden">
+<section class="relative pt-16 pb-14 px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
+  <!-- Subtle warm glowing backdrop -->
+  <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
+
   <div class="max-w-[1200px] mx-auto relative z-10">
     
-    <!-- Live Countdown Pill: Next Long Weekend in 9 Days -->
-    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#171717] text-white text-xs font-medium mb-6 shadow-sm">
-      <span class="w-2 h-2 rounded-full bg-[#50e3c2] animate-pulse"></span>
-      <span id="heroCountdownBadge">Next Long Weekend in 9 Days: Raksha Bandhan (3 Days Off Free)</span>
+    <!-- 1. Alert Badge (Top Pill with soft emerald glow) -->
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold mb-5 shadow-xs hover:bg-emerald-100/80 transition-all">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span id="heroCountdownBadge">🌴 Next getaway in 9 days: Raksha Bandhan (3 Days Off · 0 Leaves Needed)</span>
     </div>
 
-    <!-- Main Headline -->
-    <h1 class="display-xl text-[#171717] max-w-[850px] mb-4">
-      The math behind your year off.
+    <!-- 2. Main Headline & Tagline -->
+    <h1 class="text-3xl sm:text-5xl lg:text-[52px] font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-2.5">
+      You deserve a break. We found the time for you.
     </h1>
-
-    <!-- Lead Paragraph -->
-    <p class="text-lg text-[#4d4d4d] max-w-[640px] mb-8 leading-relaxed">
-      Maximize your continuous days off with algorithmically calculated leave bridges, regional gazetted holiday hacks, and exact leave budget solver.
+    <p class="text-lg sm:text-xl font-bold text-amber-600 mb-4 tracking-tight">
+      Take more vacations. Burn fewer leaves.
     </p>
 
-    <!-- Stat Highlights Row: Punchy & Engaging Copy -->
-    <div class="flex items-center gap-6 flex-wrap">
+    <!-- 3. Empathetic Description (Subtext) -->
+    <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-normal">
+      Escape the daily grind without emptying your leave balance. We automatically turn regular weekends and public holidays into guilt-free mini vacations.
+    </p>
+
+    <!-- 4. Metric Cards (3 Clean Highlight Cards) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-[850px]">
       
-      <!-- Stat 1: The Ultimate Year-End Hack (4 Leaves -> 10 Days) -->
-      <div class="flex items-center gap-3.5 bg-white px-5 py-3.5 rounded-xl border border-[#ebebeb] shadow-sm hover:border-[#a1a1a1] transition-all">
-        <span class="font-mono text-2xl font-bold text-[#171717]" id="heroTopDaysOff">10 Days</span>
-        <span class="text-xs text-[#666666] font-medium leading-tight">
-          Turn 4 Leaves into 10 Days<br/>
-          <span class="text-[#10b981] font-bold">25 Dec – 03 Jan (Year-End Break)</span>
-        </span>
+      <!-- Card 1 -->
+      <div class="bg-white/90 backdrop-blur-xs p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
+        <span class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1">10 Days Off</span>
+        <span class="text-xs text-slate-500 font-medium leading-relaxed">Year-End Break using just 4 leaves</span>
       </div>
 
-      <!-- Stat 2: Max ROI Multiplier -->
-      <div class="flex items-center gap-3.5 bg-white px-5 py-3.5 rounded-xl border border-[#ebebeb] shadow-sm hover:border-[#a1a1a1] transition-all">
-        <span class="font-mono text-2xl font-bold text-[#0070f3]">5.0x</span>
-        <span class="text-xs text-[#666666] font-medium leading-tight">
-          Max Leave Multiplier<br/>
-          <span class="text-[#0070f3] font-semibold">Take 1 Leave ➔ Get 5 Days Off</span>
-        </span>
+      <!-- Card 2 -->
+      <div class="bg-white/90 backdrop-blur-xs p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
+        <span class="text-xl sm:text-2xl font-extrabold text-blue-600 mb-1">5x Multiplier</span>
+        <span class="text-xs text-slate-500 font-medium leading-relaxed">Turn 1 casual leave into a 5-day escape</span>
       </div>
 
-      <!-- Stat 3: 100% Verified Gazettes -->
-      <div class="flex items-center gap-3.5 bg-white px-5 py-3.5 rounded-xl border border-[#ebebeb] shadow-sm hover:border-[#a1a1a1] transition-all">
-        <span class="font-mono text-2xl font-bold text-[#7928ca]">100%</span>
-        <span class="text-xs text-[#666666] font-medium leading-tight">
-          Verified Holiday Data<br/>
-          <span class="text-[#7928ca] font-semibold">DoPT & RBI 2026 Gazettes</span>
-        </span>
+      <!-- Card 3 -->
+      <div class="bg-white/90 backdrop-blur-xs p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between">
+        <span class="text-xl sm:text-2xl font-extrabold text-emerald-600 mb-1">100% Verified</span>
+        <span class="text-xs text-slate-500 font-medium leading-relaxed">Matched with official 2026 Indian holidays</span>
       </div>
 
     </div>

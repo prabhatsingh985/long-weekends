@@ -30,7 +30,7 @@ import Footer from "../components/Footer.astro";
           <span class="font-semibold text-lg tracking-tight text-slate-900 flex items-center gap-1.5">
             Long Weekendai <span class="text-xs">🇮🇳</span>
           </span>
-          <span class="caption-mono text-[10px] text-slate-500 tracking-widest">Company Dashboard (v2)</span>
+          <span class="text-[11px] text-slate-500 font-medium">Custom Office Calendar</span>
         </div>
       </a>
 
@@ -47,45 +47,47 @@ import Footer from "../components/Footer.astro";
   </header>
 
   <!-- Hero Section & Multi-Format Ingestion Uploader -->
-  <section class="py-12 px-6 border-b border-slate-200 bg-white mesh-gradient-bg">
+  <section class="relative py-14 px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
     <div class="max-w-[1200px] mx-auto">
       
       <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-4 shadow-xs">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Version 2.0: AI-Powered PDF & Image Holiday Parser</span>
+        <span>✨ Custom Vacation Planner for Your Office</span>
       </div>
 
-      <h1 class="display-xl text-slate-900 max-w-[850px] mb-3">
-        Match Your Company Holidays
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-3">
+        Add Your Office Holidays
       </h1>
-      <p class="text-base text-slate-600 max-w-[700px] mb-8 leading-relaxed">
-        Upload your company's holiday circular (PDF, Scanned Document, Image, or Text). The dynamic solver extracts your exact dates and recalculates all leave bridges in real-time!
+      <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-normal">
+        Upload your office holiday list, screenshot, or PDF below. We will automatically find the best long weekends and guilt-free mini vacations tailored just for your team!
       </p>
 
       <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-xs max-w-[950px]">
         
         <div class="flex items-center gap-2 p-1 bg-slate-200 rounded-xl mb-5 w-fit">
-          <button type="button" class="tab-btn active" data-tab="tab-upload">📄 Upload PDF / Image (Auto OCR)</button>
-          <button type="button" class="tab-btn" data-tab="tab-text">📝 Paste Text / Email</button>
+          <button type="button" class="tab-btn active" data-tab="tab-upload">📄 Upload Document / Screenshot</button>
+          <button type="button" class="tab-btn" data-tab="tab-text">📝 Paste Holiday List / Email</button>
         </div>
 
         <div id="tab-upload" class="tab-content active">
           <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-slate-800 rounded-2xl p-8 text-center cursor-pointer transition-all bg-white hover:bg-slate-50 relative">
             <input type="file" id="fileUploadInput" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" class="hidden" />
             <div class="text-4xl mb-3" id="dropZoneIcon">📁</div>
-            <div class="text-sm font-bold text-slate-900 mb-1" id="dropZoneTitle">Click to Upload PDF or Drop Image Screenshot</div>
-            <div class="text-xs text-slate-500" id="dropZoneSub">Supports Digital PDFs, Scanned PDF documents (Built-in OCR), and JPG/PNG screenshots</div>
+            <div class="text-sm font-bold text-slate-900 mb-1" id="dropZoneTitle">Click to Upload PDF or Drop a Screenshot</div>
+            <div class="text-xs text-slate-500" id="dropZoneSub">Supports PDF documents, screenshots, or photos of your holiday list</div>
             
             <div id="uploadSpinner" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center p-6 z-10">
               <div class="w-8 h-8 border-3 border-slate-900 border-t-transparent rounded-full animate-spin mb-3"></div>
-              <div class="text-xs font-bold text-slate-900" id="spinnerText">Extracting dates from document...</div>
-              <div class="text-[10px] text-slate-500 mt-1" id="spinnerSub">Running client-side deep parser & OCR</div>
+              <div class="text-xs font-bold text-slate-900" id="spinnerText">Reading your holiday list...</div>
+              <div class="text-[10px] text-slate-500 mt-1" id="spinnerSub">Finding your vacation dates...</div>
             </div>
           </div>
 
-          <div id="fileUploadStatus" class="hidden mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium flex items-center justify-between">
-            <span id="fileUploadStatusText">File parsed successfully!</span>
-            <span class="font-mono text-[10px] font-bold px-2 py-0.5 bg-emerald-100 rounded">Parsed</span>
+          <div id="fileUploadStatus" class="hidden mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-semibold flex items-center gap-2">
+            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
+            <span id="fileUploadStatusText">Added holidays successfully!</span>
           </div>
         </div>
 
@@ -101,8 +103,8 @@ import Footer from "../components/Footer.astro";
         <div id="detectedDatesBox" class="mt-5 pt-4 border-t border-slate-200 hidden">
           <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-slate-900">Active Company Holidays (<span id="detectedCount">0</span>):</span>
-              <span class="text-[10px] text-emerald-700 bg-emerald-100 font-bold px-2 py-0.5 rounded-full" id="activeStatusPill">Live In Solver</span>
+              <span class="text-xs font-bold text-slate-900">Active Office Holidays (<span id="detectedCount">0</span>):</span>
+              <span class="text-[10px] text-emerald-700 bg-emerald-100 font-bold px-2 py-0.5 rounded-full" id="activeStatusPill">Active</span>
             </div>
             <button type="button" id="btnClearDates" class="text-xs text-red-600 hover:underline font-semibold cursor-pointer">Clear All Dates</button>
           </div>
@@ -184,7 +186,7 @@ import Footer from "../components/Footer.astro";
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
         <span class="font-mono text-xs font-bold px-3 py-1 bg-slate-900 text-white rounded-full" id="resultsBadge">0 Plans</span>
-        <span class="text-xs text-slate-600 font-medium" id="resultsSubtext">Upload your company circular above to view custom bridges</span>
+        <span class="text-xs text-slate-600 font-medium" id="resultsSubtext">Add your office holidays above to see your personalized long weekends</span>
       </div>
       <div class="flex items-center gap-4 text-xs text-slate-600 font-medium">
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-500"></span><span>Weekend</span></div>
@@ -199,9 +201,9 @@ import Footer from "../components/Footer.astro";
     <!-- Empty State -->
     <div class="text-center py-20 px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
       <div class="w-16 h-16 rounded-full bg-slate-50 text-3xl flex items-center justify-center mx-auto mb-4 border border-slate-200">🏢</div>
-      <h3 class="font-bold text-lg text-slate-900 mb-2" id="emptyStateTitle">No Company Holidays Uploaded Yet</h3>
+      <h3 class="font-bold text-lg text-slate-900 mb-2" id="emptyStateTitle">No Office Holidays Added Yet</h3>
       <p class="text-xs text-slate-500 max-w-md mx-auto leading-relaxed" id="emptyStateSub">
-        Please upload your company's holiday circular (PDF, Scanned Document, Image, or Paste Text) in the box above to generate your customized leave bridges!
+        Simply upload or paste your office holiday schedule in the box above to see all your potential long weekends!
       </p>
     </div>
 
@@ -533,19 +535,19 @@ import Footer from "../components/Footer.astro";
 
         try {
           if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-            spinnerText.textContent = "Extracting text streams from PDF...";
+            spinnerText.textContent = "Reading your PDF document...";
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
 
             for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-              spinnerText.textContent = `Reading PDF Page ${pageNum} of ${pdf.numPages}...`;
+              spinnerText.textContent = `Scanning page ${pageNum} of ${pdf.numPages}...`;
               const page = await pdf.getPage(pageNum);
               const textContent = await page.getTextContent();
               const pageStrings = textContent.items.map((item: any) => item.str).join(" ");
               fullExtractedText += "\n" + pageStrings;
 
               if (pageStrings.trim().length < 40 && typeof Tesseract !== "undefined") {
-                spinnerText.textContent = `Running OCR on Page ${pageNum}...`;
+                spinnerText.textContent = `Reading holiday dates from page ${pageNum}...`;
                 const viewport = page.getViewport({ scale: 1.8 });
                 const canvas = document.createElement("canvas");
                 canvas.width = viewport.width;
@@ -558,7 +560,7 @@ import Footer from "../components/Footer.astro";
               }
             }
           } else if (file.type.startsWith("image/")) {
-            spinnerText.textContent = "Running OCR on Screenshot Image...";
+            spinnerText.textContent = "Scanning your holiday image...";
             const ocrResult = await Tesseract.recognize(file, "eng");
             fullExtractedText = ocrResult.data.text;
           } else {
@@ -570,9 +572,9 @@ import Footer from "../components/Footer.astro";
 
           fileStatus.classList.remove("hidden");
           if (dates.length > 0) {
-            fileStatusText.textContent = `Successfully extracted ${dates.length} company holidays from "${file.name}"`;
+            fileStatusText.textContent = `Added ${dates.length} office holidays from "${file.name}"`;
           } else {
-            fileStatusText.textContent = `Read "${file.name}". No standard dates detected. Use "+ Add Date" to add your dates.`;
+            fileStatusText.textContent = `Uploaded "${file.name}". No dates detected. Use "+ Add Date" below to add manually.`;
           }
 
           renderDetectedDates(dates);
@@ -580,7 +582,7 @@ import Footer from "../components/Footer.astro";
         } catch (err: any) {
           console.error("Deep parsing error:", err);
           fileStatus.classList.remove("hidden");
-          fileStatusText.textContent = `Parsing error on "${file.name}". You can paste text or add dates manually.`;
+          fileStatusText.textContent = `Could not read "${file.name}". You can paste your text or add dates manually.`;
           renderDetectedDates(state.customHolidays);
           render();
         } finally {
@@ -799,11 +801,11 @@ import Footer from "../components/Footer.astro";
           empty.classList.remove("hidden");
           const emptyTitle = document.getElementById("emptyStateTitle");
           const emptySub = document.getElementById("emptyStateSub");
-          if (emptyTitle) emptyTitle.textContent = "No Company Holidays Uploaded Yet";
-          if (emptySub) emptySub.textContent = "Please upload your company's holiday circular (PDF, Scanned Document, Image, or Paste Text) in the box above to generate your customized leave bridges!";
+          if (emptyTitle) emptyTitle.textContent = "No Office Holidays Added Yet";
+          if (emptySub) emptySub.textContent = "Simply upload or paste your office holiday schedule in the box above to see all your potential long weekends!";
         }
         if (badge) badge.textContent = "0 Plans";
-        if (subtext) subtext.textContent = "Upload your company circular above to view custom bridges";
+        if (subtext) subtext.textContent = "Add your office holidays above to see your personalized long weekends";
         return;
       }
 
@@ -819,7 +821,7 @@ import Footer from "../components/Footer.astro";
       state.currentPlans = plans;
 
       if (badge) badge.textContent = plans.length + (plans.length === 1 ? " Plan" : " Plans");
-      if (subtext) subtext.textContent = "Calculated with " + state.selectedLeaves + (state.selectedLeaves === 1 ? " leave" : " leaves") + " using " + state.customHolidays.length + " company dates";
+      if (subtext) subtext.textContent = "Showing options with " + state.selectedLeaves + (state.selectedLeaves === 1 ? " leave" : " leaves") + " using " + state.customHolidays.length + " office holidays";
 
       if (!grid || !empty) return;
 
