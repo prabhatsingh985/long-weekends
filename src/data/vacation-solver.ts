@@ -279,7 +279,12 @@ export function solveVacationPlans(options: SolverOptions): VacationPlan[] {
     });
   }
 
-  deduplicatedPlans.sort((a, b) => a.startDate.localeCompare(b.startDate));
+  deduplicatedPlans.sort((a, b) => {
+    if (b.totalDaysOff !== a.totalDaysOff) {
+      return b.totalDaysOff - a.totalDaysOff;
+    }
+    return a.startDate.localeCompare(b.startDate);
+  });
 
   return deduplicatedPlans;
 }

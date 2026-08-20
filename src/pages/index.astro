@@ -88,6 +88,27 @@ import Footer from "../components/Footer.astro";
       <div class="flex items-center gap-3">
         <span class="font-mono text-xs font-bold px-3 py-1 bg-slate-900 text-white rounded-full" id="resultsBadge">0 Plans</span>
         <span class="text-xs text-slate-600 font-medium" id="resultsSubtext">Showing options with 0 leaves</span>
+        
+        <!-- Custom Premium Dropdown -->
+        <div class="relative w-full sm:w-[240px]" id="customSortDropdown">
+          <button type="button" id="sortDropdownBtn" class="flex items-center justify-between w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 text-[11px] sm:text-xs font-bold rounded-full px-4 py-2 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all shadow-sm">
+            <span id="sortDropdownLabel">Sort: Highest Efficiency</span>
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <!-- Menu (Hidden by default) -->
+          <div id="sortDropdownMenu" class="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 transition-all duration-200 opacity-0 scale-95 origin-top-right pointer-events-none hidden">
+            <div class="py-1 flex flex-col">
+              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="efficiency">
+                Highest Efficiency
+                <svg class="w-4 h-4 text-emerald-500 check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              </button>
+              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="date">
+                Chronological (Dates)
+                <svg class="w-4 h-4 text-emerald-500 hidden check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="flex items-center gap-4 text-xs text-slate-600 font-medium">
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-500"></span><span>Weekend</span></div>
@@ -243,7 +264,8 @@ import Footer from "../components/Footer.astro";
       workWeek: 5,
       selectedLeaves: 0,
       selectedMonth: "ALL",
-      currentPlans: [] as any[]
+      currentPlans: [] as any[],
+      sortBy: "efficiency"
     };
 
     function init() {
@@ -252,7 +274,57 @@ import Footer from "../components/Footer.astro";
     }
 
     function bindEvents() {
-      const regionSelect = document.getElementById("regionSelect") as HTMLSelectElement;
+      // Custom Dropdown Logic
+      const dropdownBtn = document.getElementById("sortDropdownBtn");
+      const dropdownMenu = document.getElementById("sortDropdownMenu");
+      const dropdownLabel = document.getElementById("sortDropdownLabel");
+      const sortOptions = document.querySelectorAll(".sort-option");
+
+      if (dropdownBtn && dropdownMenu) {
+        dropdownBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isHidden = dropdownMenu.classList.contains("hidden");
+          if (isHidden) {
+            dropdownMenu.classList.remove("hidden", "pointer-events-none");
+            setTimeout(() => dropdownMenu.classList.remove("opacity-0", "scale-95"), 10);
+          } else {
+            dropdownMenu.classList.add("opacity-0", "scale-95");
+            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
+          }
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.add("opacity-0", "scale-95");
+            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
+          }
+        });
+
+        sortOptions.forEach(option => {
+          option.addEventListener("click", () => {
+            const value = option.dataset.value;
+            if (!value) return;
+
+            const text = value === "efficiency" ? "Sort: Highest Efficiency" : "Sort: Chronological (Dates)";
+            if (dropdownLabel) dropdownLabel.textContent = text;
+
+            sortOptions.forEach(opt => {
+              const icon = opt.querySelector(".check-icon");
+              if (icon) {
+                if (opt === option) icon.classList.remove("hidden");
+                else icon.classList.add("hidden");
+              }
+            });
+
+            state.sortBy = value;
+            dropdownMenu.classList.add("opacity-0", "scale-95");
+            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
+            
+            render();
+          });
+        });
+      }
+      const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
       const btn5Day = document.getElementById("btnWorkweek5");
       const btn6Day = document.getElementById("btnWorkweek6");
 
@@ -501,6 +573,15 @@ import Footer from "../components/Footer.astro";
         fromDate: CURRENT_DATE_REF
       });
 
+      
+      if (state.sortBy === "efficiency") {
+        plans.sort((a, b) => {
+          if (b.totalDaysOff !== a.totalDaysOff) return b.totalDaysOff - a.totalDaysOff;
+          return a.startDate.localeCompare(b.startDate);
+        });
+      } else {
+        plans.sort((a, b) => a.startDate.localeCompare(b.startDate));
+      }
       state.currentPlans = plans;
 
       if (badge) badge.textContent = plans.length + (plans.length === 1 ? " Plan" : " Plans");
