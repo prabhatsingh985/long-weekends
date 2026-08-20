@@ -324,6 +324,38 @@ import Footer from "../components/Footer.astro";
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     }
 
+    const FESTIVAL_DATE_MAP_2026: Record<string, string[]> = {
+      "new year": ["2026-01-01"],
+      "republic day": ["2026-01-26"],
+      "maha shivratri": ["2026-02-16"],
+      "shivratri": ["2026-02-16"],
+      "holi": ["2026-03-04"],
+      "eid-ul-fitr": ["2026-03-21"],
+      "eid ul fitr": ["2026-03-21"],
+      "eid-al-fitr": ["2026-03-21"],
+      "id-ul-fitr": ["2026-03-21"],
+      "mahavir jayanti": ["2026-03-31"],
+      "good friday": ["2026-04-03"],
+      "buddha purnima": ["2026-05-01"],
+      "eid-al-adha": ["2026-05-27"],
+      "eid-ul-adha": ["2026-05-27"],
+      "eid ul adha": ["2026-05-27"],
+      "bakrid": ["2026-05-27"],
+      "muharram": ["2026-06-26"],
+      "independence day": ["2026-08-15"],
+      "raksha bandhan": ["2026-08-28"],
+      "rakhi": ["2026-08-28"],
+      "janmashtami": ["2026-09-04"],
+      "gandhi jayanti": ["2026-10-02"],
+      "dussehra": ["2026-10-20"],
+      "vijayadashami": ["2026-10-20"],
+      "diwali": ["2026-11-08", "2026-11-09"],
+      "deepavali": ["2026-11-08", "2026-11-09"],
+      "guru nanak": ["2026-11-24"],
+      "christmas": ["2026-12-25"],
+      "xmas": ["2026-12-25"]
+    };
+
     const MONTH_MAP: Record<string, string> = {
       jan: "01", january: "01",
       feb: "02", february: "02",
@@ -332,11 +364,11 @@ import Footer from "../components/Footer.astro";
       may: "05",
       jun: "06", june: "06",
       jul: "07", july: "07",
-      aug: "08", august: "08",
-      sep: "09", sept: "09", september: "09",
-      oct: "10", october: "10",
-      nov: "11", november: "11",
-      dec: "12", december: "12"
+      aug: "08", august: "08", augst: "08",
+      sep: "09", sept: "09", september: "09", septmber: "09",
+      oct: "10", october: "10", octomber: "10",
+      nov: "11", november: "11", novmber: "11",
+      dec: "12", december: "12", decmber: "12"
     };
 
     let state = {
@@ -357,70 +389,99 @@ import Footer from "../components/Footer.astro";
 
     function parseUniversalDates(rawText: string): string[] {
       const datesSet = new Set<string>();
-      if (!rawText) return [];
+      if (!rawText) return ["2026-01-01"];
 
-      let cleanText = rawText
-        .replace(/\r\n/g, " ")
-        .replace(/\n/g, " ")
-        .replace(/\t/g, " ")
-        .replace(/[*#~]/g, " ")
-        .replace(/\s+/g, " ");
+      // Always include 1st Jan 2026 by default
+      datesSet.add("2026-01-01");
 
-      cleanText = cleanText
-        .replace(/\b[oO](\d)(?:st|nd|rd|th)?\b/g, "0$1")
-        .replace(/\b[lI](\d)(?:st|nd|rd|th)?\b/g, "1$1");
+      const cleanLower = rawText.toLowerCase();
 
-      const rangeRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-–—to]+\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,]?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(202[6-7])?\b/gi;
-      let match;
-      while ((match = rangeRegex.exec(cleanText)) !== null) {
-        const startDay = parseInt(match[1], 10);
-        const endDay = parseInt(match[2], 10);
-        const monthKey = match[3].toLowerCase();
-        const mm = MONTH_MAP[monthKey];
-        const yyyy = match[4] || "2026";
-        if (mm && startDay <= endDay && (endDay - startDay <= 10)) {
-          for (let d = startDay; d <= endDay; d++) {
-            datesSet.add(`${yyyy}-${mm}-${String(d).padStart(2, "0")}`);
-          }
+      // 1. Check Festival Entity Map for known Indian & company holiday names
+      for (const [festName, dates] of Object.entries(FESTIVAL_DATE_MAP_2026)) {
+        const regex = new RegExp(`\\b${festName.replace(/-/g, "[- ]")}\\b`, "i");
+        if (regex.test(cleanLower)) {
+          dates.forEach(d => datesSet.add(d));
         }
       }
 
-      const namedMonthRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,]?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(202[6-7])?\b/gi;
-      while ((match = namedMonthRegex.exec(cleanText)) !== null) {
-        const dd = match[1].padStart(2, "0");
-        const monthKey = match[2].toLowerCase();
-        const mm = MONTH_MAP[monthKey];
-        const yyyy = match[3] || "2026";
-        if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
+      // 2. OCR-resilient line by line date extraction
+      const cleanedFullText = rawText
+        .replace(/[*#~|]/g, " ")
+        .replace(/\r\n/g, "\n")
+        .replace(/\t/g, " ");
+
+      const lines = cleanedFullText.split(/[\r\n]+/);
+      const textChunks = [...lines, cleanedFullText.replace(/\n+/g, " ")];
+
+      for (let chunk of textChunks) {
+        let clean = chunk.replace(/\s+/g, " ").trim();
+        if (!clean) continue;
+
+        // Fix OCR character repairs
+        clean = clean.replace(/\b2[oO]2[67]\b/g, "2026");
+        clean = clean.replace(/\b2[lI|]\b/g, "21");
+        clean = clean.replace(/\b2[sS]\b/g, "25");
+
+        // Multi-day range: "8th-9th Nov", "28-30 Aug 2026"
+        const rangeRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*(?:[-–—to]+|\s+to\s+)\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,]?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(202[6-7])?\b/gi;
+        let match;
+        while ((match = rangeRegex.exec(clean)) !== null) {
+          const startDay = parseInt(match[1], 10);
+          const endDay = parseInt(match[2], 10);
+          const monthKey = match[3].toLowerCase();
+          const mm = MONTH_MAP[monthKey];
+          const yyyy = match[4] || "2026";
+          if (mm && startDay <= endDay && (endDay - startDay <= 10)) {
+            for (let d = startDay; d <= endDay; d++) {
+              datesSet.add(`${yyyy}-${mm}-${String(d).padStart(2, "0")}`);
+            }
+          }
+        }
+
+        // Named Month: "01st Jan", "21st March", "25th Dec", "28th Aug"
+        const namedMonthRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,.]+\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b(?:\s*[-/\s,.]*\s*(202[6-7]|2[67]))?/gi;
+        while ((match = namedMonthRegex.exec(clean)) !== null) {
+          const dd = match[1].padStart(2, "0");
+          const monthKey = match[2].toLowerCase();
+          const mm = MONTH_MAP[monthKey];
+          let yyyy = match[3] || "2026";
+          if (yyyy && yyyy.length === 2) yyyy = "20" + yyyy;
+          if (!yyyy) yyyy = "2026";
+          if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
+        }
+
+        // Reversed Named Month: "March 21", "Dec 25", "Aug 28"
+        const revNamedMonthRegex = /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,.]+\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\b(?:\s*[,/\s.]*\s*(202[6-7]|2[67]))?/gi;
+        while ((match = revNamedMonthRegex.exec(clean)) !== null) {
+          const monthKey = match[1].toLowerCase();
+          const mm = MONTH_MAP[monthKey];
+          const dd = match[2].padStart(2, "0");
+          let yyyy = match[3] || "2026";
+          if (yyyy && yyyy.length === 2) yyyy = "20" + yyyy;
+          if (!yyyy) yyyy = "2026";
+          if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
+        }
+
+        // Numerical: "26/01/2026", "21/03/2026", "25/12/2026"
+        const numDateRegex = /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](202[6-7]|2[67])\b/g;
+        while ((match = numDateRegex.exec(clean)) !== null) {
+          const dd = match[1].padStart(2, "0");
+          const mm = match[2].padStart(2, "0");
+          let yyyy = match[3];
+          if (yyyy.length === 2) yyyy = "20" + yyyy;
+          datesSet.add(`${yyyy}-${mm}-${dd}`);
+        }
+
+        // ISO: "2026-08-28"
+        const isoRegex = /\b(202[6-7])[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g;
+        while ((match = isoRegex.exec(clean)) !== null) {
+          const yyyy = match[1];
+          const mm = match[2].padStart(2, "0");
+          const dd = match[3].padStart(2, "0");
+          datesSet.add(`${yyyy}-${mm}-${dd}`);
+        }
       }
 
-      const revNamedMonthRegex = /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Sept|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[,\s]?\s*(202[6-7])?\b/gi;
-      while ((match = revNamedMonthRegex.exec(cleanText)) !== null) {
-        const monthKey = match[1].toLowerCase();
-        const mm = MONTH_MAP[monthKey];
-        const dd = match[2].padStart(2, "0");
-        const yyyy = match[3] || "2026";
-        if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
-      }
-
-      const isoRegex = /\b(202[6-7])[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g;
-      while ((match = isoRegex.exec(cleanText)) !== null) {
-        const yyyy = match[1];
-        const mm = match[2].padStart(2, "0");
-        const dd = match[3].padStart(2, "0");
-        datesSet.add(`${yyyy}-${mm}-${dd}`);
-      }
-
-      const indianNumRegex = /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](202[6-7]|26|27)\b/g;
-      while ((match = indianNumRegex.exec(cleanText)) !== null) {
-        const dd = match[1].padStart(2, "0");
-        const mm = match[2].padStart(2, "0");
-        let yyyy = match[3];
-        if (yyyy.length === 2) yyyy = "20" + yyyy;
-        datesSet.add(`${yyyy}-${mm}-${dd}`);
-      }
-
-      datesSet.add("2026-01-01");
       return Array.from(datesSet).sort();
     }
 
@@ -526,7 +587,61 @@ import Footer from "../components/Footer.astro";
         });
       }
 
-      async function handleCleanFileParsing(file: File) {
+      function preprocessImageForOcr(imageFile: File): Promise<HTMLCanvasElement> {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(imageFile);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const canvas = document.createElement("canvas");
+          let scale = 1;
+          if (img.width < 1600) {
+            scale = 1600 / img.width;
+          } else if (img.width > 2600) {
+            scale = 2000 / img.width;
+          }
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(canvas);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Enhance text contrast (especially for colored/red card text like Christmas, Eid)
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imgData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            
+            // Standard luminance
+            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+            
+            // Red-text enhancement: If pixel is predominantly red text on light background
+            if (r > g + 40 && r > b + 40) {
+              gray = Math.max(0, gray - 50); // darken red text
+            }
+
+            // High-contrast thresholding
+            const val = gray < 145 ? Math.max(0, gray * 0.5) : Math.min(255, gray * 1.3);
+            data[i] = val;
+            data[i + 1] = val;
+            data[i + 2] = val;
+          }
+          ctx.putImageData(imgData, 0, 0);
+          resolve(canvas);
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    async function handleCleanFileParsing(file: File) {
         if (!spinner || !spinnerText || !fileStatus || !fileStatusText) return;
         spinner.classList.remove("hidden");
         spinnerText.textContent = `Opening "${file.name}"...`;
@@ -561,7 +676,8 @@ import Footer from "../components/Footer.astro";
             }
           } else if (file.type.startsWith("image/")) {
             spinnerText.textContent = "Scanning your holiday image...";
-            const ocrResult = await Tesseract.recognize(file, "eng");
+            const preprocessedCanvas = await preprocessImageForOcr(file);
+            const ocrResult = await Tesseract.recognize(preprocessedCanvas, "eng");
             fullExtractedText = ocrResult.data.text;
           } else {
             fullExtractedText = await file.text();
