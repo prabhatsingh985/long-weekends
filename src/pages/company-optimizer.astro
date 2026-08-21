@@ -160,7 +160,7 @@ import Footer from "../components/Footer.astro";
         </button>
         <button type="button" class="chip-btn" data-leaves="3">
           <span class="chip-title">3 Leaves</span>
-          <span class="chip-desc">6-Day Festival</span>
+          <span class="chip-desc">6+ Day Festival</span>
         </button>
         
         <div class="chip-btn custom-chip" id="customChipWrapper">
@@ -460,17 +460,6 @@ import Footer from "../components/Footer.astro";
       // Always include 1st Jan 2026 by default
       datesSet.add("2026-01-01");
 
-      const cleanLower = rawText.toLowerCase();
-
-      // 1. Check Festival Entity Map for known Indian & company holiday names
-      for (const [festName, dates] of Object.entries(FESTIVAL_DATE_MAP_2026)) {
-        const regex = new RegExp(`\\b${festName.replace(/-/g, "[- ]")}\\b`, "i");
-        if (regex.test(cleanLower)) {
-          dates.forEach(d => datesSet.add(d));
-        }
-      }
-
-      // 2. OCR-resilient line by line date extraction
       const cleanedFullText = rawText
         .replace(/[*#~|]/g, " ")
         .replace(/\r\n/g, "\n")
@@ -488,63 +477,115 @@ import Footer from "../components/Footer.astro";
         clean = clean.replace(/\b2[lI|]\b/g, "21");
         clean = clean.replace(/\b2[sS]\b/g, "25");
 
-        // Multi-day range: "8th-9th Nov", "28-30 Aug 2026"
-        const rangeRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*(?:[-–—to]+|\s+to\s+)\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,]?\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,]?\s*(202[6-7])?\b/gi;
-        let match;
-        while ((match = rangeRegex.exec(clean)) !== null) {
-          const startDay = parseInt(match[1], 10);
-          const endDay = parseInt(match[2], 10);
-          const monthKey = match[3].toLowerCase();
-          const mm = MONTH_MAP[monthKey];
-          const yyyy = match[4] || "2026";
-          if (mm && startDay <= endDay && (endDay - startDay <= 10)) {
+        let foundDateInChunk = false;
+
+        function addRange(startDay: number, endDay: number, monthKey: string, yyyy: string, matchStr: string) {
+          const mm = MONTH_MAP[monthKey.toLowerCase().substring(0,3)];
+          if (mm && startDay <= endDay && (endDay - startDay <= 15)) {
             for (let d = startDay; d <= endDay; d++) {
-              datesSet.add(`${yyyy}-${mm}-${String(d).padStart(2, "0")}`);
+              datesSet.add(yyyy + "-" + mm + "-" + String(d).padStart(2, "0"));
             }
+            foundDateInChunk = true;
+            clean = clean.replace(matchStr, " [EXTRACTED] ");
           }
         }
 
-        // Named Month: "01st Jan", "21st March", "25th Dec", "28th Aug"
-        const namedMonthRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\s*[-/\s,.]+\s*(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b(?:\s*[-/\s,.]*\s*(202[6-7]|2[67]))?/gi;
-        while ((match = namedMonthRegex.exec(clean)) !== null) {
-          const dd = match[1].padStart(2, "0");
-          const monthKey = match[2].toLowerCase();
-          const mm = MONTH_MAP[monthKey];
-          let yyyy = match[3] || "2026";
-          if (yyyy && yyyy.length === 2) yyyy = "20" + yyyy;
-          if (!yyyy) yyyy = "2026";
-          if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
+        function addDate(dd: string, monthKey: string, yyyy: string, matchStr: string) {
+          const mm = MONTH_MAP[monthKey.toLowerCase().substring(0,3)];
+          if (mm) {
+            datesSet.add(yyyy + "-" + mm + "-" + dd.padStart(2, "0"));
+            foundDateInChunk = true;
+            clean = clean.replace(matchStr, " [EXTRACTED] ");
+          }
         }
 
-        // Reversed Named Month: "March 21", "Dec 25", "Aug 28"
-        const revNamedMonthRegex = /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s*[-/\s,.]+\s*(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\b(?:\s*[,/\s.]*\s*(202[6-7]|2[67]))?/gi;
-        while ((match = revNamedMonthRegex.exec(clean)) !== null) {
-          const monthKey = match[1].toLowerCase();
-          const mm = MONTH_MAP[monthKey];
-          const dd = match[2].padStart(2, "0");
-          let yyyy = match[3] || "2026";
-          if (yyyy && yyyy.length === 2) yyyy = "20" + yyyy;
-          if (!yyyy) yyyy = "2026";
-          if (mm) datesSet.add(`${yyyy}-${mm}-${dd}`);
+        const mName = "(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)";
+        const dPat = "(0?[1-9]|[12]\\d|3[01])(?:st|nd|rd|th)?";
+        const yPat = "(202[6-7]|2[67])";
+        const sep = "\\s*[-–—to]+\\s*"; 
+
+        let match;
+
+        // R1: Month DD - Month DD YYYY
+        const r1 = new RegExp("\\b" + mName + "\\s+" + dPat + sep + mName + "\\s+" + dPat + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
+        while ((match = r1.exec(clean)) !== null) {
+          const mm1 = match[1]; const d1 = parseInt(match[2]); const mm2 = match[3]; const d2 = parseInt(match[4]);
+          let yyyy = match[5] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
+          if (mm1.toLowerCase().substring(0,3) === mm2.toLowerCase().substring(0,3)) {
+            addRange(d1, d2, mm1, yyyy, match[0]);
+          }
         }
 
-        // Numerical: "26/01/2026", "21/03/2026", "25/12/2026"
-        const numDateRegex = /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](202[6-7]|2[67])\b/g;
-        while ((match = numDateRegex.exec(clean)) !== null) {
-          const dd = match[1].padStart(2, "0");
-          const mm = match[2].padStart(2, "0");
-          let yyyy = match[3];
-          if (yyyy.length === 2) yyyy = "20" + yyyy;
-          datesSet.add(`${yyyy}-${mm}-${dd}`);
+        // R2: Month DD - DD YYYY
+        const r2 = new RegExp("\\b" + mName + "\\s+" + dPat + sep + dPat + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
+        while ((match = r2.exec(clean)) !== null) {
+          const mm = match[1]; const d1 = parseInt(match[2]); const d2 = parseInt(match[3]);
+          let yyyy = match[4] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
+          addRange(d1, d2, mm, yyyy, match[0]);
         }
 
-        // ISO: "2026-08-28"
+        // R3: DD Month - DD Month YYYY
+        const r3 = new RegExp("\\b" + dPat + "\\s+" + mName + sep + dPat + "\\s+" + mName + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
+        while ((match = r3.exec(clean)) !== null) {
+          const d1 = parseInt(match[1]); const mm1 = match[2]; const d2 = parseInt(match[3]); const mm2 = match[4];
+          let yyyy = match[5] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
+          if (mm1.toLowerCase().substring(0,3) === mm2.toLowerCase().substring(0,3)) {
+            addRange(d1, d2, mm1, yyyy, match[0]);
+          }
+        }
+
+        // R4: DD - DD Month YYYY
+        const r4 = new RegExp("\\b" + dPat + sep + dPat + "\\s+" + mName + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
+        while ((match = r4.exec(clean)) !== null) {
+          const d1 = parseInt(match[1]); const d2 = parseInt(match[2]); const mm = match[3];
+          let yyyy = match[4] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
+          addRange(d1, d2, mm, yyyy, match[0]);
+        }
+        
+        // Now single dates
+        
+        // ISO: YYYY-MM-DD
         const isoRegex = /\b(202[6-7])[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g;
         while ((match = isoRegex.exec(clean)) !== null) {
-          const yyyy = match[1];
-          const mm = match[2].padStart(2, "0");
-          const dd = match[3].padStart(2, "0");
-          datesSet.add(`${yyyy}-${mm}-${dd}`);
+          datesSet.add(match[1] + "-" + match[2].padStart(2, '0') + "-" + match[3].padStart(2, '0'));
+          foundDateInChunk = true;
+          clean = clean.replace(match[0], " [EXTRACTED] ");
+        }
+
+        // Numerical: DD/MM/YYYY
+        const numDateRegex = /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](202[6-7]|2[67])\b/g;
+        while ((match = numDateRegex.exec(clean)) !== null) {
+          let yyyy = match[3]; if (yyyy.length === 2) yyyy = "20" + yyyy;
+          datesSet.add(yyyy + "-" + match[2].padStart(2, '0') + "-" + match[1].padStart(2, '0'));
+          foundDateInChunk = true;
+          clean = clean.replace(match[0], " [EXTRACTED] ");
+        }
+
+        // Named Month: DD Month YYYY
+        const namedMonthRegex = new RegExp("\\b" + dPat + "\\s*[-/\\s,.]+\\s*" + mName + "\\b(?:\\s*[-/\\s,.]*\\s*" + yPat + ")?", "gi");
+        while ((match = namedMonthRegex.exec(clean)) !== null) {
+          const dd = match[1]; const mm = match[2]; 
+          let yyyy = match[3] || "2026"; if (yyyy.length === 2) yyyy = "20" + yyyy;
+          addDate(dd, mm, yyyy, match[0]);
+        }
+
+        // Reversed Named Month: Month DD YYYY
+        const revNamedMonthRegex = new RegExp("\\b" + mName + "\\s*[-/\\s,.]+\\s*" + dPat + "\\b(?:\\s*[,/\\s.]*\\s*" + yPat + ")?", "gi");
+        while ((match = revNamedMonthRegex.exec(clean)) !== null) {
+          const mm = match[1]; const dd = match[2];
+          let yyyy = match[3] || "2026"; if (yyyy.length === 2) yyyy = "20" + yyyy;
+          addDate(dd, mm, yyyy, match[0]);
+        }
+
+        // Fallback: Check Festival Entity Map ONLY if NO explicit date was found in this line
+        if (!foundDateInChunk) {
+          const cleanLower = clean.toLowerCase();
+          for (const [festName, dates] of Object.entries(FESTIVAL_DATE_MAP_2026)) {
+            const regex = new RegExp(`\\b${festName.replace(/-/g, "[- ]")}\\b`, "i");
+            if (regex.test(cleanLower)) {
+              dates.forEach(d => datesSet.add(d));
+            }
+          }
         }
       }
 
