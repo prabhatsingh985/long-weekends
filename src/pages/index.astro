@@ -668,6 +668,8 @@ import Footer from "../components/Footer.astro";
               <div class="flex items-center justify-between gap-2 mb-2">
                 ${topBadge}
                 
+                <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 shadow-sm">${plan.totalDaysOff} Days Off</span>
                 <!-- Single Minimalist Ghost Calendar Button -->
                 <button 
                   type="button" 
@@ -678,6 +680,7 @@ import Footer from "../components/Footer.astro";
                   <span class="text-sm">🗓️</span>
                 </button>
               </div>
+              </div>
 
               <!-- Main Details -->
               <h3 class="font-bold text-base text-slate-900 tracking-tight mb-1 group-hover:text-blue-600 transition-colors">
@@ -686,8 +689,7 @@ import Footer from "../components/Footer.astro";
               <div class="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mb-2.5">
                 <span>🗓️</span>
                 <span class="font-bold text-slate-800">${formatDateRange(plan.startDate, plan.endDate)}</span>
-                <span class="text-slate-300">·</span>
-                <span class="text-slate-600 font-medium">${plan.totalDaysOff} Consecutive Days Off</span>
+                
               </div>
 
               <!-- Interactive Day-by-Day Ribbon -->

@@ -133,16 +133,16 @@ function generateDealTitle(
   const festivalLabel = distinctFestivals.length > 0 ? distinctFestivals.join(" & ") : cleanFestivalName(primaryHoliday);
 
   if (leavesNeeded === 0) {
-    return `${festivalLabel}: ${totalDays} Days Free Weekend`;
+    return `${festivalLabel}`;
   }
 
   if (strategy === "pre") {
-    return `${festivalLabel} (Pre-Break): ${totalDays} Days Off`;
+    return `${festivalLabel} (Pre-Break)`;
   } else if (strategy === "post") {
-    return `${festivalLabel} (Post-Break): ${totalDays} Days Off`;
+    return `${festivalLabel} (Post-Break)`;
   }
 
-  return `${festivalLabel}: ${totalDays} Days Off`;
+  return `${festivalLabel}`;
 }
 
 export function solveVacationPlans(options: SolverOptions): VacationPlan[] {
