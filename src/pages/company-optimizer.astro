@@ -889,6 +889,15 @@ import Footer from "../components/Footer.astro";
 
           renderDetectedDates(dates);
           render();
+          if (dates.length > 0) {
+            setTimeout(() => {
+              const box = document.getElementById("detectedDatesBox");
+              if (box) {
+                // Scroll specifically to the box so it aligns nicely with the header
+                box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 300); // Small delay to let Astro finish rendering the DOM
+          }
         } catch (err: any) {
           console.error("Deep parsing error:", err);
           fileStatus.classList.remove("hidden");
