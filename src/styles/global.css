@@ -24,7 +24,7 @@
   body {
     background-color: var(--color-canvas-soft);
     color: var(--color-ink);
-    font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
@@ -58,4 +58,432 @@
 
 .shadow-vercel-lg {
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.04), 0px 12px 24px -6px rgba(0, 0, 0, 0.08);
+}
+
+/* ==========================================================================
+   HIGH-CONTRAST PREMIUM DARK MODE SYSTEM
+   ========================================================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark header {
+  background-color: rgba(11, 15, 25, 0.9) !important;
+  border-color: #1e293b !important;
+}
+
+/* General Layout & Cards */
+html.dark .bg-white {
+  background-color: #131c2e !important;
+  color: #f8fafc !important;
+}
+
+html.dark [class*="bg-[#fafafa]"] {
+  background-color: #0b0f19 !important;
+}
+
+html.dark [class*="bg-[#f5f5f5]"],
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #1a2436 !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-100,
+html.dark [class*="border-[#ebebeb]"],
+html.dark .border-zinc-200 {
+  border-color: #243147 !important;
+}
+
+/* Typography Contrast */
+html.dark .text-slate-900,
+html.dark [class*="text-[#171717]"],
+html.dark .text-zinc-900,
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-zinc-500,
+html.dark [class*="text-[#666666]"] {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+/* Specific Color Class Contrast Overrides in Dark Mode */
+html.dark .text-emerald-950,
+html.dark .text-emerald-900,
+html.dark .text-emerald-800,
+html.dark .text-emerald-700 {
+  color: #a7f3d0 !important;
+}
+
+html.dark .text-amber-950,
+html.dark .text-amber-900,
+html.dark .text-amber-800,
+html.dark .text-amber-700 {
+  color: #fef08a !important;
+}
+
+html.dark .text-blue-950,
+html.dark .text-blue-900,
+html.dark .text-blue-800,
+html.dark .text-blue-700 {
+  color: #bfdbfe !important;
+}
+
+/* Select & Inputs */
+html.dark select,
+html.dark textarea,
+html.dark input {
+  background-color: #1a2436 !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* Chip Buttons (0 Leaves, 1 Leave, etc.) */
+html.dark .chip-btn {
+  background-color: #151f32 !important;
+  border-color: #26354d !important;
+}
+
+html.dark .chip-btn .chip-title {
+  color: #f8fafc !important;
+}
+
+html.dark .chip-btn .chip-desc {
+  color: #94a3b8 !important;
+}
+
+html.dark .chip-btn:hover {
+  border-color: #475569 !important;
+  background-color: #1e2c45 !important;
+}
+
+/* ACTIVE CHIP BUTTON FIX (White Card with Dark Text) */
+html.dark .chip-btn.active {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15) !important;
+}
+
+html.dark .chip-btn.active .chip-title {
+  color: #0f172a !important;
+}
+
+html.dark .chip-btn.active .chip-desc {
+  color: #475569 !important;
+}
+
+/* Month Filter Tabs */
+html.dark .month-tab-btn {
+  background-color: #151f32 !important;
+  color: #cbd5e1 !important;
+  border-color: #26354d !important;
+}
+
+html.dark .month-tab-btn:hover {
+  background-color: #1e2c45 !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+html.dark .month-tab-btn.active {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Custom Stepper Box */
+html.dark .stepper-box {
+  background-color: #1a2436 !important;
+  border-color: #334155 !important;
+}
+
+html.dark .stepper-btn,
+html.dark .stepper-val {
+  color: #f8fafc !important;
+}
+
+/* Hero Section Gradient in Dark Mode */
+html.dark section.bg-gradient-to-b {
+  background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(17, 24, 39, 0.9), #0b0f19) !important;
+  border-color: #1e293b !important;
+}
+
+/* Card Pills (Holiday, Weekend, PTO) in Dark Mode */
+/* Holiday Pill */
+html.dark [class*="bg-emerald-50"] {
+  background-color: rgba(6, 78, 59, 0.5) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  color: #a7f3d0 !important;
+}
+
+html.dark [class*="bg-emerald-50"] span,
+html.dark [class*="bg-emerald-50"] div {
+  color: #a7f3d0 !important;
+}
+
+html.dark [class*="bg-emerald-100"] {
+  background-color: rgba(6, 95, 70, 0.9) !important;
+  color: #ecfdf5 !important;
+}
+
+/* Weekend Pill */
+html.dark [class*="bg-blue-50"] {
+  background-color: rgba(30, 58, 138, 0.5) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  color: #bfdbfe !important;
+}
+
+html.dark [class*="bg-blue-50"] span,
+html.dark [class*="bg-blue-50"] div {
+  color: #bfdbfe !important;
+}
+
+html.dark [class*="bg-blue-100"] {
+  background-color: rgba(30, 64, 175, 0.9) !important;
+  color: #eff6ff !important;
+}
+
+/* PTO / Leave Pill */
+html.dark [class*="bg-amber-50"] {
+  background-color: rgba(120, 53, 15, 0.5) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  color: #fef08a !important;
+}
+
+html.dark [class*="bg-amber-50"] span,
+html.dark [class*="bg-amber-50"] div {
+  color: #fef08a !important;
+}
+
+html.dark [class*="bg-amber-200"],
+html.dark [class*="bg-amber-100"] {
+  background-color: rgba(146, 64, 14, 0.9) !important;
+  color: #fefce8 !important;
+}
+
+/* Bottom Action Banners inside Cards */
+html.dark [class*="bg-emerald-50"] {
+  background-color: rgba(6, 78, 59, 0.45) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+html.dark [class*="bg-amber-50"] {
+  background-color: rgba(120, 53, 15, 0.45) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Uploader DropZone & Loading Overlay Fix */
+html.dark #dropZone {
+  background-color: #131c2e !important;
+  border-color: #334155 !important;
+}
+
+html.dark #uploadSpinner {
+  background-color: rgba(19, 28, 46, 0.96) !important;
+}
+
+html.dark #uploadSpinner .animate-spin {
+  border-color: #f8fafc !important;
+  border-top-color: transparent !important;
+}
+
+html.dark #spinnerText {
+  color: #f8fafc !important;
+}
+
+html.dark #spinnerSub {
+  color: #94a3b8 !important;
+}
+
+html.dark #fileUploadStatus {
+  background-color: rgba(6, 78, 59, 0.5) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  color: #a7f3d0 !important;
+}
+
+/* Footer & Dropdowns */
+html.dark footer {
+  background-color: #0b0f19 !important;
+  border-color: #1e293b !important;
+}
+
+html.dark .theme-toggle-btn {
+  background-color: #1a2436 !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark #sortDropdownMenu {
+  background-color: #1a2436 !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .sort-option:hover {
+  background-color: #243248 !important;
+}
+
+
+/* ==========================================================================
+   MONTH CALENDAR GRID MODAL CELL OVERRIDES IN DARK MODE
+   ========================================================================== */
+
+/* Normal Weekday Cell text (1, 5, 6, 7, 8, 9...) */
+html.dark .group\/calcell.text-slate-400,
+html.dark [class*="group/calcell"].text-slate-400 {
+  color: #cbd5e1 !important;
+}
+
+/* Normal Weekend Cell (10, 11, 17, 18, 24, 25, 31) */
+html.dark [class*="group/calcell"][class*="bg-slate-100"] {
+  background-color: rgba(30, 41, 59, 0.7) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #334155 !important;
+}
+
+html.dark [class*="group/calcell"][class*="bg-slate-100"] span {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+/* Active Plan Holiday Cell (e.g. 2 Oct - Green) */
+html.dark [class*="group/calcell"][class*="bg-emerald-100"] {
+  background-color: #064e3b !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+html.dark [class*="group/calcell"][class*="bg-emerald-100"] span {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Active Plan Weekend Cell (e.g. 3 Oct, 4 Oct - Blue) */
+html.dark [class*="group/calcell"][class*="bg-blue-100"] {
+  background-color: #1e40af !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+html.dark [class*="group/calcell"][class*="bg-blue-100"] span {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Active Plan Leave Cell (Amber/Yellow) */
+html.dark [class*="group/calcell"][class*="bg-amber-100"] {
+  background-color: #78350f !important;
+  border-color: #f59e0b !important;
+  color: #ffffff !important;
+}
+
+html.dark [class*="group/calcell"][class*="bg-amber-100"] span {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Calendar Month Container Card inside Modal */
+html.dark #calendarModal .bg-white {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+html.dark #calendarModal .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark #calendarModal .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+
+/* ==========================================================================
+   RESULTS LEGEND BAR OVERRIDES IN DARK MODE
+   ========================================================================== */
+html.dark .results-legend-bar {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+html.dark .results-legend-bar span {
+  color: #e2e8f0 !important;
+}
+
+html.dark .results-legend-bar .bg-blue-500 {
+  background-color: #3b82f6 !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6) !important;
+}
+
+html.dark .results-legend-bar .bg-emerald-500 {
+  background-color: #10b981 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6) !important;
+}
+
+html.dark .results-legend-bar .bg-amber-500 {
+  background-color: #f59e0b !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6) !important;
+}
+
+
+/* ==========================================================================
+   CALENDAR MODAL LEGEND DOTS OVERRIDES IN DARK MODE
+   ========================================================================== */
+html.dark #calendarModal .bg-slate-50 {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark #calendarModal .bg-slate-50 span {
+  color: #f8fafc !important;
+  font-weight: 600 !important;
+}
+
+html.dark #calendarModal .bg-emerald-500 {
+  background-color: #10b981 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7) !important;
+}
+
+html.dark #calendarModal .bg-amber-500 {
+  background-color: #f59e0b !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7) !important;
+}
+
+html.dark #calendarModal .bg-blue-500 {
+  background-color: #3b82f6 !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.7) !important;
+}
+
+
+/* ==========================================================================
+   DAYS OFF BADGE & CALENDAR BUTTON OVERRIDES IN DARK MODE
+   ========================================================================== */
+html.dark .days-off-badge {
+  background-color: rgba(49, 46, 129, 0.6) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  color: #c7d2fe !important;
+}
+
+html.dark .btn-open-cal {
+  background-color: #1a2436 !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .btn-open-cal:hover {
+  background-color: #243248 !important;
+  border-color: #475569 !important;
 }
