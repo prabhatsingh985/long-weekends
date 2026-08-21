@@ -124,7 +124,7 @@ import Footer from "../components/Footer.astro";
   </section>
 
   <!-- Interactive Leave Budget Selector (Favorite Layout) -->
-  <section class="py-5 px-6 bg-white border-b border-[#ebebeb] shadow-xs">
+  <section class="py-5 px-6 bg-white border-b border-[#ebebeb] shadow-xs hidden" id="budgetSection">
     <div class="max-w-[1200px] mx-auto">
       
             <!-- Filter Header -->
@@ -181,7 +181,7 @@ import Footer from "../components/Footer.astro";
   </section>
 
   <!-- Vacation Grid / Empty Prompt Section -->
-  <main class="flex-1 py-10 px-6 max-w-[1200px] mx-auto w-full">
+  <main class="flex-1 py-10 px-6 max-w-[1200px] mx-auto w-full hidden" id="gridSection">
     
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
@@ -1022,6 +1022,17 @@ import Footer from "../components/Footer.astro";
     }
 
     function render() {
+      const budgetSection = document.getElementById("budgetSection");
+      const gridSection = document.getElementById("gridSection");
+      
+      if (!state.customHolidays || state.customHolidays.length === 0) {
+        if (budgetSection) budgetSection.classList.add("hidden");
+        if (gridSection) gridSection.classList.add("hidden");
+      } else {
+        if (budgetSection) budgetSection.classList.remove("hidden");
+        if (gridSection) gridSection.classList.remove("hidden");
+      }
+
       const grid = document.getElementById("vacationGrid");
       const empty = document.getElementById("emptyState");
       const badge = document.getElementById("resultsBadge");
@@ -1068,7 +1079,8 @@ import Footer from "../components/Footer.astro";
 
       if (plans.length === 0) {
         grid.innerHTML = "";
-        empty.classList.remove("hidden");
+        const empty = document.getElementById("emptyState");
+        if(empty) empty.classList.remove("hidden");
         const emptyTitle = document.getElementById("emptyStateTitle");
         const emptySub = document.getElementById("emptyStateSub");
         if (emptyTitle) emptyTitle.textContent = "No Long Weekend Found for this Leave Budget";
