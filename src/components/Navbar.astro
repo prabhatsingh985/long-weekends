@@ -16,11 +16,11 @@
     </a>
 
     <!-- Nav Controls -->
-    <div class="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+    <div class="flex items-center gap-2 sm:gap-3 justify-between sm:justify-end flex-nowrap w-full sm:w-auto mt-2 sm:mt-0">
 
       <!-- Region Selector -->
-      <div class="flex items-center gap-1.5">
-        <select id="navRegionSelector" class="bg-[#fafafa] border border-[#ebebeb] text-[#171717] text-xs font-semibold rounded-md px-2 sm:px-3 py-1 sm:py-1.5 outline-none focus:border-[#171717] cursor-pointer">
+      <div class="flex items-center gap-1.5 flex-1 min-w-0">
+        <select id="navRegionSelector" class="w-full text-ellipsis overflow-hidden bg-[#fafafa] border border-[#ebebeb] text-[#171717] text-xs font-semibold rounded-md px-2 sm:px-3 py-1 sm:py-1.5 outline-none focus:border-[#171717] cursor-pointer">
           <option value="ALL" selected>🇮🇳 Pan-India IT</option>
           <option value="SOUTH">🟢 South (Bangalore / Chennai / Hyd)</option>
           <option value="WEST">🟠 West (Mumbai / Pune)</option>
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Workweek Toggle -->
-      <div class="flex items-center gap-1 bg-[#f5f5f5] p-1 rounded-md border border-[#ebebeb]">
+      <div class="flex items-center gap-1 bg-[#f5f5f5] p-1 rounded-md border border-[#ebebeb] shrink-0">
         <button type="button" id="btnWorkweek5" class="px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white">5-Day</button>
         <button type="button" id="btnWorkweek6" class="px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]">6-Day</button>
       </div>

@@ -130,33 +130,33 @@ import Footer from "../components/Footer.astro";
 
   <!-- Interactive Calendar View Modal / Popover -->
   <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-      <button type="button" id="btnCloseCalendarModal" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-sm cursor-pointer transition-all">✕</button>
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative animate-in fade-in zoom-in-95 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
+      <button type="button" id="btnCloseCalendarModal" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-sm cursor-pointer transition-all">✕</button>
       
       <!-- Modal Header -->
-      <div class="mb-5">
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 text-[11px] font-bold border border-blue-200 mb-1.5">
+      <div class="mb-3 sm:mb-5 pr-6">
+        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-bold border border-blue-200 mb-1 sm:mb-1.5">
           <span>🗓️ Month Calendar View</span>
         </div>
-        <h3 class="text-lg font-bold text-slate-900" id="calModalTitle">Vacation Calendar</h3>
-        <p class="text-xs text-slate-500" id="calModalDates">Dates</p>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight" id="calModalTitle">Vacation Calendar</h3>
+        <p class="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight" id="calModalDates">Dates</p>
       </div>
 
       <!-- Calendar Container (Single or Dual Month) -->
-      <div id="calModalContent" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"></div>
+      <div id="calModalContent" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6"></div>
 
       <!-- Compact One-Line Legend -->
-      <div class="flex items-center justify-center gap-4 py-2.5 px-4 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 flex-wrap">
+      <div class="flex items-center justify-center gap-2 sm:gap-4 py-2 sm:py-2.5 px-2 sm:px-4 bg-slate-50 rounded-xl border border-slate-200 text-[10px] sm:text-xs font-semibold text-slate-700 flex-wrap leading-none">
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500"></span>
           <span>Public Holiday</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500"></span>
           <span>Apply PTO</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-blue-500"></span>
           <span>Weekend Off</span>
         </div>
       </div>
@@ -299,6 +299,52 @@ import Footer from "../components/Footer.astro";
     }
 
     function bindEvents() {
+      // Intercept Footer links for smooth transition without reload on homepage
+      document.querySelectorAll(".footer-filter-link").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          const url = new URL((link as HTMLAnchorElement).href);
+          const params = new URLSearchParams(url.search);
+          
+          let changed = false;
+          if (params.has("region")) {
+            const r = params.get("region");
+            if (["ALL", "SOUTH", "WEST", "NORTH", "EAST"].includes(r)) {
+              state.selectedRegion = r;
+              const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
+              if (regionSelect) {
+                regionSelect.value = r;
+                regionSelect.dispatchEvent(new Event("change"));
+              }
+              changed = true;
+            }
+          }
+          if (params.has("leaves")) {
+            const l = parseInt(params.get("leaves") || "0", 10);
+            if (!isNaN(l)) {
+              state.selectedLeaves = l;
+              changed = true;
+            }
+          }
+          if (params.has("month")) {
+            const m = params.get("month");
+            if (m) {
+              state.selectedMonth = m;
+              changed = true;
+            }
+          }
+
+          if (changed) {
+            updateActiveUI();
+            render();
+            // Scroll to the main UI area so user sees the change
+            document.getElementById("main-content-area")?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Let's scroll to top if main-content-area is not there
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+      });
+  
       // Custom Dropdown Logic
       const dropdownBtn = document.getElementById("sortDropdownBtn");
       const dropdownMenu = document.getElementById("sortDropdownMenu");

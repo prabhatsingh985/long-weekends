@@ -1,4 +1,10 @@
 ---
+const pathname = Astro.url.pathname;
+const isCompanyOptimizer = pathname.includes('company-optimizer');
+
+const description = isCompanyOptimizer
+  ? "Upload your office holiday list to discover guaranteed long weekends tailored specifically for your company."
+  : "{description}";
 ---
 <footer class="bg-white border-t border-zinc-200 py-16 px-4 sm:px-6 mt-16">
   <div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between gap-12 mb-8">
@@ -14,20 +20,20 @@
       <div>
         <h4 class="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-4">Popular Regions</h4>
         <ul class="space-y-3">
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Pan-India IT Corporate</a></li>
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Karnataka (Bangalore)</a></li>
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Maharashtra (Mumbai/Pune)</a></li>
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Delhi NCR</a></li>
+          <li><a href="/?region=ALL" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Pan-India IT Corporate</a></li>
+          <li><a href="/?region=SOUTH" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Karnataka (Bangalore)</a></li>
+          <li><a href="/?region=WEST" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Maharashtra (Mumbai/Pune)</a></li>
+          <li><a href="/?region=NORTH" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Delhi NCR</a></li>
         </ul>
       </div>
 
       <div>
         <h4 class="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-4">Leave Math</h4>
         <ul class="space-y-3">
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">0 Leaves (Free 3-Day Breaks)</a></li>
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">1 Leave (Smart 4-Day Bridge)</a></li>
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">2 Leaves (5-6 Day Vacations)</a></li>
-          <li><a href="#" class="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Diwali & Durga Puja Hacks</a></li>
+          <li><a href="/?leaves=0" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">0 Leaves (Free 3-Day Breaks)</a></li>
+          <li><a href="/?leaves=1" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">1 Leave (Smart 4-Day Bridge)</a></li>
+          <li><a href="/?leaves=2" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">2 Leaves (5-6 Day Vacations)</a></li>
+          <li><a href="/?month=10" class="footer-filter-link text-sm text-zinc-500 hover:text-zinc-900 transition-colors">Diwali & Durga Puja Hacks</a></li>
         </ul>
       </div>
 
