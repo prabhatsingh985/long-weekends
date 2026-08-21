@@ -487,3 +487,35 @@ html.dark .btn-open-cal:hover {
   background-color: #243248 !important;
   border-color: #475569 !important;
 }
+
+
+/* ==========================================================================
+   COMPANY OPTIMIZER & UPLOADER DARK MODE OVERRIDES
+   ========================================================================== */
+html.dark .tab-btn {
+  color: #94a3b8 !important;
+}
+
+html.dark .tab-btn:hover:not(.active) {
+  color: #f8fafc !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .tab-btn.active {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15) !important;
+}
+
+html.dark [class*="px-3.5"] {
+  background-color: rgba(6, 78, 59, 0.5) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  color: #a7f3d0 !important;
+}
+
+html.dark [class*="px-3.5"] span {
+  color: #a7f3d0 !important;
+}
+
+
