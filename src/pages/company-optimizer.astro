@@ -21,7 +21,7 @@ import Footer from "../components/Footer.astro";
 
   <!-- Header with Navigation Back to National Calendar -->
   <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-xs">
-    <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
       <a href="/" class="flex items-center gap-3 group text-decoration-none">
         <div class="w-9 h-9 rounded-md bg-slate-900 text-white flex items-center justify-center font-mono font-bold text-sm shadow-xs">
           LW
@@ -47,7 +47,7 @@ import Footer from "../components/Footer.astro";
   </header>
 
   <!-- Hero Section & Multi-Format Ingestion Uploader -->
-  <section class="relative py-14 px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
+  <section class="relative py-8 sm:py-10 sm:py-14 px-4 sm:px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
     <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
     <div class="max-w-[1200px] mx-auto flex flex-col items-center text-center">
@@ -57,7 +57,7 @@ import Footer from "../components/Footer.astro";
         <span>✨ Custom Vacation Planner for Your Office</span>
       </div>
 
-      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-3">
+      <h1 class="text-[28px] leading-tight sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-3">
         Add Your Office Holidays
       </h1>
       <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-normal">
@@ -72,7 +72,7 @@ import Footer from "../components/Footer.astro";
         </div>
 
         <div id="tab-upload" class="tab-content active">
-          <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-slate-800 rounded-2xl p-8 text-center cursor-pointer transition-all bg-white hover:bg-slate-50 relative">
+          <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-slate-800 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all bg-white hover:bg-slate-50 relative">
             <input type="file" id="fileUploadInput" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" class="hidden" />
             <div class="text-4xl mb-3" id="dropZoneIcon">📁</div>
             <div class="text-sm font-bold text-slate-900 mb-1" id="dropZoneTitle">Click to Upload PDF or Drop a Screenshot</div>
@@ -124,7 +124,7 @@ import Footer from "../components/Footer.astro";
   </section>
 
   <!-- Interactive Leave Budget Selector (Favorite Layout) -->
-  <section class="py-5 px-6 bg-white border-b border-[#ebebeb] shadow-xs hidden" id="budgetSection">
+  <section class="py-5 px-4 sm:px-6 bg-white border-b border-[#ebebeb] shadow-xs hidden" id="budgetSection">
     <div class="max-w-[1200px] mx-auto">
       
             <!-- Filter Header -->
@@ -145,7 +145,7 @@ import Footer from "../components/Footer.astro";
         </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6" id="budgetChipsContainer">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6" id="budgetChipsContainer">
         <button type="button" class="chip-btn active" data-leaves="0">
           <span class="chip-title">0 Leaves</span>
           <span class="chip-desc">Free 3-Day Breaks</span>
@@ -181,7 +181,7 @@ import Footer from "../components/Footer.astro";
   </section>
 
   <!-- Vacation Grid / Empty Prompt Section -->
-  <main class="flex-1 py-10 px-6 max-w-[1200px] mx-auto w-full hidden" id="gridSection">
+  <main class="flex-1 py-8 sm:py-10 px-4 sm:px-6 max-w-[1200px] mx-auto w-full hidden" id="gridSection">
     
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
@@ -220,7 +220,7 @@ import Footer from "../components/Footer.astro";
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
 
     <!-- Empty State -->
-    <div class="text-center py-20 px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
+    <div class="text-center py-20 px-4 sm:px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
       <div class="w-16 h-16 rounded-full bg-slate-50 text-3xl flex items-center justify-center mx-auto mb-4 border border-slate-200">🏢</div>
       <h3 class="font-bold text-lg text-slate-900 mb-2" id="emptyStateTitle">No Office Holidays Added Yet</h3>
       <p class="text-xs text-slate-500 max-w-md mx-auto leading-relaxed" id="emptyStateSub">

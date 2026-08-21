@@ -22,7 +22,7 @@ import Footer from "../components/Footer.astro";
   <Hero />
 
   <!-- Interactive Filter Bar (Exact Favorite Layout) -->
-  <section class="py-3 px-6 bg-white border-b border-[#ebebeb] shadow-xs">
+  <section class="py-3 px-4 sm:px-6 bg-white border-b border-[#ebebeb] shadow-xs">
     <div class="max-w-[1200px] mx-auto">
       
             <!-- Filter Header -->
@@ -44,7 +44,7 @@ import Footer from "../components/Footer.astro";
       </div>
 
       <!-- 5 Leave Budget Chips -->
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4" id="budgetChipsContainer">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4" id="budgetChipsContainer">
         <button type="button" class="chip-btn active" data-leaves="0">
           <span class="chip-title">0 Leaves</span>
           <span class="chip-desc">Free 3-Day Breaks</span>
@@ -81,7 +81,7 @@ import Footer from "../components/Footer.astro";
   </section>
 
   <!-- Vacation Grid Results -->
-  <main class="flex-1 py-10 px-6 max-w-[1200px] mx-auto w-full">
+  <main class="flex-1 py-8 sm:py-10 px-4 sm:px-6 max-w-[1200px] mx-auto w-full">
     
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
@@ -120,7 +120,7 @@ import Footer from "../components/Footer.astro";
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
 
     <!-- Empty State -->
-    <div class="hidden text-center py-20 px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
+    <div class="hidden text-center py-20 px-4 sm:px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
       <div class="w-16 h-16 rounded-full bg-slate-50 text-3xl flex items-center justify-center mx-auto mb-4 border border-slate-200">🏖️</div>
       <h3 class="font-bold text-lg text-slate-900 mb-2">No Long Weekend Found for this Budget</h3>
       <p class="text-xs text-slate-500 max-w-md mx-auto">Try selecting another leave budget (e.g. 1, 2, or 3 leaves) or check "All Upcoming" to view all available bridges.</p>
