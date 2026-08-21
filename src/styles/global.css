@@ -173,15 +173,30 @@ html.dark .chip-btn:hover {
 html.dark .chip-btn.active {
   background-color: #ffffff !important;
   border-color: #ffffff !important;
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25) !important;
 }
 
 html.dark .chip-btn.active .chip-title {
   color: #0f172a !important;
+  font-weight: 800 !important;
 }
 
 html.dark .chip-btn.active .chip-desc {
   color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+html.dark .chip-btn.active .stepper-box {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.dark .chip-btn.active .stepper-btn {
+  color: #334155 !important;
+}
+
+html.dark .chip-btn.active .stepper-val {
+  color: #0f172a !important;
 }
 
 /* Month Filter Tabs */
@@ -519,3 +534,28 @@ html.dark [class*="px-3.5"] span {
 }
 
 
+
+
+.font-serif-elegant {
+  font-family: 'Playfair Display', serif;
+}
+
+
+/* Hero CTA Button Dark Mode - Premium Solid White */
+html.dark .hero-cta-btn {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: transparent !important;
+  box-shadow: 0 8px 25px -6px rgba(255, 255, 255, 0.15) !important;
+}
+html.dark .hero-cta-btn:hover {
+  background-color: #f1f5f9 !important;
+  box-shadow: 0 12px 30px -6px rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-2px);
+}
+html.dark .hero-cta-btn span.text-slate-400 {
+  color: #64748b !important;
+}
+html.dark .hero-cta-btn:hover span.text-slate-400 {
+  color: #0f172a !important;
+}
