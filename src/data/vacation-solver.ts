@@ -137,12 +137,12 @@ function generateDealTitle(
   }
 
   if (strategy === "pre") {
-    return `${festivalLabel} (Pre-Break): ${totalDays} Days Off (Take ${leavesNeeded} ${leavesNeeded === 1 ? "Leave" : "Leaves"})`;
+    return `${festivalLabel} (Pre-Break): ${totalDays} Days Off`;
   } else if (strategy === "post") {
-    return `${festivalLabel} (Post-Break): ${totalDays} Days Off (Take ${leavesNeeded} ${leavesNeeded === 1 ? "Leave" : "Leaves"})`;
+    return `${festivalLabel} (Post-Break): ${totalDays} Days Off`;
   }
 
-  return `${festivalLabel}: ${totalDays} Days Off (Take ${leavesNeeded} ${leavesNeeded === 1 ? "Leave" : "Leaves"})`;
+  return `${festivalLabel}: ${totalDays} Days Off`;
 }
 
 export function solveVacationPlans(options: SolverOptions): VacationPlan[] {
