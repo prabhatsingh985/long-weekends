@@ -1,32 +1,21 @@
 ---
 ---
-<section class="relative pt-16 pb-14 px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
-  <!-- Subtle warm glowing backdrop -->
-  <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
-
-  <div class="max-w-[1200px] mx-auto relative z-10">
+<section class="relative pt-24 pb-20 px-6 border-b border-zinc-200 bg-white overflow-hidden">
+  <div class="max-w-[1000px] mx-auto relative z-10 text-center flex flex-col items-center">
     
-    <!-- 1. Alert Badge (Dynamically calculated based on real today date) -->
-    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-5 shadow-xs hover:bg-emerald-100/80 transition-all">
-      <span class="text-sm">🌴</span>
-      <span id="heroCountdownBadge">Next: Raksha Bandhan (3 Days Off · 0 Leaves Needed)</span>
+    <!-- 1. Clean Badge -->
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-semibold mb-8">
+      <svg class="w-3.5 h-3.5 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+      <span id="heroCountdownBadge" class="font-display tracking-tight">Scanning for optimal long weekends...</span>
     </div>
 
     <!-- 2. Main Headline & Tagline -->
-    <h1 class="text-3xl sm:text-5xl lg:text-[52px] font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-2.5">
-      You deserve a break. We found the time for you.
+    <h1 class="font-display text-4xl sm:text-6xl lg:text-[64px] font-extrabold text-zinc-900 tracking-tight leading-[1.1] max-w-[850px] mb-6">
+      Stop waiting for holidays. <br/><span class="text-zinc-600">Start taking them.</span>
     </h1>
-    <p class="text-lg sm:text-xl font-bold text-amber-600 mb-4 tracking-tight">
-      Take more vacations. Burn fewer leaves.
+    <p class="text-lg sm:text-xl text-zinc-500 max-w-[650px] leading-relaxed font-normal mb-10">
+      We automatically combine your weekends with official public holidays to give you the longest possible breaks, using the absolute minimum PTO. 
     </p>
-
-    <!-- 3. Empathetic Description (Subtext) -->
-    <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-normal">
-      Escape the daily grind without emptying your leave balance. We automatically turn regular weekends and public holidays into guilt-free mini vacations.
-    </p>
-
-    
 
   </div>
 </section>
@@ -40,7 +29,6 @@
 
     const today = getTodayIso();
 
-    // Check starting with 0 leaves, then 1 leave, 2 leaves, up to 4 leaves
     for (let l = 0; l <= 4; l++) {
       const plans = solveVacationPlans({
         leaves: l,
@@ -50,7 +38,6 @@
         fromDate: today
       });
 
-      // User requirement: check upcoming where startDate > today (or startDate >= today)
       let upcoming = plans.filter(p => p.startDate > today);
       if (upcoming.length === 0) {
         upcoming = plans.filter(p => p.startDate >= today);
@@ -68,20 +55,16 @@
         
         const daysOff = nextPlan.totalDaysOff || 3;
         const leaves = typeof nextPlan.leavesRequired === "number" ? nextPlan.leavesRequired : l;
-        const leavesText = leaves === 0 ? "0 Leaves Needed" : `${leaves} ${leaves === 1 ? 'Leave' : 'Leaves'} Needed`;
+        const leavesText = leaves === 0 ? "0 PTO" : `${leaves} PTO`;
 
-        badge.textContent = `Next: ${label} (${daysOff} Days Off · ${leavesText})`;
+        badge.innerHTML = `<span class="text-zinc-500 font-medium">Next up:</span> <span class="font-bold text-zinc-900">${label}</span> <span class="text-zinc-300 mx-1.5">•</span> ${daysOff} Days Off <span class="text-zinc-300 mx-1.5">•</span> ${leavesText}`;
         return;
       }
     }
 
-    // Fallback for year end
-    badge.textContent = "Year-End Getaways · 2027 Plans Available Soon";
+    badge.innerHTML = "Year-End Getaways · 2027 Plans Available Soon";
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initDynamicHeroBadge);
-  } else {
-    initDynamicHeroBadge();
-  }
+  initDynamicHeroBadge();
+  document.addEventListener("astro:page-load", initDynamicHeroBadge);
 </script>
