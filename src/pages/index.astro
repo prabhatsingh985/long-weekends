@@ -257,7 +257,7 @@ import Footer from "../components/Footer.astro";
           If you're wondering <strong>when is the next long weekend</strong>, you're not alone — it's one of the most searched questions by working professionals in India every single month. The answer changes constantly as holidays pass and new ones approach. That's exactly why we built this tool: so you never have to manually check calendars or count days again.
         </p>
         <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Our calculator automatically identifies the <strong>next long weekend</strong> based on today's date, your region, and India's gazetted public holidays. Whether it's a 3-day break over a regular Saturday–Sunday–Monday or a 9-day mega-vacation that bridges Diwali into a full week off, you'll see every option ranked by efficiency — most days off for the fewest leaves used.
+          Our calculator automatically identifies the <strong>next long weekend</strong> based on today's date, your selected country (India or United States), and official gazetted public holidays. Whether it's a 3-day break over a regular Saturday–Sunday–Monday or a 9-day mega-vacation that bridges Diwali into a full week off, you'll see every option ranked by efficiency — most days off for the fewest leaves used.
         </p>
       </div>
 
@@ -269,37 +269,67 @@ import Footer from "../components/Footer.astro";
           Upcoming Long Weekends in 2026
         </h2>
         <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-          India has one of the most generous public holiday calendars in the world. In 2026, there are <strong class="text-slate-900 dark:text-white">10–15 long weekend opportunities</strong> for professionals on a standard 5-day work week — and even more if you include regional and optional holidays. Some highlights include:
+          Both India and the United States offer incredible public holiday calendars in 2026. Whether you're working in India or the US, there are <strong class="text-slate-900 dark:text-white">10–15 long weekend opportunities</strong> on a standard 5-day work week — with even more options when you bridge 1–2 PTO days. Key highlights include:
         </p>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 my-6">
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">January 2026</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Republic Day Weekend</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">A guaranteed 3-day weekend with 0 leaves required.</p>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">January 2026</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Republic Day & MLK Day</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Guaranteed 3-day long weekends with 0 leaves required.</p>
           </div>
 
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <span class="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 block mb-1">March 2026</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Holi Celebration Break</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Bridge just 1 leave to unlock a 4–5 day vacation.</p>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400">Spring 2026</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Holi & Good Friday Breaks</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">3 to 5 day spring getaways with minimal PTO usage.</p>
           </div>
 
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-1">August 2026</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Independence Day Bridge</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Use 2 PTO days mid-week to get a full week off.</p>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">May & July 2026</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇺🇸 USA</span>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Memorial Day & 4th of July</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Classic US summer long weekends over Friday/Monday holidays.</p>
           </div>
 
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <span class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-1">Oct – Nov 2026</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Dussehra & Diwali Festival Sweep</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Combine 3 PTO leaves into a 9+ consecutive day mega getaway.</p>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">August & Sept 2026</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Independence Day & Labor Day</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Late summer 3-day and mid-week bridge opportunities.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Nov 2026</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇺🇸 USA</span>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Thanksgiving & Black Friday</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">4-day long weekend taking just 1 day PTO on Black Friday.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400">Oct – Dec 2026</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Diwali & Christmas Getaways</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">The grand year-end holiday sweeps to recharge for 2027.</p>
           </div>
         </div>
 
         <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Use the leave-budget selector above to filter by how many PTO days you're willing to spend, and instantly see every <strong>upcoming long weekend</strong> that fits your budget.
+          Use the country selector and leave-budget options above to filter by your location and available PTO, and instantly see every <strong>upcoming long weekend</strong> customized for you.
         </p>
       </div>
 
@@ -325,7 +355,7 @@ import Footer from "../components/Footer.astro";
             <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
             <div>
               <h4 class="font-bold text-slate-900 dark:text-white text-sm">Pick your region & work week</h4>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Select Pan-India IT, South, West, North, or East regions, and toggle 5-day or 6-day work weeks.</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Select India (Pan-India IT) or United States (US Federal), and toggle 5-day or 6-day work weeks.</p>
             </div>
           </div>
           <div class="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
@@ -346,7 +376,7 @@ import Footer from "../components/Footer.astro";
           Why Long Weekends Matter for Indian Professionals
         </h2>
         <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-          Most Indian IT companies offer 15–24 paid leaves per year. That sounds generous until you realize it has to cover sick days, personal emergencies, and family obligations. The average corporate employee ends up with barely a week of true vacation time.
+          Most corporate companies in India and the United States offer 15–24 paid leaves per year. That sounds generous until you realize it has to cover sick days, personal emergencies, and family obligations. The average corporate employee ends up with barely a week of true vacation time.
         </p>
         <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
           <strong class="text-slate-900 dark:text-white">Long weekends change the math entirely.</strong> By strategically placing 1–3 PTO days around existing public holidays and weekends, you can unlock 4–9 day breaks without depleting your leave balance. It's not about working less — it's about planning smarter.
@@ -596,6 +626,32 @@ import Footer from "../components/Footer.astro";
 
     function init() {
       setupThemeToggle();
+
+      // Read initial URL parameters (e.g. ?region=USA)
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("region")) {
+        const r = params.get("region");
+        if (r && ["ALL", "USA", "SOUTH", "WEST", "NORTH", "EAST"].includes(r)) {
+          state.selectedRegion = r;
+          const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
+          if (regionSelect) {
+            regionSelect.value = r;
+          }
+          const flag = document.getElementById("brandFlag");
+          if (flag) {
+            flag.textContent = r === "USA" ? "🇺🇸" : "🇮🇳";
+          }
+        }
+      }
+      if (params.has("leaves")) {
+        const l = parseInt(params.get("leaves") || "0", 10);
+        if (!isNaN(l)) state.selectedLeaves = l;
+      }
+      if (params.has("month")) {
+        const m = params.get("month");
+        if (m) state.selectedMonth = m;
+      }
+
       bindEvents();
       render();
     }
@@ -611,7 +667,7 @@ import Footer from "../components/Footer.astro";
           let changed = false;
           if (params.has("region")) {
             const r = params.get("region");
-            if (["ALL", "SOUTH", "WEST", "NORTH", "EAST"].includes(r)) {
+            if (["ALL", "USA", "SOUTH", "WEST", "NORTH", "EAST"].includes(r)) {
               state.selectedRegion = r;
               const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
               if (regionSelect) {
