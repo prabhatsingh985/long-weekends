@@ -4,12 +4,15 @@ import holidaysData from "../../holidays_2026.json";
 export const NATIONAL_HOLIDAYS_2026 = holidaysData.national_holidays;
 export const STATE_SPECIFIC_HOLIDAYS = holidaysData.state_specific_holidays;
 
+export type RegionCode = "ALL" | "SOUTH" | "WEST" | "NORTH" | "EAST" | "USA";
+
 export const REGION_STATE_MAP: Record<RegionCode, string[]> = {
   ALL: [],
   SOUTH: ["KA", "TN"],
   WEST: ["MH"],
   NORTH: ["DL"],
   EAST: ["WB"],
+  USA: ["USA"],
 };
 
 export function getTodayIso(): string {
@@ -58,6 +61,11 @@ export function buildCalendarMap(
     customHolidays.forEach((dt) => {
       const festivalName = knownFestivals.get(dt) || "Company Holiday";
       holidayMap.set(dt, festivalName);
+    });
+  } else if (region === "USA") {
+    const usaHols = STATE_SPECIFIC_HOLIDAYS["USA"] || [];
+    usaHols.forEach((h) => {
+      holidayMap.set(h.date, h.name);
     });
   } else {
     NATIONAL_HOLIDAYS_2026.forEach((h) => {

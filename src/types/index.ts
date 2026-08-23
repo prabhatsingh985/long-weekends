@@ -30,3 +30,13 @@ export interface AiInsight {
   recommendedPlaces: string;
   matchedCount: number;
 }
+
+export type RegionCode = 'ALL' | 'SOUTH' | 'WEST' | 'NORTH' | 'EAST' | 'USA';
+
+export interface CalendarDay {
+  date: string;
+  dayOfWeek: number;
+  isWeekend: boolean;
+  isHoliday: boolean;
+  holidayName: string | null;
+}

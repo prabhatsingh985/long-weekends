@@ -405,6 +405,120 @@
         "state": "Tamil Nadu",
         "longWeekendType": "bridge_1_leave"
       }
+    ],
+    "USA": [
+      {
+        "id": "us-new-year-2026",
+        "name": "New Year's Day",
+        "date": "2026-01-01",
+        "day": "Thursday",
+        "state": "USA",
+        "longWeekendType": "bridge_1_leave"
+      },
+      {
+        "id": "us-mlk-2026",
+        "name": "M L King Day",
+        "date": "2026-01-19",
+        "day": "Monday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-presidents-2026",
+        "name": "Presidents' Day",
+        "date": "2026-02-16",
+        "day": "Monday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-good-friday-2026",
+        "name": "Good Friday",
+        "date": "2026-04-03",
+        "day": "Friday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-easter-2026",
+        "name": "Easter Sunday",
+        "date": "2026-04-05",
+        "day": "Sunday",
+        "state": "USA",
+        "longWeekendType": "weekend"
+      },
+      {
+        "id": "us-memorial-2026",
+        "name": "Memorial Day",
+        "date": "2026-05-25",
+        "day": "Monday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-juneteenth-2026",
+        "name": "Juneteenth",
+        "date": "2026-06-19",
+        "day": "Friday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-independence-obs-2026",
+        "name": "Independence Day Holiday",
+        "date": "2026-07-03",
+        "day": "Friday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-independence-2026",
+        "name": "Independence Day",
+        "date": "2026-07-04",
+        "day": "Saturday",
+        "state": "USA",
+        "longWeekendType": "weekend"
+      },
+      {
+        "id": "us-labor-2026",
+        "name": "Labor Day",
+        "date": "2026-09-07",
+        "day": "Monday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-columbus-2026",
+        "name": "Columbus Day",
+        "date": "2026-10-12",
+        "day": "Monday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-veterans-2026",
+        "name": "Veterans Day",
+        "date": "2026-11-11",
+        "day": "Wednesday",
+        "state": "USA",
+        "longWeekendType": "bridge_2_leaves"
+      },
+      {
+        "id": "us-thanksgiving-2026",
+        "name": "Thanksgiving Day",
+        "date": "2026-11-26",
+        "day": "Thursday",
+        "state": "USA",
+        "longWeekendType": "bridge_1_leave"
+      },
+      {
+        "id": "us-christmas-2026",
+        "name": "Christmas",
+        "date": "2026-12-25",
+        "day": "Friday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      }
     ]
   }
 }

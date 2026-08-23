@@ -242,88 +242,198 @@ import Footer from "../components/Footer.astro";
 
   
   <!-- SEO Content Section — placed below the interactive tool -->
-  <section class="py-16 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-white to-slate-50/80 border-t border-slate-100">
-    <div class="max-w-[800px] mx-auto">
+  <section class="py-16 sm:py-24 px-4 sm:px-6 bg-white dark:bg-[#0b0f19] border-t border-slate-200/80 dark:border-slate-800/80 transition-colors">
+    <div class="max-w-[850px] mx-auto">
 
       <!-- Section Intro -->
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-6">When Is the Next Long Weekend?</h2>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-4">
-        If you're wondering <strong>when is the next long weekend</strong>, you're not alone — it's one of the most searched questions by working professionals in India every single month. The answer changes constantly as holidays pass and new ones approach. That's exactly why we built this tool: so you never have to manually check calendars or count days again.
-      </p>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-10">
-        Our calculator automatically identifies the <strong>next long weekend</strong> based on today's date, your region, and India's gazetted public holidays. Whether it's a 3-day break over a regular Saturday–Sunday–Monday or a 9-day mega-vacation that bridges Diwali into a full week off, you'll see every option ranked by efficiency — most days off for the fewest leaves used.
-      </p>
+      <div class="mb-12">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-bold border border-blue-200/60 dark:border-blue-800/60 mb-3">
+          🗓️ 2026 Vacation Planner
+        </span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
+          When Is the Next Long Weekend?
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+          If you're wondering <strong>when is the next long weekend</strong>, you're not alone — it's one of the most searched questions by working professionals in India every single month. The answer changes constantly as holidays pass and new ones approach. That's exactly why we built this tool: so you never have to manually check calendars or count days again.
+        </p>
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+          Our calculator automatically identifies the <strong>next long weekend</strong> based on today's date, your region, and India's gazetted public holidays. Whether it's a 3-day break over a regular Saturday–Sunday–Monday or a 9-day mega-vacation that bridges Diwali into a full week off, you'll see every option ranked by efficiency — most days off for the fewest leaves used.
+        </p>
+      </div>
 
-      <hr class="border-slate-200 mb-10" />
+      <hr class="border-slate-200 dark:border-slate-800/80 my-10" />
 
       <!-- Upcoming Long Weekends -->
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-6">Upcoming Long Weekends in 2026</h2>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-4">
-        India has one of the most generous public holiday calendars in the world. In 2026, there are <strong>10–15 long weekend opportunities</strong> for professionals on a standard 5-day work week — and even more if you include regional and optional holidays. Some highlights include:
-      </p>
-      <ul class="list-disc list-inside text-[15px] sm:text-base text-slate-600 leading-relaxed mb-4 space-y-2 pl-2">
-        <li><strong>Republic Day (January):</strong> A guaranteed 3-day weekend with zero leaves.</li>
-        <li><strong>Holi (March):</strong> Bridge one day to turn it into a 4–5 day break.</li>
-        <li><strong>Independence Day (August):</strong> Falls mid-week in 2026 — use 2 leaves to unlock a full week off.</li>
-        <li><strong>Dussehra–Diwali stretch (October–November):</strong> The festival season goldmine — with just 3 PTO days, you can get 9+ consecutive days off.</li>
-        <li><strong>Christmas–New Year (December):</strong> The classic year-end extended break using minimal leave.</li>
-      </ul>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-10">
-        Use the leave-budget selector above to filter by how many PTO days you're willing to spend, and instantly see every <strong>upcoming long weekend</strong> that fits your budget.
-      </p>
+      <div class="mb-12">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
+          Upcoming Long Weekends in 2026
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+          India has one of the most generous public holiday calendars in the world. In 2026, there are <strong class="text-slate-900 dark:text-white">10–15 long weekend opportunities</strong> for professionals on a standard 5-day work week — and even more if you include regional and optional holidays. Some highlights include:
+        </p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-6">
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-1">January 2026</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Republic Day Weekend</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">A guaranteed 3-day weekend with 0 leaves required.</p>
+          </div>
 
-      <hr class="border-slate-200 mb-10" />
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 block mb-1">March 2026</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Holi Celebration Break</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Bridge just 1 leave to unlock a 4–5 day vacation.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-1">August 2026</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Independence Day Bridge</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Use 2 PTO days mid-week to get a full week off.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-1">Oct – Nov 2026</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Dussehra & Diwali Festival Sweep</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Combine 3 PTO leaves into a 9+ consecutive day mega getaway.</p>
+          </div>
+        </div>
+
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+          Use the leave-budget selector above to filter by how many PTO days you're willing to spend, and instantly see every <strong>upcoming long weekend</strong> that fits your budget.
+        </p>
+      </div>
+
+      <hr class="border-slate-200 dark:border-slate-800/80 my-10" />
 
       <!-- How It Works -->
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-6">How the Long Weekend Calculator Works</h2>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-4">
-        The Long Weekends is a free, no-sign-up tool designed specifically for Indian corporate professionals. Here's how it works:
-      </p>
-      <ol class="list-decimal list-inside text-[15px] sm:text-base text-slate-600 leading-relaxed mb-4 space-y-3 pl-2">
-        <li><strong>Select your leave budget</strong> — choose 0, 1, 2, 3, or a custom number of PTO days you're willing to use per trip.</li>
-        <li><strong>Pick your region</strong> — holidays differ across India. Select Pan-India IT, South (Bangalore/Chennai), West (Mumbai/Pune), North (Delhi NCR), or East (Kolkata) to see region-specific holidays.</li>
-        <li><strong>Choose your work week</strong> — toggle between a 5-day or 6-day schedule.</li>
-        <li><strong>Browse your results</strong> — every possible long weekend is calculated instantly and ranked by efficiency. Each plan shows exactly which days are weekends, which are public holidays, and which days you need to take as leave.</li>
-      </ol>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-10">
-        All calculations run entirely in your browser. No data is sent to any server, no account is needed, and it's completely free.
-      </p>
+      <div class="mb-12">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
+          How the Long Weekend Calculator Works
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+          The Long Weekends is a free, no-sign-up tool designed specifically for Indian corporate professionals. Here's how to maximize your leave balance:
+        </p>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+            <div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-sm">Select your leave budget</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Choose 0, 1, 2, 3, or a custom number of PTO days you're willing to use per trip.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-sm">Pick your region & work week</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Select Pan-India IT, South, West, North, or East regions, and toggle 5-day or 6-day work weeks.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
+            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-sm">Browse your visual results</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Every option shows exact dates, public holidays, and weekend bridges ranked by efficiency.</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <hr class="border-slate-200 mb-10" />
+      <hr class="border-slate-200 dark:border-slate-800/80 my-10" />
 
       <!-- Why Long Weekends Matter -->
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-6">Why Long Weekends Matter for Indian Professionals</h2>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-4">
-        Most Indian IT companies offer 15–24 paid leaves per year. That sounds generous until you realize it has to cover sick days, personal emergencies, and actual vacations. The average professional ends up with barely a week of "real" vacation time after deducting everything else.
-      </p>
-      <p class="text-[15px] sm:text-base text-slate-600 leading-relaxed mb-10">
-        <strong>Long weekends change the math entirely.</strong> By strategically placing 1–3 PTO days around existing public holidays and weekends, you can unlock 4–9 day breaks without depleting your leave balance. It's not about working less — it's about planning smarter. Studies consistently show that regular short breaks improve productivity, reduce burnout, and boost overall well-being. A well-timed <strong>long weekend in 2026</strong> is the most efficient way to recharge.
-      </p>
+      <div class="mb-16">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
+          Why Long Weekends Matter for Indian Professionals
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+          Most Indian IT companies offer 15–24 paid leaves per year. That sounds generous until you realize it has to cover sick days, personal emergencies, and family obligations. The average corporate employee ends up with barely a week of true vacation time.
+        </p>
+        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+          <strong class="text-slate-900 dark:text-white">Long weekends change the math entirely.</strong> By strategically placing 1–3 PTO days around existing public holidays and weekends, you can unlock 4–9 day breaks without depleting your leave balance. It's not about working less — it's about planning smarter.
+        </p>
+      </div>
 
-      <hr class="border-slate-200 mb-10" />
+      <!-- FAQ Section (Ultra-Modern Card Accordion Style) -->
+      <div class="pt-6 border-t border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between gap-4 mb-8 flex-wrap">
+          <div>
+            <span class="text-xs font-mono font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase block mb-1">Got Questions?</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Frequently Asked Questions
+            </h2>
+          </div>
+          <span class="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-200/80 dark:border-slate-700">
+            5 Common Answers
+          </span>
+        </div>
 
-      <!-- FAQ Section -->
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-8">Frequently Asked Questions</h2>
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 mb-2">When is the next long weekend in 2026?</h3>
-          <p class="text-[15px] text-slate-600 leading-relaxed">The next long weekend depends on today's date. Our tool automatically identifies the nearest upcoming long weekend based on India's gazetted holidays and your weekend schedule. Check the countdown badge at the top of this page for a live answer.</p>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 mb-2">How many long weekends are there in 2026?</h3>
-          <p class="text-[15px] text-slate-600 leading-relaxed">For a standard 5-day work week, India has approximately 10–15 long weekend opportunities in 2026, depending on your region and which optional holidays your company observes. With just 1–3 PTO days per trip, many of these can be extended into 4–9 day vacations.</p>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 mb-2">How does the long weekend calculator work?</h3>
-          <p class="text-[15px] text-slate-600 leading-relaxed">Select your leave budget (0, 1, 2, or 3+ days), your region, and work-week type. The calculator cross-references gazetted public holidays with your weekends to find every possible bridge opportunity, ranked by efficiency — so you get the most days off for the fewest leaves used.</p>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 mb-2">Can I use this tool for my company's holiday list?</h3>
-          <p class="text-[15px] text-slate-600 leading-relaxed">Yes. Visit the <a href="/company-optimizer" class="text-blue-600 hover:text-blue-800 font-semibold underline">Company Holiday Optimizer</a> page and upload your office holiday PDF, image, or paste the text directly. The tool extracts your company-specific holidays and generates a fully personalized long weekend plan.</p>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-slate-800 mb-2">Do I need to create an account to use this tool?</h3>
-          <p class="text-[15px] text-slate-600 leading-relaxed">No. The Long Weekends is completely free and requires no sign-up. All calculations happen instantly in your browser — no data is stored or sent to any server.</p>
+        <div class="space-y-3.5">
+          
+          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
+            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
+              <span class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 text-xs flex items-center justify-center font-mono shrink-0">Q1</span>
+                When is the next long weekend in 2026?
+              </span>
+              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </summary>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+              The next long weekend depends on today's date. Our tool automatically identifies the nearest upcoming long weekend based on India's gazetted holidays and your weekend schedule. Check the live countdown badge at the top of this page for an instant answer.
+            </p>
+          </details>
+
+          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
+            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
+              <span class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-lg bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 text-xs flex items-center justify-center font-mono shrink-0">Q2</span>
+                How many long weekends are there in 2026?
+              </span>
+              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </summary>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+              For a standard 5-day work week, India has approximately 10–15 long weekend opportunities in 2026, depending on your region and which optional holidays your company observes. With just 1–3 PTO days per trip, many of these can be extended into 4–9 day vacations.
+            </p>
+          </details>
+
+          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
+            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
+              <span class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-lg bg-amber-500/10 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs flex items-center justify-center font-mono shrink-0">Q3</span>
+                How does the long weekend calculator work?
+              </span>
+              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </summary>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+              Select your leave budget (0, 1, 2, or 3+ days), your region, and work-week type. The calculator cross-references gazetted public holidays with your weekends to find every possible bridge opportunity, ranked by efficiency — so you get the most days off for the fewest leaves used.
+            </p>
+          </details>
+
+          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
+            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
+              <span class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-lg bg-purple-500/10 dark:bg-purple-400/10 text-purple-600 dark:text-purple-400 text-xs flex items-center justify-center font-mono shrink-0">Q4</span>
+                Can I use this tool for my company's holiday list?
+              </span>
+              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </summary>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+              Yes! Visit the <a href="/company-optimizer" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Company Holiday Optimizer</a> page and upload your office holiday PDF, image, or paste the text directly. The tool extracts your company-specific holidays and generates a fully personalized long weekend plan.
+            </p>
+          </details>
+
+          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
+            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
+              <span class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-lg bg-pink-500/10 dark:bg-pink-400/10 text-pink-600 dark:text-pink-400 text-xs flex items-center justify-center font-mono shrink-0">Q5</span>
+                Do I need to create an account to use this tool?
+              </span>
+              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </summary>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+              No. The Long Weekends is completely free and requires no sign-up. All calculations happen instantly in your browser — no data is stored or sent to any server.
+            </p>
+          </details>
+
         </div>
       </div>
 
@@ -506,6 +616,10 @@ import Footer from "../components/Footer.astro";
               const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
               if (regionSelect) {
                 regionSelect.value = r;
+                const flag = document.getElementById("brandFlag");
+                if (flag) {
+                  flag.textContent = r === "USA" ? "🇺🇸" : "🇮🇳";
+                }
                 regionSelect.dispatchEvent(new Event("change"));
               }
               changed = true;
@@ -593,7 +707,12 @@ import Footer from "../components/Footer.astro";
 
       if (regionSelect) {
         regionSelect.addEventListener("change", (e) => {
-          state.selectedRegion = (e.target as HTMLSelectElement).value;
+          const val = (e.target as HTMLSelectElement).value;
+          state.selectedRegion = val;
+          const flag = document.getElementById("brandFlag");
+          if (flag) {
+            flag.textContent = val === "USA" ? "🇺🇸" : "🇮🇳";
+          }
           render();
         });
       }
