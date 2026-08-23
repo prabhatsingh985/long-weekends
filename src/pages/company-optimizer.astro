@@ -42,76 +42,74 @@ import Footer from "../components/Footer.astro";
   </script>
 
 </head>
-<body class="bg-[#fafafa] text-[#171717] font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-[#F7F7F7] text-[#222222] font-sans antialiased min-h-screen flex flex-col">
 
   <!-- Header with Navigation Back to National Calendar -->
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-xs">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 min-h-[4rem] py-2 sm:py-0 flex flex-wrap items-center justify-between gap-2 sm:gap-4">
-      <a href="/" class="flex items-center gap-3 group text-decoration-none">
-        <div class="w-9 h-9 rounded-md bg-slate-900 text-white flex items-center justify-center font-mono font-bold text-sm shadow-xs">
-          LW
-        </div>
-        <div class="flex flex-col">
-          <span class="font-semibold text-[15px] sm:text-lg tracking-tight text-[#171717] flex items-center gap-1.5 whitespace-nowrap">
-            The Long Weekends <span class="text-xs">🇮🇳</span>
-          </span>
-          <span class="caption-mono text-[9px] sm:text-[10px] text-[#888888] tracking-widest whitespace-nowrap uppercase">thelongweekends.com</span>
-        </div>
-      </a>
-
-      <div class="flex items-center gap-3">
-        <a 
-          href="/" 
-          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition-all no-underline"
-        >
-          <span>←</span>
-          <span class="hidden sm:inline">Back to National Calendar</span><span class="sm:hidden">National Calendar</span>
+  <header class="sticky top-0 z-50 bg-white border-b border-[#EBEBEB]">
+    <div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="flex items-center justify-between h-[80px]">
+        <a href="/" class="flex items-center gap-2 group no-underline shrink-0">
+          <div class="w-10 h-10 bg-gradient-to-br from-[#FF385C] to-[#E31C5F] rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+            <span class="text-white font-extrabold text-sm">LW</span>
+          </div>
+          <div class="hidden sm:flex flex-col">
+            <span class="font-extrabold text-[17px] tracking-tight text-[#222222] whitespace-nowrap">
+              The Long Weekends
+            </span>
+          </div>
         </a>
+
+        <div class="flex items-center gap-3">
+          <a 
+            href="/" 
+            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-[#DDDDDD] hover:border-[#222222] text-[#222222] text-[12px] font-semibold transition-all no-underline bg-white hover:bg-[#F7F7F7]"
+          >
+            <span class="hidden sm:inline">Back to National Calendar</span><span class="sm:hidden">← Calendar</span>
+          </a>
+        </div>
       </div>
     </div>
   </header>
 
   <!-- Hero Section & Multi-Format Ingestion Uploader -->
-  <section class="relative py-8 sm:py-10 sm:py-14 px-4 sm:px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
-    <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="max-w-[1200px] mx-auto relative z-10 flex flex-col items-center text-center">
-      
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-4 shadow-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>✨ Custom Vacation Planner for Your Office</span>
+  <section class="py-10 sm:py-14 px-4 sm:px-6 border-b border-[#EBEBEB] bg-white">
+    <div class="max-w-[960px] mx-auto flex flex-col items-center text-center">
+
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F7F7F7] border border-[#EBEBEB] text-[11px] font-bold text-[#717171] mb-5">
+        <span class="w-2 h-2 rounded-full bg-[#008A05] animate-pulse"></span>
+        <span>Custom Vacation Planner for Your Office</span>
       </div>
 
-      <h1 class="text-[28px] leading-tight sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-3">
+      <h1 class="text-[28px] leading-tight sm:text-5xl font-extrabold text-[#222222] tracking-tight leading-[1.15] max-w-[850px] mb-3">
         Add Your Office Holidays
       </h1>
-      <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-medium">
+      <p class="text-base sm:text-lg text-[#717171] max-w-[720px] mb-8 leading-relaxed font-medium">
         Upload your office holiday list, screenshot, or PDF below. We will automatically find the best long weekends and guilt-free mini vacations tailored just for your team!
       </p>
 
-      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-xs w-full max-w-[950px] text-left">
+      <div class="bg-white border border-[#EBEBEB] rounded-2xl p-6 shadow-sm w-full max-w-[950px] text-left">
         
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 p-1.5 bg-slate-100 border border-slate-200/60 rounded-2xl mb-6 w-full sm:w-fit shadow-inner mx-auto">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 p-1.5 bg-[#F7F7F7] border border-[#EBEBEB] rounded-full mb-6 w-full sm:w-fit mx-auto">
           <button type="button" class="tab-btn active w-full sm:w-auto text-center" data-tab="tab-upload">📄 Upload Document / Screenshot</button>
           <button type="button" class="tab-btn w-full sm:w-auto text-center" data-tab="tab-text">📝 Paste Holiday List / Email</button>
         </div>
 
         <div id="tab-upload" class="tab-content active">
-          <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-slate-800 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all bg-white hover:bg-slate-50 relative">
+          <div id="dropZone" class="border-2 border-dashed border-[#DDDDDD] hover:border-[#222222] rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all bg-[#F7F7F7] hover:bg-white relative">
             <input type="file" id="fileUploadInput" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" class="hidden" />
             <div class="text-4xl mb-3" id="dropZoneIcon">📁</div>
-            <div class="text-sm font-bold text-slate-900 mb-1" id="dropZoneTitle">Click to Upload PDF or Drop a Screenshot</div>
-            <div class="text-xs text-slate-500" id="dropZoneSub">Supports PDF documents, screenshots, or photos of your holiday list</div>
+            <div class="text-sm font-bold text-[#222222] mb-1" id="dropZoneTitle">Click to Upload PDF or Drop a Screenshot</div>
+            <div class="text-xs text-[#717171]" id="dropZoneSub">Supports PDF documents, screenshots, or photos of your holiday list</div>
             
-            <div id="uploadSpinner" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center p-6 z-10">
-              <div class="w-8 h-8 border-3 border-slate-900 border-t-transparent rounded-full animate-spin mb-3"></div>
-              <div class="text-xs font-bold text-slate-900" id="spinnerText">Reading your holiday list...</div>
-              <div class="text-[10px] text-slate-500 mt-1" id="spinnerSub">Finding your vacation dates...</div>
+            <div id="uploadSpinner" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center p-6 z-10">
+              <div class="w-8 h-8 border-3 border-[#222222] border-t-transparent rounded-full animate-spin mb-3"></div>
+              <div class="text-xs font-bold text-[#222222]" id="spinnerText">Reading your holiday list...</div>
+              <div class="text-[10px] text-[#717171] mt-1" id="spinnerSub">Finding your vacation dates...</div>
             </div>
           </div>
 
-          <div id="fileUploadStatus" class="hidden mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-semibold flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
+          <div id="fileUploadStatus" class="hidden mt-3 p-3 bg-[#F0FFF4] border border-[#008A05]/20 rounded-xl text-xs text-[#008A05] font-semibold flex items-center gap-2">
+            <span class="w-4 h-4 rounded-full bg-[#008A05] text-white flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
             <span id="fileUploadStatusText">Added holidays successfully!</span>
           </div>
         </div>
@@ -121,25 +119,25 @@ import Footer from "../components/Footer.astro";
             id="companyTextPaste" 
             rows="5" 
             placeholder="Paste your company holiday list, email or table here...&#10;e.g.&#10;01st Jan - New Year&#10;26 Jan 2026 - Republic Day&#10;4 March 2026 - Holi&#10;8th-9th Nov - Diwali&#10;25 Dec 2026 - Christmas" 
-            class="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-900 font-mono outline-none focus:border-slate-800 shadow-inner"
+            class="w-full bg-white border border-[#EBEBEB] rounded-xl p-4 text-xs text-[#222222] font-mono outline-none focus:border-[#222222] shadow-inner"
           ></textarea>
         </div>
 
-        <div id="detectedDatesBox" class="mt-5 pt-4 border-t border-slate-200 hidden">
+        <div id="detectedDatesBox" class="mt-5 pt-4 border-t border-[#EBEBEB] hidden">
           <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-slate-900">Active Office Holidays (<span id="detectedCount">0</span>):</span>
-              <span class="text-[10px] text-emerald-700 bg-emerald-100 font-bold px-2 py-0.5 rounded-full" id="activeStatusPill">Active</span>
+              <span class="text-xs font-bold text-[#222222]">Active Office Holidays (<span id="detectedCount">0</span>):</span>
+              <span class="text-[10px] text-[#008A05] bg-[#008A05]/10 font-bold px-2 py-0.5 rounded-full" id="activeStatusPill">Active</span>
             </div>
-            <button type="button" id="btnClearDates" class="text-xs text-red-600 hover:underline font-semibold cursor-pointer">Clear All Dates</button>
+            <button type="button" id="btnClearDates" class="text-xs text-[#E31C5F] hover:underline font-semibold cursor-pointer">Clear All Dates</button>
           </div>
           
-          <div id="detectedPills" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2.5 bg-white rounded-xl border border-slate-200 mb-3"></div>
+          <div id="detectedPills" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2.5 bg-white rounded-xl border border-[#EBEBEB] mb-3"></div>
 
-          <div class="flex items-center gap-2 pt-2 border-t border-slate-200">
-            <span class="text-[11px] font-semibold text-slate-600 shrink-0">+ Add Date:</span>
-            <input type="date" id="manualDateInput" min="2026-01-01" max="2027-01-10" value="2026-01-01" class="bg-white border border-slate-300 text-slate-900 text-xs font-mono px-2.5 py-1 rounded-md outline-none" />
-            <button type="button" id="btnAddManualDate" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-md cursor-pointer transition-all">+ Add Date</button>
+          <div class="flex items-center gap-2 pt-2 border-t border-[#EBEBEB]">
+            <span class="text-[11px] font-semibold text-[#717171] shrink-0">+ Add Date:</span>
+            <input type="date" id="manualDateInput" min="2026-01-01" max="2027-01-10" value="2026-01-01" class="bg-white border border-[#DDDDDD] text-[#222222] text-xs font-mono px-2.5 py-1 rounded-md outline-none" />
+            <button type="button" id="btnAddManualDate" class="px-3 py-1 bg-[#222222] hover:bg-[#171717] text-white text-xs font-bold rounded-md cursor-pointer transition-all">+ Add Date</button>
           </div>
         </div>
 
@@ -149,14 +147,14 @@ import Footer from "../components/Footer.astro";
   </section>
 
   <!-- Interactive Leave Budget Selector (Favorite Layout) -->
-  <section class="py-5 px-4 sm:px-6 bg-white border-b border-[#ebebeb] shadow-xs hidden" id="budgetSection">
-    <div class="max-w-[1200px] mx-auto">
+  <section class="py-5 px-4 sm:px-6 bg-white border-b border-[#EBEBEB] hidden" id="budgetSection">
+    <div class="max-w-[1760px] mx-auto">
       
-            <!-- Filter Header -->
+      <!-- Filter Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <div class="flex items-center gap-2">
           <span class="text-base">🎯</span>
-          <span class="font-bold text-sm text-[#171717]">Select Your Leave Budget</span>
+          <span class="font-bold text-sm text-[#222222]">Select Your Leave Budget</span>
         </div>
         
         <!-- Month Tabs (Moved to Header Row) -->
@@ -191,13 +189,13 @@ import Footer from "../components/Footer.astro";
         <div class="chip-btn custom-chip" id="customChipWrapper">
           <div class="flex items-center justify-between w-full">
             <span class="chip-title">Custom</span>
-            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 border border-amber-500/20">4+ PTO</span>
+            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#FF385C]/10 text-[#E31C5F] border border-[#FF385C]/20">4+ PTO</span>
           </div>
-          <div class="stepper-box flex items-center justify-between w-full mt-1 bg-slate-100/90 border border-slate-200/80 rounded-lg px-2 py-0.5 transition-colors">
-            <button type="button" id="btnDecLeave" class="stepper-btn font-bold text-xs hover:text-slate-900 cursor-pointer select-none text-slate-600">−</button>
-            <span class="stepper-val text-xs font-mono font-bold text-slate-800 select-none"><span id="customLeavesDisplay">4</span> Leaves</span>
+          <div class="stepper-box flex items-center justify-between w-full mt-1 bg-[#F7F7F7] border border-[#EBEBEB] rounded-lg px-2 py-0.5 transition-colors">
+            <button type="button" id="btnDecLeave" class="stepper-btn font-bold text-xs hover:text-[#222222] cursor-pointer select-none text-[#717171]">−</button>
+            <span class="stepper-val text-xs font-mono font-bold text-[#222222] select-none"><span id="customLeavesDisplay">4</span> Leaves</span>
             <input type="hidden" id="customLeavesInput" value="4" />
-            <button type="button" id="btnIncLeave" class="stepper-btn font-bold text-xs hover:text-slate-900 cursor-pointer select-none text-slate-600">+</button>
+            <button type="button" id="btnIncLeave" class="stepper-btn font-bold text-xs hover:text-[#222222] cursor-pointer select-none text-[#717171]">+</button>
           </div>
         </div>
       </div>
@@ -206,38 +204,38 @@ import Footer from "../components/Footer.astro";
   </section>
 
   <!-- Vacation Grid / Empty Prompt Section -->
-  <main class="flex-1 py-8 sm:py-10 px-4 sm:px-6 max-w-[1200px] mx-auto w-full hidden" id="gridSection">
+  <main class="flex-1 py-8 sm:py-10 px-4 sm:px-6 max-w-[1760px] mx-auto w-full hidden" id="gridSection">
     
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
-        <span class="font-mono text-xs font-bold px-3 py-1 bg-slate-900 text-white rounded-full" id="resultsBadge">0 Plans</span>
-        <span class="text-xs text-slate-600 font-medium" id="resultsSubtext">Showing options with 0 leaves</span>
+        <span class="font-mono text-xs font-bold px-3 py-1 bg-[#222222] text-white rounded-full" id="resultsBadge">0 Plans</span>
+        <span class="text-xs text-[#717171] font-medium" id="resultsSubtext">Showing options with 0 leaves</span>
         
         <!-- Custom Premium Dropdown -->
         <div class="relative w-full sm:w-[240px]" id="customSortDropdown">
-          <button type="button" id="sortDropdownBtn" class="flex items-center justify-between w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 text-[11px] sm:text-xs font-bold rounded-full px-4 py-2 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all shadow-sm">
+          <button type="button" id="sortDropdownBtn" class="flex items-center justify-between w-full bg-white hover:bg-[#F7F7F7] border border-[#DDDDDD] text-[#717171] hover:text-[#222222] text-[11px] sm:text-xs font-bold rounded-full px-4 py-2 outline-none focus:border-[#222222] focus:ring-4 focus:ring-[#F7F7F7] transition-all shadow-sm">
             <span id="sortDropdownLabel">Sort: Highest Efficiency</span>
-            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+            <svg class="w-3.5 h-3.5 text-[#B0B0B0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
           </button>
           <!-- Menu (Hidden by default) -->
-          <div id="sortDropdownMenu" class="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 transition-all duration-200 opacity-0 scale-95 origin-top-right pointer-events-none hidden">
+          <div id="sortDropdownMenu" class="absolute right-0 mt-2 w-full bg-white border border-[#EBEBEB] rounded-xl shadow-xl overflow-hidden z-50 transition-all duration-200 opacity-0 scale-95 origin-top-right pointer-events-none hidden">
             <div class="py-1 flex flex-col">
-              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="efficiency">
+              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-[#717171] hover:bg-[#F7F7F7] hover:text-[#222222] transition-colors flex items-center justify-between" data-value="efficiency">
                 Highest Efficiency
-                <svg class="w-4 h-4 text-emerald-500 check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="w-4 h-4 text-[#008A05] check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
               </button>
-              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="date">
+              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-[#717171] hover:bg-[#F7F7F7] hover:text-[#222222] transition-colors flex items-center justify-between" data-value="date">
                 Chronological (Dates)
-                <svg class="w-4 h-4 text-emerald-500 hidden check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="w-4 h-4 text-[#008A05] hidden check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
               </button>
             </div>
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-4 text-xs text-slate-600 font-medium">
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-500"></span><span>Weekend</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span><span>Company / Public Holiday</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span><span>Apply PTO</span></div>
+      <div class="flex items-center gap-4 text-xs text-[#717171] font-semibold">
+        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#008A05]"></span><span>Holiday</span></div>
+        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#FF385C]"></span><span>PTO</span></div>
+        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#00A699]"></span><span>Weekend</span></div>
       </div>
     </div>
 
@@ -245,10 +243,12 @@ import Footer from "../components/Footer.astro";
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
 
     <!-- Empty State -->
-    <div class="text-center py-20 px-4 sm:px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
-      <div class="w-16 h-16 rounded-full bg-slate-50 text-3xl flex items-center justify-center mx-auto mb-4 border border-slate-200">🏢</div>
-      <h3 class="font-bold text-lg text-slate-900 mb-2" id="emptyStateTitle">No Office Holidays Added Yet</h3>
-      <p class="text-xs text-slate-500 max-w-md mx-auto leading-relaxed" id="emptyStateSub">
+    <div class="text-center py-20 px-4 sm:px-6 bg-white border border-[#EBEBEB] rounded-2xl shadow-sm" id="emptyState">
+      <div class="w-16 h-16 rounded-full bg-[#F7F7F7] border border-[#EBEBEB] flex items-center justify-center mx-auto mb-4">
+        <span class="text-3xl">🏢</span>
+      </div>
+      <h3 class="font-semibold text-[17px] text-[#222222] mb-1" id="emptyStateTitle">No Office Holidays Added Yet</h3>
+      <p class="text-[14px] text-[#717171] max-w-md mx-auto leading-relaxed" id="emptyStateSub">
         Simply upload or paste your office holiday schedule in the box above to see all your potential long weekends!
       </p>
     </div>
@@ -256,33 +256,28 @@ import Footer from "../components/Footer.astro";
   </main>
 
   <!-- Interactive Calendar View Modal / Popover -->
-  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative animate-in fade-in zoom-in-95 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
-      <button type="button" id="btnCloseCalendarModal" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-sm cursor-pointer transition-all">✕</button>
+  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="modal-content bg-white rounded-3xl max-w-[680px] w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button type="button" id="btnCloseCalendarModal" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-[#F7F7F7] hover:bg-[#EBEBEB] flex items-center justify-center transition-colors z-10 cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#222222]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
       
-      <div class="mb-3 sm:mb-5 pr-6">
-        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-bold border border-blue-200 mb-1 sm:mb-1.5">
-          <span>🗓️ Month Calendar View</span>
+      <div class="px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F7F7F7] border border-[#EBEBEB] text-[11px] font-bold text-[#717171] mb-3">
+          <span>🗓️</span><span>Calendar View</span>
         </div>
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight" id="calModalTitle">Vacation Calendar</h3>
-        <p class="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight" id="calModalDates">Dates</p>
+        <h3 class="text-[20px] sm:text-[22px] font-bold text-[#222222] mb-1" id="calModalTitle">Vacation Calendar</h3>
+        <p class="text-[13px] text-[#717171]" id="calModalDates">Dates</p>
       </div>
 
-      <div id="calModalContent" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6"></div>
+      <div id="calModalContent" class="grid grid-cols-1 md:grid-cols-2 gap-4 px-6 sm:px-8 mb-4"></div>
 
-      <div class="flex items-center justify-center gap-2 sm:gap-4 py-2 sm:py-2.5 px-2 sm:px-4 bg-slate-50 rounded-xl border border-slate-200 text-[10px] sm:text-xs font-semibold text-slate-700 flex-wrap leading-none">
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500"></span>
-          <span>Company / Public Holiday</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500"></span>
-          <span>Apply PTO</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-blue-500"></span>
-          <span>Weekend Off</span>
-        </div>
+      <div class="mx-6 sm:mx-8 mb-6 sm:mb-8 py-3 px-4 bg-[#F7F7F7] rounded-2xl flex items-center justify-center gap-4 sm:gap-6 flex-wrap">
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#008A05]"></span><span class="text-[12px] font-semibold text-[#222222]">Holiday</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#FF385C]"></span><span class="text-[12px] font-semibold text-[#222222]">PTO</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#00A699]"></span><span class="text-[12px] font-semibold text-[#222222]">Weekend</span></div>
       </div>
     </div>
   </div>
@@ -290,11 +285,10 @@ import Footer from "../components/Footer.astro";
   <Footer />
 
   <style>
-    
     .chip-btn {
       background: #ffffff;
-      border: 1px solid #ebebeb;
-      border-radius: 16px;
+      border: 1px solid #DDDDDD;
+      border-radius: 12px;
       padding: 8px 14px;
       display: flex;
       flex-direction: column;
@@ -306,18 +300,18 @@ import Footer from "../components/Footer.astro";
       justify-content: space-between;
     }
     .chip-btn:hover {
-      border-color: #cbd5e1;
-      background: #f8fafc;
+      border-color: #222222;
+      background: #ffffff;
     }
     .chip-btn.active {
-      background: #171717;
-      border-color: #171717;
+      background: #222222;
+      border-color: #222222;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     }
     .chip-btn.active .chip-title { color: #ffffff; }
-    .chip-btn.active .chip-desc { color: #94a3b8; }
+    .chip-btn.active .chip-desc { color: #B0B0B0; }
     .chip-btn.active .stepper-box {
-      background: #262626;
+      background: #171717;
       border-color: #404040;
     }
     .chip-btn.active .stepper-btn {
@@ -326,45 +320,31 @@ import Footer from "../components/Footer.astro";
     .chip-btn.active .stepper-val {
       color: #ffffff;
     }
-    .chip-title { font-size: 0.95rem; font-weight: 700; color: #171717; }
-    .chip-desc { font-size: 0.72rem; color: #666666; margin-top: 2px; }
+    .chip-title { font-size: 0.95rem; font-weight: 700; color: #222222; }
+    .chip-desc { font-size: 0.72rem; color: #717171; margin-top: 2px; }
     
     .month-tab-btn {
       padding: 6px 16px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      border-radius: 9999px;
-      background: transparent;
-      color: #666666;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-    .month-tab-btn:hover { color: #171717; background: #ffffff; border-color: #ebebeb; }
-    .month-tab-btn.active { background: #171717; color: #ffffff; border-color: #171717; }
-      /* Premium Month Tabs (Pill Style) */
-    .month-tab-btn {
       font-size: 13px;
       font-weight: 600;
-      color: #475569;
-      padding: 4px 14px;
       border-radius: 9999px;
       background: #ffffff;
-      border: 1px solid #e2e8f0;
-      white-space: nowrap;
+      color: #717171;
+      border: 1px solid #DDDDDD;
+      cursor: pointer;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
     }
     .month-tab-btn:hover:not(.active) {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-      color: #0f172a;
+      background: #F7F7F7;
+      border-color: #222222;
+      color: #222222;
     }
     .month-tab-btn.active {
-      background: #0f172a; /* Solid black active state */
-      border-color: #0f172a;
+      background: #222222;
+      border-color: #222222;
       color: #ffffff;
-      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+      box-shadow: 0 2px 4px rgba(34, 34, 34, 0.15);
     }
     
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -374,30 +354,30 @@ import Footer from "../components/Footer.astro";
       padding: 10px 20px;
       font-size: 14px;
       font-weight: 700;
-      border-radius: 10px;
+      border-radius: 9999px;
       background: transparent;
-      color: #64748b;
+      color: #717171;
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
     }
     .tab-btn:hover:not(.active) {
-      color: #0f172a;
-      background: rgba(255, 255, 255, 0.5);
+      color: #222222;
+      background: rgba(255, 255, 255, 0.6);
     }
     .tab-btn.active {
       background: #ffffff;
-      color: #0f172a;
+      color: #222222;
       box-shadow: 0 2px 5px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
     }
     
     #dropZone {
-      background: #f8fafc;
-      border: 2px dashed #cbd5e1;
+      background: #F7F7F7;
+      border: 2px dashed #DDDDDD;
       transition: all 0.2s ease;
     }
     #dropZone:hover {
-      border-color: #0f172a;
+      border-color: #222222;
       background: #ffffff;
       box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     }
@@ -661,9 +641,9 @@ import Footer from "../components/Footer.astro";
         const dateObj = new Date(d + "T00:00:00");
         const formatted = dateObj.toLocaleDateString("en-IN", { day: "numeric", month: "short", weekday: "short" });
         return `
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold bg-slate-50 border border-slate-300 text-slate-900 rounded-lg shadow-xs hover:border-slate-800 transition-all">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold bg-[#F7F7F7] border border-[#EBEBEB] text-[#222222] rounded-lg shadow-xs hover:border-[#222222] transition-all">
             <span>${formatted} (${d})</span>
-            <button type="button" class="btn-remove-date text-red-500 hover:text-red-700 font-bold ml-1 cursor-pointer" data-date="${d}" title="Remove this date">✕</button>
+            <button type="button" class="btn-remove-date text-[#E31C5F] hover:text-[#D70466] font-bold ml-1 cursor-pointer" data-date="${d}" title="Remove this date">✕</button>
           </span>
         `;
       }).join("");
@@ -776,11 +756,11 @@ import Footer from "../components/Footer.astro";
 
       if (dropZone && fileInput) {
         dropZone.addEventListener("click", () => fileInput.click());
-        dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("border-slate-800"); });
-        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("border-slate-800"));
+        dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("border-[#222222]"); });
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("border-[#222222]"));
         dropZone.addEventListener("drop", (e) => {
           e.preventDefault();
-          dropZone.classList.remove("border-slate-800");
+          dropZone.classList.remove("border-[#222222]");
           if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
             handleCleanFileParsing(e.dataTransfer.files[0]);
           }
@@ -1025,7 +1005,7 @@ import Footer from "../components/Footer.astro";
 
       let cellsHtml = "";
       for (let i = 0; i < monOffset; i++) {
-        cellsHtml += `<div class="h-8"></div>`;
+        cellsHtml += `<div class="h-9"></div>`;
       }
 
       for (let d = 1; d <= daysInMonth; d++) {
@@ -1035,35 +1015,35 @@ import Footer from "../components/Footer.astro";
         const dayOfWeek = new Date(year, monthIndex, d).getDay();
         const isNormalWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-        let cellStyle = "text-slate-400 bg-transparent";
+        let cellStyle = "text-[#B0B0B0] bg-transparent";
         let dotHtml = "";
         let tooltipText = "";
 
         if (daysMap.has(iso)) {
           const item = daysMap.get(iso);
           if (item.type === "holiday") {
-            cellStyle = "bg-emerald-100 text-emerald-950 font-bold border border-emerald-300 ring-2 ring-emerald-400/30";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block mt-0.5"></span>';
+            cellStyle = "bg-[#008A05] text-white font-bold border-none";
+            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-white/60 inline-block mt-0.5"></span>';
             tooltipText = item.label || "Company Holiday";
           } else if (item.type === "leave") {
-            cellStyle = "bg-amber-100 text-amber-950 font-bold border border-amber-300 ring-2 ring-amber-400/30";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-amber-600 inline-block mt-0.5"></span>';
+            cellStyle = "bg-[#FF385C] text-white font-bold border-none";
+            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-white/60 inline-block mt-0.5"></span>';
             tooltipText = "Apply PTO Leave";
           } else if (item.type === "weekend") {
-            cellStyle = "bg-blue-100/80 text-blue-950 font-bold border border-blue-300";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block mt-0.5"></span>';
+            cellStyle = "bg-[#00A699] text-white font-bold border-none";
+            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-white/60 inline-block mt-0.5"></span>';
             tooltipText = "Weekend Off";
           }
         } else if (isNormalWeekend) {
-          cellStyle = "text-slate-600 bg-slate-100/60 font-medium";
+          cellStyle = "text-[#717171] bg-[#F7F7F7] font-medium";
         }
 
         cellsHtml += `
-          <div class="h-8 rounded-lg flex flex-col items-center justify-center text-xs transition-all relative group/calcell select-none ${cellStyle}">
+          <div class="h-9 rounded-xl flex flex-col items-center justify-center text-xs transition-all relative group/calcell select-none ${cellStyle}">
             <span>${d}</span>
             ${dotHtml}
             ${tooltipText ? `
-              <div class="hidden group-hover/calcell:block absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-900 text-white text-[10px] font-medium rounded shadow-lg whitespace-nowrap z-30 pointer-events-none">
+              <div class="hidden group-hover/calcell:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#222222] text-white text-[10px] font-semibold rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
                 ${tooltipText}
               </div>
             ` : ""}
@@ -1072,14 +1052,14 @@ import Footer from "../components/Footer.astro";
       }
 
       return `
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="text-xs font-bold text-slate-800 text-center mb-3 tracking-tight pb-2 border-b border-slate-100">
+        <div class="bg-white border border-[#EBEBEB] rounded-2xl p-4">
+          <div class="text-[12px] font-bold text-[#222222] text-center mb-3 pb-2 border-b border-[#EBEBEB]">
             ${monthTitle}
           </div>
-          <div class="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-slate-400">
+          <div class="grid grid-cols-7 gap-1.5 text-center mb-2 text-[10px] font-bold text-[#B0B0B0] uppercase tracking-wider">
             <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
           </div>
-          <div class="grid grid-cols-7 gap-1">
+          <div class="grid grid-cols-7 gap-1.5">
             ${cellsHtml}
           </div>
         </div>
@@ -1110,10 +1090,10 @@ import Footer from "../components/Footer.astro";
 
       let calendarsHtml = "";
       if (startY === endY && startM === endM) {
-        mContent.className = "grid grid-cols-1 max-w-sm mx-auto w-full gap-4 mb-6";
+        mContent.className = "grid grid-cols-1 max-w-sm mx-auto w-full gap-4 mb-6 px-6 sm:px-8";
         calendarsHtml = renderMonthGrid(startY, startM, daysMap);
       } else {
-        mContent.className = "grid grid-cols-1 md:grid-cols-2 gap-4 mb-6";
+        mContent.className = "grid grid-cols-1 md:grid-cols-2 gap-4 px-6 sm:px-8 mb-6";
         calendarsHtml = renderMonthGrid(startY, startM, daysMap) + renderMonthGrid(endY, endM, daysMap);
       }
 
@@ -1194,33 +1174,33 @@ import Footer from "../components/Footer.astro";
         const pillsHtml = plan.days.map((d) => {
           if (d.type === "holiday") {
             return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-emerald-50 hover:bg-emerald-100/70 text-emerald-900 border border-emerald-200 hover:border-emerald-300 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700">${d.dayName}</span>
+              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-[#008A05]/5 hover:bg-[#008A05]/10 text-[#008A05] border border-[#008A05]/20 hover:border-[#008A05]/30 group/day relative cursor-default select-none">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-[#008A05]">${d.dayName}</span>
                 <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100/90 text-emerald-800 mt-1 truncate max-w-full">Holiday</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
+                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#008A05]/10 text-[#008A05] mt-1 truncate max-w-full">Holiday</span>
+                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#222222] text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
                   ${d.label || "Company Holiday"}
                 </div>
               </div>
             `;
           } else if (d.type === "weekend") {
             return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-blue-50/70 hover:bg-blue-100/60 text-blue-900 border border-blue-200/80 hover:border-blue-300 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-blue-700">${d.dayName}</span>
+              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-[#00A699]/5 hover:bg-[#00A699]/10 text-[#00A699] border border-[#00A699]/20 hover:border-[#00A699]/30 group/day relative cursor-default select-none">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-[#00A699]">${d.dayName}</span>
                 <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-blue-100/80 text-blue-800 mt-1">Weekend</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
+                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#00A699]/10 text-[#00A699] mt-1">Weekend</span>
+                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#222222] text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
                   Weekly Weekend Off
                 </div>
               </div>
             `;
           } else {
             return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-amber-50 hover:bg-amber-100/70 text-amber-900 border border-amber-300 hover:border-amber-400 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-amber-700">${d.dayName}</span>
+              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-[#FF385C]/5 hover:bg-[#FF385C]/10 text-[#E31C5F] border border-[#FF385C]/20 hover:border-[#FF385C]/30 group/day relative cursor-default select-none">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-[#E31C5F]">${d.dayName}</span>
                 <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-200/90 text-amber-950 mt-1 font-bold">Take PTO</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
+                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#FF385C]/10 text-[#E31C5F] mt-1 font-bold">Take PTO</span>
+                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#222222] text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
                   Apply 1 Day Leave (PTO)
                 </div>
               </div>
@@ -1229,15 +1209,15 @@ import Footer from "../components/Footer.astro";
         }).join("");
 
         const topBadge = plan.leavesRequired === 0
-          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">⚡ 0 Leaves Needed</span>`
-          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">🎯 ${plan.leavesRequired} ${plan.leavesRequired === 1 ? "Leave" : "Leaves"} Needed (${plan.efficiencyMultiplier})</span>`;
+          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#008A05]/5 text-[#008A05] border border-[#008A05]/20">⚡ 0 Leaves Needed</span>`
+          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#FF385C]/5 text-[#E31C5F] border border-[#FF385C]/20">🎯 ${plan.leavesRequired} ${plan.leavesRequired === 1 ? "Leave" : "Leaves"} Needed (${plan.efficiencyMultiplier})</span>`;
 
         let bottomBarHtml = "";
         if (plan.leavesRequired === 0) {
           bottomBarHtml = `
-            <div class="bg-emerald-50/70 border border-emerald-200 rounded-lg p-2.5 flex items-center gap-2 mt-0.5">
-              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
-              <div class="text-xs font-medium text-emerald-950">
+            <div class="bg-[#008A05]/5 border border-[#008A05]/20 rounded-xl p-2.5 flex items-center gap-2 mt-0.5">
+              <span class="w-5 h-5 rounded-full bg-[#008A05] text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+              <div class="text-xs font-medium text-[#008A05]">
                 <span class="font-bold">Direct Weekend Bridge</span> · No PTO required
               </div>
             </div>
@@ -1245,28 +1225,28 @@ import Footer from "../components/Footer.astro";
         } else {
           const leaveDays = plan.days.filter(d => d.type === "leave").map(d => `${d.dayName} ${d.dayNum}`).join(", ");
           bottomBarHtml = `
-            <div class="bg-amber-50/70 border border-amber-200 rounded-lg p-2.5 flex items-center gap-2 mt-0.5">
-              <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">🎯</span>
-              <div class="text-xs font-medium text-amber-950">
-                <span class="font-bold">Apply PTO:</span> <span class="underline decoration-amber-500">${leaveDays}</span>
+            <div class="bg-[#FF385C]/5 border border-[#FF385C]/20 rounded-xl p-2.5 flex items-center gap-2 mt-0.5">
+              <span class="w-5 h-5 rounded-full bg-[#FF385C] text-white flex items-center justify-center text-[10px] font-bold shrink-0">🎯</span>
+              <div class="text-xs font-medium text-[#E31C5F]">
+                <span class="font-bold">Apply PTO:</span> <span class="underline decoration-[#FF385C]">${leaveDays}</span>
               </div>
             </div>
           `;
         }
 
         return `
-          <div class="bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 group relative">
+          <div class="listing-card bg-white border border-[#EBEBEB] hover:border-[#DDDDDD] rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-3 group relative">
             <div>
               <div class="flex items-center justify-between gap-2 mb-2">
                 ${topBadge}
                 
                 <div class="flex items-center gap-1.5">
-                  <span class="days-off-badge inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                  <span class="days-off-badge inline-flex items-center gap-1 text-[11px] font-bold text-[#E31C5F] bg-[#FF385C]/5 border border-[#FF385C]/20 px-2.5 py-0.5 rounded-full shadow-2xs">
                     🔥 ${plan.totalDaysOff} Days Off
                   </span>
                   <button 
                     type="button" 
-                    class="btn-open-cal p-1.5 px-2 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 hover:border-slate-300 transition-all flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 shadow-2xs" 
+                    class="btn-open-cal p-1.5 px-2 rounded-full text-xs font-semibold text-[#717171] bg-[#F7F7F7] hover:bg-[#EBEBEB] border border-[#EBEBEB] hover:border-[#DDDDDD] transition-all flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 shadow-2xs" 
                     title="View Month Calendar Grid"
                     data-idx="${planIdx}"
                   >
@@ -1275,12 +1255,12 @@ import Footer from "../components/Footer.astro";
                 </div>
               </div>
 
-              <h3 class="font-bold text-base text-slate-900 tracking-tight mb-1 group-hover:text-blue-600 transition-colors">
+              <h3 class="font-bold text-base text-[#222222] tracking-tight mb-1 group-hover:text-[#E31C5F] transition-colors">
                 ${plan.title}
               </h3>
-              <div class="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mb-2.5">
+              <div class="text-xs font-semibold text-[#717171] flex items-center gap-1.5 mb-2.5">
                 <span>🗓️</span>
-                <span class="font-bold text-slate-800">${formatDateRange(plan.startDate, plan.endDate)}</span>
+                <span class="font-bold text-[#222222]">${formatDateRange(plan.startDate, plan.endDate)}</span>
                 
               </div>
 

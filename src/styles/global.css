@@ -2,560 +2,416 @@
 
 @layer base {
   :root {
-    --color-primary: #171717;
-    --color-on-primary: #ffffff;
-    --color-ink: #171717;
-    --color-body: #4d4d4d;
-    --color-mute: #888888;
-    --color-hairline: #ebebeb;
-    --color-hairline-strong: #a1a1a1;
-    --color-canvas: #ffffff;
-    --color-canvas-soft: #fafafa;
-    --color-canvas-soft-2: #f5f5f5;
-    --color-link: #0070f3;
-    
-    --color-cyan: #50e3c2;
-    --color-pink: #ff0080;
-    --color-violet: #7928ca;
-    --color-amber: #f5a623;
-    --color-emerald: #10b981;
+    --airbnb-rose: #FF385C;
+    --airbnb-dark: #222222;
+    --airbnb-gray: #717171;
+    --airbnb-light-gray: #DDDDDD;
+    --airbnb-bg: #F7F7F7;
+    --airbnb-white: #FFFFFF;
+    --airbnb-green: #008A05;
+    --airbnb-blue: #00A699;
+  }
+
+  * {
+    box-sizing: border-box;
   }
 
   body {
-    background-color: var(--color-canvas-soft);
-    color: var(--color-ink);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--airbnb-bg);
+    color: var(--airbnb-dark);
+    font-family: 'Circular', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
   }
 }
 
-.mesh-gradient-bg {
-  background: radial-gradient(at 0% 0%, rgba(80, 227, 194, 0.12) 0px, transparent 50%),
-              radial-gradient(at 50% 0%, rgba(121, 40, 202, 0.1) 0px, transparent 50%),
-              radial-gradient(at 100% 0%, rgba(255, 0, 128, 0.1) 0px, transparent 50%),
-              radial-gradient(at 80% 50%, rgba(245, 166, 35, 0.08) 0px, transparent 50%);
+/* ==========================================================================
+   AIRBNB GLOBAL STYLES
+   ========================================================================== */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
-.display-xl {
-  font-size: 3.25rem;
-  line-height: 1.05;
-  letter-spacing: -2.4px;
-  font-weight: 600;
+/* Selection color */
+::selection {
+  background-color: rgba(255, 56, 92, 0.15);
+  color: var(--airbnb-dark);
 }
 
-.caption-mono {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.75rem;
-  line-height: 1rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.shadow-vercel {
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.03), 0px 2px 2px rgba(0, 0, 0, 0.04), 0px 8px 16px -4px rgba(0, 0, 0, 0.06);
-}
-
-.shadow-vercel-lg {
-  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.04), 0px 12px 24px -6px rgba(0, 0, 0, 0.08);
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--airbnb-rose);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* ==========================================================================
-   HIGH-CONTRAST PREMIUM DARK MODE SYSTEM
+   AIRBNB COMPONENT CLASSES
+   ========================================================================== */
+
+/* Airbnb Button Base */
+.airbnb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.airbnb-btn-primary {
+  background: linear-gradient(to right, #E61E4D, #E31C5F, #D70466);
+  color: white;
+}
+
+.airbnb-btn-primary:hover {
+  background: linear-gradient(to right, #D70466, #E31C5F, #E61E4D);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(231, 29, 95, 0.3);
+}
+
+.airbnb-btn-outline {
+  background: white;
+  color: var(--airbnb-dark);
+  border: 1px solid var(--airbnb-light-gray);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.airbnb-btn-outline:hover {
+  border-color: var(--airbnb-dark);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Airbnb Card */
+.airbnb-card {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.airbnb-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Airbnb Divider */
+.airbnb-divider {
+  height: 1px;
+  background: #EBEBEB;
+  border: none;
+  margin: 0;
+}
+
+/* Hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================================================
+   DARK MODE
    ========================================================================== */
 html.dark {
   color-scheme: dark;
 }
 
 html.dark body {
-  background-color: #0b0f19 !important;
-  color: #f1f5f9 !important;
+  background-color: #0a0a0a !important;
+  color: #fafafa !important;
 }
 
 html.dark header {
-  background-color: rgba(11, 15, 25, 0.9) !important;
-  border-color: #1e293b !important;
+  background-color: rgba(10, 10, 10, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: #2a2a2a !important;
 }
 
-/* General Layout & Cards */
 html.dark .bg-white {
-  background-color: #131c2e !important;
-  color: #f8fafc !important;
+  background-color: #1a1a1a !important;
+  color: #fafafa !important;
 }
 
-html.dark [class*="bg-[#fafafa]"] {
-  background-color: #0b0f19 !important;
+html.dark [class*="bg-[#F7F7F7]"],
+html.dark .bg-gray-50 {
+  background-color: #121212 !important;
 }
 
-html.dark [class*="bg-[#f5f5f5]"],
-html.dark .bg-slate-50,
-html.dark .bg-slate-100 {
-  background-color: #1a2436 !important;
+html.dark .border-gray-200,
+html.dark [class*="border-[#EBEBEB]"],
+html.dark [class*="border-[#ebebeb]"] {
+  border-color: #2a2a2a !important;
 }
 
-html.dark .border-slate-200,
-html.dark .border-slate-100,
-html.dark [class*="border-[#ebebeb]"],
-html.dark .border-zinc-200 {
-  border-color: #243147 !important;
+/* Dark mode typography */
+html.dark .text-gray-900,
+html.dark [class*="text-[#222222]"] {
+  color: #fafafa !important;
 }
 
-/* Typography Contrast */
-html.dark .text-slate-900,
-html.dark [class*="text-[#171717]"],
-html.dark .text-zinc-900,
-html.dark .text-slate-800 {
-  color: #f8fafc !important;
+html.dark .text-gray-500,
+html.dark [class*="text-[#717171]"],
+html.dark .text-gray-600 {
+  color: #b0b0b0 !important;
 }
 
-html.dark .text-slate-600,
-html.dark .text-slate-500,
-html.dark .text-zinc-500,
-html.dark [class*="text-[#666666]"] {
-  color: #94a3b8 !important;
+/* Dark mode cards */
+html.dark .airbnb-card {
+  background-color: #1a1a1a !important;
 }
 
-html.dark .text-slate-700 {
-  color: #cbd5e1 !important;
+/* Dark mode filter pills */
+html.dark .airbnb-filter {
+  background-color: #1a1a1a !important;
+  border-color: #333 !important;
+  color: #fafafa !important;
 }
 
-/* Specific Color Class Contrast Overrides in Dark Mode */
-html.dark .text-emerald-950,
-html.dark .text-emerald-900,
-html.dark .text-emerald-800,
-html.dark .text-emerald-700 {
-  color: #a7f3d0 !important;
+html.dark .airbnb-filter:hover {
+  border-color: #555 !important;
 }
 
-html.dark .text-amber-950,
-html.dark .text-amber-900,
-html.dark .text-amber-800,
-html.dark .text-amber-700 {
-  color: #fef08a !important;
+html.dark .airbnb-filter.active {
+  background-color: #fafafa !important;
+  border-color: #fafafa !important;
+  color: #000 !important;
 }
 
-html.dark .text-blue-950,
-html.dark .text-blue-900,
-html.dark .text-blue-800,
-html.dark .text-blue-700 {
-  color: #bfdbfe !important;
+/* Dark mode category pills */
+html.dark .category-pill {
+  background-color: #1a1a1a !important;
+  border-color: #333 !important;
+  color: #b0b0b0 !important;
 }
 
-/* Select & Inputs */
+html.dark .category-pill:hover {
+  border-color: #555 !important;
+  color: #fafafa !important;
+}
+
+html.dark .category-pill.active {
+  background-color: #fafafa !important;
+  border-color: #fafafa !important;
+  color: #000 !important;
+}
+
+/* Dark mode cards */
+html.dark .listing-card {
+  background-color: #1a1a1a !important;
+}
+
+.listing-card .card-visual {
+  background-color: #ffffff;
+}
+
+html.dark .listing-card .card-visual {
+  background-color: #2a2a2a !important;
+}
+
+html.dark .listing-card .card-title {
+  color: #fafafa !important;
+}
+
+html.dark .listing-card .card-dates {
+  color: #b0b0b0 !important;
+}
+
+html.dark .listing-card .card-efficiency {
+  color: #fafafa !important;
+}
+
+html.dark .listing-card .card-badge.free {
+  background: rgba(0, 138, 5, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+html.dark .listing-card .card-badge.paid {
+  background: rgba(255, 56, 92, 0.2) !important;
+  color: #fb7185 !important;
+}
+
+/* Dark mode hero */
+html.dark .hero-section {
+  background: linear-gradient(to bottom, #1a1a1a, #0a0a0a) !important;
+  border-color: #2a2a2a !important;
+}
+
+/* Dark mode modal */
+html.dark #calendarModal .modal-content {
+  background-color: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+}
+
+/* Dark mode footer */
+html.dark footer {
+  background-color: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+  color: #fafafa !important;
+}
+
+/* Dark mode mini calendar tiles */
+html.dark .mini-day {
+  background-color: #333 !important;
+  border-color: #444 !important;
+}
+
+html.dark .mini-day .day-name {
+  color: #999 !important;
+}
+
+html.dark .mini-day .day-num {
+  color: #ddd !important;
+}
+
+html.dark .mini-day.holiday {
+  background-color: rgba(0, 138, 5, 0.3) !important;
+  border-color: rgba(0, 138, 5, 0.5) !important;
+  color: #4ade80 !important;
+}
+
+html.dark .mini-day.weekend {
+  background-color: rgba(0, 166, 153, 0.3) !important;
+  border-color: rgba(0, 166, 153, 0.5) !important;
+  color: #5eead4 !important;
+}
+
+html.dark .mini-day.pto {
+  background-color: rgba(255, 56, 92, 0.3) !important;
+  border-color: rgba(255, 56, 92, 0.5) !important;
+  color: #fb7185 !important;
+}
+
+/* Dark mode theme toggle */
+html.dark .theme-toggle-btn {
+  background-color: #1a1a1a !important;
+  border-color: #333 !important;
+  color: #fafafa !important;
+}
+
+html.dark .theme-toggle-btn:hover {
+  background-color: #2a2a2a !important;
+}
+
+/* Dark mode inputs */
 html.dark select,
-html.dark textarea,
-html.dark input {
-  background-color: #1a2436 !important;
-  color: #f8fafc !important;
-  border-color: #334155 !important;
+html.dark input,
+html.dark textarea {
+  background-color: transparent !important;
+  color: #fafafa !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* Chip Buttons (0 Leaves, 1 Leave, etc.) */
+html.dark select:focus,
+html.dark input:focus,
+html.dark textarea:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Dark mode calendar cells */
+html.dark [class*="group/calcell"][class*="bg-emerald-100"] {
+  background-color: rgba(0, 138, 5, 0.25) !important;
+  color: #4ade80 !important;
+  border-color: rgba(0, 138, 5, 0.4) !important;
+}
+
+html.dark [class*="group/calcell"][class*="bg-blue-100"] {
+  background-color: rgba(0, 166, 153, 0.25) !important;
+  color: #5eead4 !important;
+  border-color: rgba(0, 166, 153, 0.4) !important;
+}
+
+html.dark [class*="group/calcell"][class*="bg-amber-100"] {
+  background-color: rgba(255, 56, 92, 0.25) !important;
+  color: #fb7185 !important;
+  border-color: rgba(255, 56, 92, 0.4) !important;
+}
+
+/* Dark mode chips */
 html.dark .chip-btn {
-  background-color: #151f32 !important;
-  border-color: #26354d !important;
-}
-
-html.dark .chip-btn .chip-title {
-  color: #f8fafc !important;
-}
-
-html.dark .chip-btn .chip-desc {
-  color: #94a3b8 !important;
+  background-color: #1a1a1a !important;
+  border-color: #333 !important;
 }
 
 html.dark .chip-btn:hover {
-  border-color: #475569 !important;
-  background-color: #1e2c45 !important;
+  background-color: #2a2a2a !important;
+  border-color: #444 !important;
 }
 
-/* ACTIVE CHIP BUTTON FIX (White Card with Dark Text) */
 html.dark .chip-btn.active {
-  background-color: #ffffff !important;
-  border-color: #ffffff !important;
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25) !important;
+  background-color: #fafafa !important;
+  border-color: #fafafa !important;
+  color: #000 !important;
 }
 
 html.dark .chip-btn.active .chip-title {
-  color: #0f172a !important;
-  font-weight: 800 !important;
+  color: #000 !important;
 }
 
 html.dark .chip-btn.active .chip-desc {
-  color: #475569 !important;
-  font-weight: 600 !important;
+  color: #555 !important;
 }
 
-html.dark .chip-btn.active .stepper-box {
-  background: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
-}
-
-html.dark .chip-btn.active .stepper-btn {
-  color: #334155 !important;
-}
-
-html.dark .chip-btn.active .stepper-val {
-  color: #0f172a !important;
-}
-
-/* Month Filter Tabs */
-html.dark .month-tab-btn {
-  background-color: #151f32 !important;
-  color: #cbd5e1 !important;
-  border-color: #26354d !important;
-}
-
-html.dark .month-tab-btn:hover {
-  background-color: #1e2c45 !important;
-  color: #ffffff !important;
-  border-color: #475569 !important;
-}
-
-html.dark .month-tab-btn.active {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #ffffff !important;
-  font-weight: 700 !important;
-}
-
-/* Custom Stepper Box */
-html.dark .stepper-box {
-  background-color: #1a2436 !important;
-  border-color: #334155 !important;
-}
-
-html.dark .stepper-btn,
-html.dark .stepper-val {
-  color: #f8fafc !important;
-}
-
-/* Hero Section Gradient in Dark Mode */
-html.dark section.bg-gradient-to-b {
-  background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(17, 24, 39, 0.9), #0b0f19) !important;
-  border-color: #1e293b !important;
-}
-
-/* Card Pills (Holiday, Weekend, PTO) in Dark Mode */
-/* Holiday Pill */
-html.dark [class*="bg-emerald-50"] {
-  background-color: rgba(6, 78, 59, 0.5) !important;
-  border-color: rgba(16, 185, 129, 0.5) !important;
-  color: #a7f3d0 !important;
-}
-
-html.dark [class*="bg-emerald-50"] span,
-html.dark [class*="bg-emerald-50"] div {
-  color: #a7f3d0 !important;
-}
-
-html.dark [class*="bg-emerald-100"] {
-  background-color: rgba(6, 95, 70, 0.9) !important;
-  color: #ecfdf5 !important;
-}
-
-/* Weekend Pill */
-html.dark [class*="bg-blue-50"] {
-  background-color: rgba(30, 58, 138, 0.5) !important;
-  border-color: rgba(59, 130, 246, 0.5) !important;
-  color: #bfdbfe !important;
-}
-
-html.dark [class*="bg-blue-50"] span,
-html.dark [class*="bg-blue-50"] div {
-  color: #bfdbfe !important;
-}
-
-html.dark [class*="bg-blue-100"] {
-  background-color: rgba(30, 64, 175, 0.9) !important;
-  color: #eff6ff !important;
-}
-
-/* PTO / Leave Pill */
-html.dark [class*="bg-amber-50"] {
-  background-color: rgba(120, 53, 15, 0.5) !important;
-  border-color: rgba(245, 158, 11, 0.5) !important;
-  color: #fef08a !important;
-}
-
-html.dark [class*="bg-amber-50"] span,
-html.dark [class*="bg-amber-50"] div {
-  color: #fef08a !important;
-}
-
-html.dark [class*="bg-amber-200"],
-html.dark [class*="bg-amber-100"] {
-  background-color: rgba(146, 64, 14, 0.9) !important;
-  color: #fefce8 !important;
-}
-
-/* Bottom Action Banners inside Cards */
-html.dark [class*="bg-emerald-50"] {
-  background-color: rgba(6, 78, 59, 0.45) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
-}
-
-html.dark [class*="bg-amber-50"] {
-  background-color: rgba(120, 53, 15, 0.45) !important;
-  border-color: rgba(245, 158, 11, 0.4) !important;
-}
-
-/* Uploader DropZone & Loading Overlay Fix */
-html.dark #dropZone {
-  background-color: #131c2e !important;
-  border-color: #334155 !important;
-}
-
-html.dark #uploadSpinner {
-  background-color: rgba(19, 28, 46, 0.96) !important;
-}
-
-html.dark #uploadSpinner .animate-spin {
-  border-color: #f8fafc !important;
-  border-top-color: transparent !important;
-}
-
-html.dark #spinnerText {
-  color: #f8fafc !important;
-}
-
-html.dark #spinnerSub {
-  color: #94a3b8 !important;
-}
-
-html.dark #fileUploadStatus {
-  background-color: rgba(6, 78, 59, 0.5) !important;
-  border-color: rgba(16, 185, 129, 0.5) !important;
-  color: #a7f3d0 !important;
-}
-
-/* Footer & Dropdowns */
-html.dark footer {
-  background-color: #0b0f19 !important;
-  border-color: #1e293b !important;
-}
-
-html.dark .theme-toggle-btn {
-  background-color: #1a2436 !important;
-  border-color: #334155 !important;
-  color: #f8fafc !important;
-}
-
-html.dark #sortDropdownMenu {
-  background-color: #1a2436 !important;
-  border-color: #334155 !important;
-  color: #f8fafc !important;
-}
-
-html.dark .sort-option:hover {
-  background-color: #243248 !important;
-}
-
-
-/* ==========================================================================
-   MONTH CALENDAR GRID MODAL CELL OVERRIDES IN DARK MODE
-   ========================================================================== */
-
-/* Normal Weekday Cell text (1, 5, 6, 7, 8, 9...) */
-html.dark .group\/calcell.text-slate-400,
-html.dark [class*="group/calcell"].text-slate-400 {
-  color: #cbd5e1 !important;
-}
-
-/* Normal Weekend Cell (10, 11, 17, 18, 24, 25, 31) */
-html.dark [class*="group/calcell"][class*="bg-slate-100"] {
-  background-color: rgba(30, 41, 59, 0.7) !important;
-  color: #cbd5e1 !important;
-  border: 1px solid #334155 !important;
-}
-
-html.dark [class*="group/calcell"][class*="bg-slate-100"] span {
-  color: #e2e8f0 !important;
-  font-weight: 600 !important;
-}
-
-/* Active Plan Holiday Cell (e.g. 2 Oct - Green) */
-html.dark [class*="group/calcell"][class*="bg-emerald-100"] {
-  background-color: #064e3b !important;
-  border-color: #10b981 !important;
-  color: #ffffff !important;
-}
-
-html.dark [class*="group/calcell"][class*="bg-emerald-100"] span {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-}
-
-/* Active Plan Weekend Cell (e.g. 3 Oct, 4 Oct - Blue) */
-html.dark [class*="group/calcell"][class*="bg-blue-100"] {
-  background-color: #1e40af !important;
-  border-color: #3b82f6 !important;
-  color: #ffffff !important;
-}
-
-html.dark [class*="group/calcell"][class*="bg-blue-100"] span {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-}
-
-/* Active Plan Leave Cell (Amber/Yellow) */
-html.dark [class*="group/calcell"][class*="bg-amber-100"] {
-  background-color: #78350f !important;
-  border-color: #f59e0b !important;
-  color: #ffffff !important;
-}
-
-html.dark [class*="group/calcell"][class*="bg-amber-100"] span {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-}
-
-/* Calendar Month Container Card inside Modal */
-html.dark #calendarModal .bg-white {
-  background-color: #0f172a !important;
-  border-color: #1e293b !important;
-}
-
-html.dark #calendarModal .text-slate-800 {
-  color: #f8fafc !important;
-}
-
-html.dark #calendarModal .text-slate-400 {
-  color: #94a3b8 !important;
-}
-
-
-/* ==========================================================================
-   RESULTS LEGEND BAR OVERRIDES IN DARK MODE
-   ========================================================================== */
-html.dark .results-legend-bar {
-  color: #e2e8f0 !important;
-  font-weight: 600 !important;
-}
-
-html.dark .results-legend-bar span {
-  color: #e2e8f0 !important;
-}
-
-html.dark .results-legend-bar .bg-blue-500 {
-  background-color: #3b82f6 !important;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6) !important;
-}
-
-html.dark .results-legend-bar .bg-emerald-500 {
-  background-color: #10b981 !important;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6) !important;
-}
-
-html.dark .results-legend-bar .bg-amber-500 {
-  background-color: #f59e0b !important;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6) !important;
-}
-
-
-/* ==========================================================================
-   CALENDAR MODAL LEGEND DOTS OVERRIDES IN DARK MODE
-   ========================================================================== */
-html.dark #calendarModal .bg-slate-50 {
-  background-color: #0f172a !important;
-  border-color: #1e293b !important;
-  color: #f8fafc !important;
-}
-
-html.dark #calendarModal .bg-slate-50 span {
-  color: #f8fafc !important;
-  font-weight: 600 !important;
-}
-
-html.dark #calendarModal .bg-emerald-500 {
-  background-color: #10b981 !important;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7) !important;
-}
-
-html.dark #calendarModal .bg-amber-500 {
-  background-color: #f59e0b !important;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7) !important;
-}
-
-html.dark #calendarModal .bg-blue-500 {
-  background-color: #3b82f6 !important;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.7) !important;
-}
-
-
-/* ==========================================================================
-   DAYS OFF BADGE & CALENDAR BUTTON OVERRIDES IN DARK MODE
-   ========================================================================== */
-html.dark .days-off-badge {
-  background-color: rgba(49, 46, 129, 0.6) !important;
-  border-color: rgba(99, 102, 241, 0.5) !important;
-  color: #c7d2fe !important;
-}
-
-html.dark .btn-open-cal {
-  background-color: #1a2436 !important;
-  border-color: #334155 !important;
-  color: #f8fafc !important;
-}
-
-html.dark .btn-open-cal:hover {
-  background-color: #243248 !important;
-  border-color: #475569 !important;
-}
-
-
-/* ==========================================================================
-   COMPANY OPTIMIZER & UPLOADER DARK MODE OVERRIDES
-   ========================================================================== */
+/* Dark mode tabs */
 html.dark .tab-btn {
-  color: #94a3b8 !important;
+  color: #888 !important;
 }
 
 html.dark .tab-btn:hover:not(.active) {
-  color: #f8fafc !important;
-  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #fafafa !important;
+  background-color: #2a2a2a !important;
 }
 
 html.dark .tab-btn.active {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  font-weight: 800 !important;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15) !important;
+  background-color: #fafafa !important;
+  color: #000 !important;
 }
 
-html.dark [class*="px-3.5"] {
-  background-color: rgba(6, 78, 59, 0.5) !important;
-  border-color: rgba(16, 185, 129, 0.5) !important;
-  color: #a7f3d0 !important;
+/* Dark mode dropzone */
+html.dark #dropZone {
+  background-color: #1a1a1a !important;
+  border-color: #333 !important;
 }
 
-html.dark [class*="px-3.5"] span {
-  color: #a7f3d0 !important;
+html.dark #dropZone:hover {
+  border-color: #555 !important;
+  background-color: #222 !important;
 }
 
-
-
-
-.font-serif-elegant {
-  font-family: 'Playfair Display', serif;
+/* Dark mode sort dropdown */
+html.dark #sortDropdownMenu {
+  background-color: #1a1a1a !important;
+  border-color: #333 !important;
 }
 
+html.dark .sort-option:hover {
+  background-color: #2a2a2a !important;
+}
 
-/* Hero CTA Button Dark Mode - Premium Solid White */
+/* Dark mode legend */
+html.dark .results-legend-bar {
+  color: #b0b0b0 !important;
+}
+
+/* Dark mode CTA */
 html.dark .hero-cta-btn {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: transparent !important;
-  box-shadow: 0 8px 25px -6px rgba(255, 255, 255, 0.15) !important;
+  background: linear-gradient(to right, #E61E4D, #E31C5F, #D70466) !important;
+  color: white !important;
 }
+
 html.dark .hero-cta-btn:hover {
-  background-color: #f1f5f9 !important;
-  box-shadow: 0 12px 30px -6px rgba(255, 255, 255, 0.25) !important;
-  transform: translateY(-2px);
-}
-html.dark .hero-cta-btn span.text-slate-400 {
-  color: #64748b !important;
-}
-html.dark .hero-cta-btn:hover span.text-slate-400 {
-  color: #0f172a !important;
+  box-shadow: 0 4px 12px rgba(231, 29, 95, 0.4) !important;
 }

@@ -1,40 +1,75 @@
 ---
 ---
-<section class="relative pt-16 pb-14 px-4 sm:px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
-  <!-- Subtle warm glowing backdrop -->
-  <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
+<section class="hero-section relative bg-white border-b border-[#EBEBEB] overflow-hidden">
+  <!-- Clean white background like Airbnb -->
 
-  <div class="max-w-[1200px] mx-auto relative z-10 flex flex-col items-center text-center">
-    
-    <!-- 1. Alert Badge (Dynamically calculated based on real today date) -->
-    <div class="inline-flex items-center sm:items-center text-center gap-2 px-4 py-2 rounded-2xl sm:rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] sm:text-xs font-bold mb-5 shadow-xs hover:bg-emerald-100/80 transition-all leading-tight">
-      <span class="text-sm">🌴</span>
-      <span id="heroCountdownBadge">Next: Raksha Bandhan (3 Days Off · 0 Leaves Needed)</span>
+  <div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 sm:pt-16 pb-10 sm:pb-14 relative z-10">
+
+    <!-- Alert Badge -->
+    <div class="flex justify-center mb-6">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#DDDDDD] bg-white shadow-sm hover:shadow-md transition-shadow">
+        <span class="text-[13px]">🌴</span>
+        <span id="heroCountdownBadge" class="text-[12px] font-semibold text-[#222222]">Next: Raksha Bandhan (3 Days Off · 0 Leaves Needed)</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-[#717171]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
     </div>
 
-    <!-- 2. Main Headline & Tagline -->
-    <h1 class="text-[28px] leading-tight sm:text-5xl lg:text-[52px] font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-2.5">
-      You deserve a break. We found the time for you.
-    </h1>
-    <p class="text-lg sm:text-xl font-bold text-amber-600 mb-4 tracking-tight">
-      Take more vacations. Burn fewer leaves.
-    </p>
+    <!-- Main Headline -->
+    <div class="text-center mb-8">
+      <h1 class="text-[32px] sm:text-[44px] lg:text-[52px] font-extrabold text-[#222222] tracking-tight leading-[1.1] max-w-[800px] mx-auto mb-4">
+        Find your next
+        <span class="bg-gradient-to-r from-[#FF385C] to-[#E31C5F] bg-clip-text text-transparent">long weekend</span>
+      </h1>
+      <p class="text-[15px] sm:text-[17px] text-[#717171] max-w-[600px] mx-auto leading-relaxed">
+        Turn holidays into vacations. We find the best long weekends so you can take fewer leaves and travel more.
+      </p>
+    </div>
 
-    <!-- 3. Empathetic Description (Subtext) -->
-    <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-medium">
-      Escape the daily grind without emptying your leave balance. We automatically turn regular weekends and public holidays into guilt-free mini vacations.
-    </p>
+    <!-- Airbnb-style Search Bar CTA -->
+    <div class="max-w-[850px] mx-auto mb-6">
+      <div class="flex items-center border border-[#DDDDDD] rounded-full shadow-lg hover:shadow-xl transition-shadow px-2 py-2 bg-white">
+        <!-- Region -->
+        <div class="flex-1 px-5 py-2 border-r border-[#EBEBEB]">
+          <div class="text-[11px] font-bold text-[#222222] uppercase tracking-wide mb-0.5">Region</div>
+          <select id="heroRegionSelector" class="w-full bg-transparent text-[13px] font-semibold text-[#222222] outline-none cursor-pointer border-none p-0 m-0" style="-webkit-appearance:none; -moz-appearance:none; appearance:none;">
+            <option value="ALL" selected>Pan-India IT</option>
+            <option value="SOUTH">South India</option>
+            <option value="WEST">West India</option>
+            <option value="NORTH">North India</option>
+            <option value="EAST">East India</option>
+          </select>
+        </div>
 
-    <!-- Company Optimizer CTA Button -->
-    <a href="/company-optimizer" class="hero-cta-btn group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl bg-[#0f172a] hover:bg-[#1e293b] text-white font-extrabold text-[15px] shadow-[0_8px_20px_-6px_rgba(15,23,42,0.5)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_-6px_rgba(15,23,42,0.6)] border border-slate-700/50 active:scale-95 no-underline">
-      <span class="text-xl">🏢</span>
-      Upload Office Holiday List
-      <span class="text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-all duration-300 ml-1">→</span>
-    </a>
-  
+        <!-- Leaves Budget -->
+        <div class="flex-1 px-5 py-2 border-r border-[#EBEBEB]">
+          <div class="text-[11px] font-bold text-[#222222] uppercase tracking-wide mb-0.5">Leave Budget</div>
+          <select id="heroLeavesSelector" class="w-full bg-transparent text-[13px] font-semibold text-[#222222] outline-none cursor-pointer border-none p-0 m-0" style="-webkit-appearance:none; -moz-appearance:none; appearance:none;">
+            <option value="0" selected>0 Leaves (Free)</option>
+            <option value="1">1 Leave</option>
+            <option value="2">2 Leaves</option>
+            <option value="3">3 Leaves</option>
+          </select>
+        </div>
 
-    
+        <!-- Search Button -->
+        <button type="button" id="heroSearchBtn" class="flex items-center justify-center w-[48px] h-[48px] bg-gradient-to-r from-[#FF385C] to-[#E31C5F] rounded-full hover:from-[#E31C5F] hover:to-[#D70466] transition-all shadow-sm hover:shadow-md ml-2 shrink-0 cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Company Optimizer Link -->
+    <div class="text-center">
+      <a href="/company-optimizer" class="inline-flex items-center gap-2 text-[13px] font-semibold text-[#717171] hover:text-[#222222] hover:underline transition-colors">
+        <span class="text-base">🏢</span>
+        Upload your office holiday list
+        <span class="text-[#717171]">→</span>
+      </a>
+    </div>
 
   </div>
 </section>
@@ -48,7 +83,6 @@
 
     const today = getTodayIso();
 
-    // Check starting with 0 leaves, then 1 leave, 2 leaves, up to 4 leaves
     for (let l = 0; l <= 4; l++) {
       const plans = solveVacationPlans({
         leaves: l,
@@ -58,7 +92,6 @@
         fromDate: today
       });
 
-      // User requirement: check upcoming where startDate > today (or startDate >= today)
       let upcoming = plans.filter(p => p.startDate > today);
       if (upcoming.length === 0) {
         upcoming = plans.filter(p => p.startDate >= today);
@@ -83,8 +116,18 @@
       }
     }
 
-    // Fallback for year end
     badge.textContent = "Year-End Getaways · 2027 Plans Available Soon";
+  }
+
+  // Hero search button triggers scroll to filters
+  const heroSearchBtn = document.getElementById("heroSearchBtn");
+  if (heroSearchBtn) {
+    heroSearchBtn.addEventListener("click", () => {
+      const filtersSection = document.getElementById("filtersSection");
+      if (filtersSection) {
+        filtersSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   }
 
   if (document.readyState === "loading") {
