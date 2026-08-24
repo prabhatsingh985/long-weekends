@@ -462,116 +462,81 @@ import Footer from "../components/Footer.astro";
 
   <style>
     .chip-btn {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 9999px !important;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
       cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      text-align: left;
-      min-height: 76px;
-      justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      background-color: #18181b;
+      border: 1px solid #27272a;
+      color: #d4d4d8;
+      white-space: nowrap;
+      user-select: none;
     }
+
     .chip-btn:hover {
-      border-color: #94a3b8;
-      background: #ffffff;
-      transform: translateY(-2.5px);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      border-color: #3f3f46;
+      color: #ffffff;
+      background-color: #27272a;
     }
-    .chip-btn:active {
-      transform: translateY(0) scale(0.98);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-    }
+
     .chip-btn.active {
-      background: #0f172a;
-      border-color: #0f172a;
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+      background-color: #ffffff !important;
+      border-color: #ffffff !important;
+      color: #09090b !important;
+      font-weight: 800 !important;
+      border-radius: 9999px !important;
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25) !important;
     }
-    .chip-btn.active:hover {
-      background: #1e293b;
-      border-color: #1e293b;
-      transform: translateY(-2.5px);
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+
+    .chip-btn.active * {
+      color: #09090b !important;
+      font-weight: 800 !important;
     }
-    .chip-btn.active .chip-title { color: #ffffff; }
-    .chip-btn.active .chip-desc { color: #cbd5e1; }
-    .chip-btn.active .stepper-box {
-      background: #1e293b;
-      border-color: #334155;
-    }
-    .chip-btn.active .stepper-btn {
-      color: #ffffff;
-    }
-    .chip-btn.active .stepper-val {
-      color: #ffffff;
-    }
-    .chip-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; transition: color 0.15s ease; }
-    .chip-desc { font-size: 0.72rem; color: #64748b; margin-top: 2px; transition: color 0.15s ease; }
-    
+
     .month-tab-btn {
-      padding: 7px 18px;
-      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 9999px !important;
+      font-size: 0.75rem;
       font-weight: 600;
-      border-radius: 9999px;
-      background: #ffffff;
-      color: #4b5563;
-      border: 1px solid #e5e7eb;
+      transition: all 0.2s ease;
       cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      background-color: #18181b;
+      border: 1px solid #27272a;
+      color: #d4d4d8;
       white-space: nowrap;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      user-select: none;
     }
+
     .month-tab-btn:hover {
-      color: #0f172a;
-      background: #f8fafc;
-      border-color: #cbd5e1;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.07);
-    }
-    .month-tab-btn:active {
-      transform: translateY(0) scale(0.96);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-    .month-tab-btn.active {
-      background: #0f172a;
+      border-color: #3f3f46;
       color: #ffffff;
-      border-color: #0f172a;
-      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.22);
+      background-color: #27272a;
     }
-    .month-tab-btn.active:hover {
-      background: #1e293b;
-      border-color: #1e293b;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.28);
-    }
-    /* Premium Month Tabs (Pill Style) */
-    .month-tab-btn {
-      font-size: 13px;
-      font-weight: 600;
-      color: #475569;
-      padding: 4px 14px;
-      border-radius: 9999px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      white-space: nowrap;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .month-tab-btn:hover:not(.active) {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-      color: #0f172a;
-    }
+
     .month-tab-btn.active {
-      background: #0f172a; /* Solid black active state */
-      border-color: #0f172a;
-      color: #ffffff;
-      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+      background-color: #ffffff !important;
+      border-color: #ffffff !important;
+      color: #09090b !important;
+      font-weight: 800 !important;
+      border-radius: 9999px !important;
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25) !important;
     }
-    
+
+    .month-tab-btn.active * {
+      color: #09090b !important;
+      font-weight: 800 !important;
+    }
+
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>

@@ -125,10 +125,10 @@
     <!-- 5. HIGH-END GRADIENT CTA BUTTON FOR OFFICE HOLIDAY LIST -->
     <a 
       href="/company-optimizer" 
-      class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-zinc-900 via-[#1c1218] to-zinc-900 border border-rose-500/40 hover:border-rose-500/80 shadow-xl shadow-rose-950/20 text-white font-extrabold text-xs sm:text-sm transition-all duration-300 transform hover:scale-[1.02] active:scale-95 no-underline group"
+      class="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-rose-500/10 via-zinc-900 to-rose-500/10 border border-rose-500/40 hover:border-rose-500/80 shadow-lg shadow-rose-950/30 hover:shadow-rose-500/20 text-white font-extrabold text-xs sm:text-sm transition-all duration-300 transform hover:scale-[1.02] active:scale-95 no-underline group"
     >
-      <span class="text-base" aria-hidden="true">👔</span>
-      <span class="tracking-tight">Upload your office holiday list</span>
+      <span class="w-7 h-7 rounded-full bg-rose-500/20 text-[#ff2b63] flex items-center justify-center text-sm font-bold border border-rose-500/30 group-hover:scale-110 transition-transform">🏢</span>
+      <span class="tracking-tight text-zinc-200 group-hover:text-white transition-colors">Upload your office holiday list</span>
       <span class="text-[#ff2b63] font-bold text-sm group-hover:translate-x-1 transition-transform">→</span>
     </a>
 
@@ -137,6 +137,69 @@
 
 <script>
   import { solveVacationPlans, getTodayIso } from "../data/vacation-solver";
+
+  function setupHeroPopovers() {
+    const regionTrigger = document.getElementById("heroRegionTrigger");
+    const regionPopover = document.getElementById("heroRegionPopover");
+    const regionArrow = document.getElementById("heroRegionArrow");
+
+    const budgetTrigger = document.getElementById("heroBudgetTrigger");
+    const budgetPopover = document.getElementById("heroBudgetPopover");
+    const budgetArrow = document.getElementById("heroBudgetArrow");
+
+    if (regionTrigger && regionPopover) {
+      regionTrigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isHidden = regionPopover.classList.contains("hidden");
+        budgetPopover?.classList.add("hidden");
+        if (budgetArrow) budgetArrow.style.transform = "rotate(0deg)";
+        
+        if (isHidden) {
+          regionPopover.classList.remove("hidden");
+          if (regionArrow) regionArrow.style.transform = "rotate(180deg)";
+        } else {
+          regionPopover.classList.add("hidden");
+          if (regionArrow) regionArrow.style.transform = "rotate(0deg)";
+        }
+      });
+    }
+
+    if (budgetTrigger && budgetPopover) {
+      budgetTrigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isHidden = budgetPopover.classList.contains("hidden");
+        regionPopover?.classList.add("hidden");
+        if (regionArrow) regionArrow.style.transform = "rotate(0deg)";
+
+        if (isHidden) {
+          budgetPopover.classList.remove("hidden");
+          if (budgetArrow) budgetArrow.style.transform = "rotate(180deg)";
+        } else {
+          budgetPopover.classList.add("hidden");
+          if (budgetArrow) budgetArrow.style.transform = "rotate(0deg)";
+        }
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      const target = e.target as Node;
+      if (regionPopover && !regionPopover.contains(target) && regionTrigger && !regionTrigger.contains(target)) {
+        regionPopover.classList.add("hidden");
+        if (regionArrow) regionArrow.style.transform = "rotate(0deg)";
+      }
+      if (budgetPopover && !budgetPopover.contains(target) && budgetTrigger && !budgetTrigger.contains(target)) {
+        budgetPopover.classList.add("hidden");
+        if (budgetArrow) budgetArrow.style.transform = "rotate(0deg)";
+      }
+    });
+
+    window.addEventListener("scroll", () => {
+      regionPopover?.classList.add("hidden");
+      budgetPopover?.classList.add("hidden");
+      if (regionArrow) regionArrow.style.transform = "rotate(0deg)";
+      if (budgetArrow) budgetArrow.style.transform = "rotate(0deg)";
+    });
+  }
 
   function initDynamicHeroBadge() {
     const badge = document.getElementById("heroCountdownBadge");
@@ -180,10 +243,15 @@
     badge.textContent = "Year-End Getaways · 2027 Plans Available Soon";
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initDynamicHeroBadge);
-  } else {
+  function initAll() {
+    setupHeroPopovers();
     initDynamicHeroBadge();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initAll);
+  } else {
+    initAll();
   }
 </script>
 
