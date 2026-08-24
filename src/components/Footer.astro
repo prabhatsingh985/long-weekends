@@ -21,6 +21,33 @@ const leaveMath = [
   { href: "/?leaves=2", label: "2 leaves — 5–6 day trips" },
   { href: "/?month=10", label: "Diwali & Durga Puja runs" },
 ];
+
+/**
+ * The document pages' only inbound links, anywhere on the site.
+ *
+ * They were in the sitemap and reachable by URL, but nothing linked to them, so
+ * every one was an orphan: a page Google is asked to index and given no reason
+ * to trust. outputs/sitemap.test.ts fails the sweep if a sitemap entry has no
+ * link here, which is why this list and that file have to be edited together.
+ *
+ * These sat in the bottom bar first, as a wrapped row of `text-xs text-muted`
+ * beside the copyright. That was a real miss: at 12px in the muted tone, below a
+ * divider, next to a © line, they read as legal fine-print rather than
+ * navigation — and the fine-print band is the one part of a footer people's eyes
+ * skip. Promoted to a fourth titled column so they sit at the same weight as
+ * Calendars, Leave math and Tools, which is what they are.
+ *
+ * The error pages are deliberately absent. /404 and /500 are `noindex` and are
+ * not in the sitemap, so linking them from every page on the site would point
+ * crawlers at pages we have asked them to drop, and no visitor ever wants to go
+ * to one on purpose. They are reachable at their URLs for checking the design.
+ */
+const siteLinks = [
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+  { href: "/privacy", label: "Privacy policy" },
+  { href: "/terms", label: "Terms & conditions" },
+];
 ---
 
 <footer class="mt-14 sm:mt-20 border-t border-hairline bg-surface-soft">
@@ -42,9 +69,17 @@ const leaveMath = [
         </p>
       </div>
 
-      {/* gap-10 at 320px left ~124px per column, which is not enough for
-          "India (public & corporate)" to break cleanly. Tighter on phones. */}
-      <div class="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 sm:gap-14">
+      {/* Four columns, but only above lg. gap-10 at 320px left ~124px per column,
+          which is not enough for "India (public & corporate)" to break cleanly,
+          so phones stay at two tracks with a tighter gutter — four items now fill
+          exactly two rows there instead of leaving an orphan.
+
+          The jump to four is held back to lg rather than sm because between them
+          the brand block is already beside this grid at md:max-w-sm, leaving the
+          nav roughly 300px: four tracks of 75px would break every label. */}
+      <div
+        class="grid grid-cols-2 gap-x-6 gap-y-9 sm:gap-x-10 lg:grid-cols-4 lg:gap-x-8 xl:gap-x-12"
+      >
         <nav aria-labelledby="ft-countries">
           <h2
             id="ft-countries"
@@ -119,19 +154,47 @@ const leaveMath = [
             </li>
           </ul>
         </nav>
+
+        <nav aria-labelledby="ft-site">
+          <h2
+            id="ft-site"
+            class="font-mono text-[0.625rem] font-bold text-ink uppercase tracking-widest mb-4"
+          >
+            Site
+          </h2>
+          <ul class="space-y-2.5 list-none p-0 m-0">
+            {
+              siteLinks.map((l) => (
+                <li>
+                  <a
+                    href={l.href}
+                    class="text-[0.8125rem] text-body hover:text-ink transition-colors no-underline"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
       </div>
     </div>
 
-    <div
-      class="mt-12 pt-6 border-t border-hairline flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-    >
-      <p class="text-xs text-muted m-0">
-        © {year} The Long Weekends · Holiday dates cross-checked against DoPT
-        and RBI gazette notifications.
-      </p>
-      <p class="text-xs text-muted m-0">
-        Runs entirely in your browser. Nothing is uploaded.
-      </p>
+    {/* Just the two attribution lines now. The site links used to be duplicated
+        here as well; one canonical place for a link is enough, and repeating them
+        immediately below the column that now holds them was noise. */}
+    <div class="mt-12 border-t border-hairline pt-6">
+      <div
+        class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
+      >
+        <p class="text-xs text-muted m-0">
+          © {year} The Long Weekends · Holiday dates cross-checked against DoPT
+          and RBI gazette notifications.
+        </p>
+        <p class="text-xs text-muted m-0">
+          Runs entirely in your browser. Nothing is uploaded.
+        </p>
+      </div>
     </div>
   </div>
 </footer>

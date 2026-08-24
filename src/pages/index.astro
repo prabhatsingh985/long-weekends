@@ -12,7 +12,7 @@ import Navbar from "../components/Navbar.astro";
 import Hero from "../components/Hero.astro";
 import Footer from "../components/Footer.astro";
 import { getTodayIso, getUpcomingCutoffIso, solveVacationPlans } from "../data/vacation-solver";
-import { formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
+import { escapeHtml, formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
 
 const TITLE =
   "Next Long Weekend 2026 – Leave Calculator India | The Long Weekends";
@@ -73,27 +73,110 @@ const highlights = nextBreaks((leaves) =>
 );
 
 /**
- * One FAQ source feeding both the visible accordion and the JSON-LD. They had
- * drifted apart — Q1's schema answer ended with "Visit thelongweekends.com to
- * see the exact dates" while the visible answer said something else — and
- * Google requires the rendered answer to match the markup.
+ * The next break, named once.
+ *
+ * `highlights[0]` is deliberately reused rather than re-derived: nextBreaks()
+ * already answers "what is coming up", and the hero badge reads the same array.
+ * A second heuristic here is exactly how the badge and the FAQ came to name two
+ * different festivals on the same page before.
+ */
+const nextUp = highlights[0];
+
+/**
+ * Q1's answer is generated, not written.
+ *
+ * "When is the next long weekend?" is the highest-volume query this page can
+ * answer, and it is the one answer that cannot be hardcoded: a fixed string is
+ * wrong the day after the break it names. Composing it from the solver means the
+ * visible answer and the JSON-LD both move with the calendar.
+ *
+ * The build-time value is what a crawler sees. A visitor's own clock and region
+ * are applied by renderHighlights() in the client script, which is why the copy
+ * points at the badge rather than repeating the date as gospel.
+ */
+const nextUpAnswer = nextUp
+  ? `The next long weekend is <strong>${escapeHtml(nextUp.title)}, ${formatDateRange(
+      nextUp.startDate,
+      nextUp.endDate
+    )}</strong> — ${nextUp.totalDaysOff} days off ${
+      nextUp.leavesRequired === 0
+        ? "with no leave needed at all"
+        : `for ${pluralLeaves(nextUp.leavesRequired)}`
+    }. The badge at the top of this page names the same break, recalculated from your own date and region the moment the page loads.`
+  : "Every long weekend on the bundled calendar has already passed. The planner keeps working for the year ahead as soon as the holiday data is extended.";
+
+/**
+ * One FAQ source feeding both the visible accordion and the JSON-LD.
+ *
+ * The two must render the same string — Google treats a FAQPage whose markup
+ * disagrees with the visible answer as spam — so both read `item.a` and neither
+ * gets its own copy of the prose.
+ *
+ * On the question list: the brief asked for thirteen, five of which were
+ * keyword variants of the same question ("when is long weekend", "when is next
+ * long weekend", "when is the next long weekend 2026"). Shipping those as
+ * separate nodes is counterproductive: near-identical Question entries are
+ * treated as duplicate content and can cost the whole FAQPage its rich result.
+ * They are consolidated into Q1 (undated, generated) and Q3 (the dated one that
+ * enumerates the year), which is what those searches actually want.
+ *
+ * Every number below is recomputed from the shipped solver by
+ * outputs/faq.test.ts. The previous version claimed "roughly 10 to 15 long
+ * weekend opportunities" where the real figure is nine, which is the kind of
+ * confident wrongness a crawler will happily quote back at people.
  */
 const FAQ = [
   {
-    q: "When is the next long weekend in 2026?",
-    a: "The next long weekend depends on today's date. This tool automatically identifies the nearest upcoming long weekend from India's gazetted holidays and your weekend schedule, and names it in the badge at the top of the page along with how many leaves it costs.",
+    q: "When is the next long weekend?",
+    a: nextUpAnswer,
   },
   {
-    q: "How many long weekends are there in 2026?",
-    a: "For a standard 5-day work week, India has roughly 10 to 15 long weekend opportunities in 2026, depending on your region and which optional holidays your company observes. With 1 to 3 leave days per trip, many of them stretch into 4 to 9 day breaks.",
+    q: "Is this weekend a long weekend?",
+    a: "Most weekends are just two days. A weekend becomes a long weekend when a gazetted holiday lands on the Friday or the Monday beside it, or when one leave day bridges the gap to a holiday sitting midweek. The badge at the top of this page names the nearest one and counts the days, so you can tell at a glance whether the weekend in front of you is one of them.",
+  },
+  {
+    q: "When is the next long weekend in 2026?",
+    a: "There are nine long weekends in 2026 that cost no leave at all, spread right across the year: 24–26 Jan, 14–16 Feb, 3–5 Apr, 1–3 May, 26–28 Jun, 28–30 Aug, 4–6 Sep, 2–4 Oct and 25–27 Dec. Each is a three-day weekend created by a gazetted holiday falling on a Friday or a Monday. Which one is next depends on today, so the badge at the top of the page names it rather than this answer.",
+  },
+  {
+    q: "Is there any long weekend in December in 2026?",
+    a: "Yes, one — and it is well placed. Christmas Day 2026 falls on a Friday, so <strong>Friday 25 to Sunday 27 December</strong> is three days off that cost nothing. December offers no second free long weekend, but a single leave on Thursday 31 December bridges New Year into a four-day run through to Sunday 3 January 2027.",
+  },
+  {
+    q: "Are there any 4-day long weekends in 2026?",
+    a: "Not for free: <strong>all nine of the year's no-leave long weekends are exactly three days</strong>. Spend one leave day, though, and 2026 hands you a four-day break 22 times over, across 13 different festivals. The earliest is Republic Day — take Friday 23 January off and you are away until Monday 26 January.",
+  },
+  {
+    q: "Should I book travel early for these long weekends?",
+    a: "Every date here is fixed and public, which means everyone else can see it too. Fares and room rates on the popular ones — Republic Day, the spring cluster around Mahavir Jayanti and Good Friday, Diwali — start climbing weeks out. The advantage of knowing the dates months ahead is being able to commit while there is still slack in the pricing, rather than discovering the break a fortnight before it arrives.",
+  },
+  {
+    q: "How many long weekends are there in 2026 in India?",
+    a: "<strong>Nine</strong>, if they have to be free — nine three-day weekends on the national calendar that need no leave at all. Widen the budget and the count climbs fast: one leave day unlocks 22 four-day breaks, and two or three days stretch several of them into six- and nine-day runs. State holidays and your own office list add more on top.",
+  },
+  {
+    q: "Which months have the longest weekends in 2026?",
+    a: "Spring wins outright. Mahavir Jayanti and Good Friday fall close enough together that two leave days buy a six-day break from 31 March to 5 April, while every other month tops out at five days on the same budget. The irony is that March, July and November contain no long weekend that is free at all — March is the most generous month of the year and the least generous if you refuse to spend a leave.",
+  },
+  {
+    q: "How many government holidays fall near weekends in 2026?",
+    a: "<strong>Twelve of the 17 gazetted national holidays</strong> touch a weekend in 2026. Nine land on a Friday or a Monday, which makes a three-day break on its own. Three more are swallowed whole — Id-ul-Fitr, Independence Day and Diwali all fall on a Saturday or a Sunday, so they hand you nothing you did not already have. The other five fall midweek, where one well-placed leave day is what turns them into a break.",
+  },
+  {
+    q: "Which is the most extended possible weekend in 2026?",
+    a: "The longest run the year allows is an <strong>18-day stretch from Thursday 19 March to Sunday 5 April</strong>, chaining Id-ul-Fitr, Mahavir Jayanti and Good Friday together — but it costs 10 leave days, which is most of an annual balance. The same cluster is far better value in smaller bites: nine days off for three leaves, or six for two.",
+  },
+  {
+    q: "How many holidays will India have in 2026?",
+    a: "There are <strong>17 gazetted national holidays</strong> in 2026, and this planner adds your state list on top of them: seven more for Karnataka, four for Maharashtra, three each for Delhi and West Bengal, and two for Tamil Nadu. Your own office calendar will differ again, which is what the Company Holiday Optimizer is for.",
   },
   {
     q: "How does the long weekend calculator work?",
-    a: "Pick your leave budget, your region, and your work week. The calculator cross-references gazetted public holidays against your weekends to find every bridge opportunity, then ranks them by value — the most days off for the fewest leaves used.",
+    a: "Pick your leave budget, your region and your work week. The calculator cross-references gazetted public holidays against your weekends to find every bridging opportunity, then ranks them by value — the most days off for the fewest leaves spent.",
   },
   {
     q: "Can I use this tool for my company's holiday list?",
-    a: "Yes. Open the Company Holiday Optimizer and upload your office holiday PDF or image, or paste the text. It extracts your company's holidays and plans around those instead of the national list, so you only see breaks your office actually observes.",
+    a: "Yes. Open the Company Holiday Optimizer and upload your office holiday PDF or image, or paste the text straight in. It reads your company's dates and plans around those instead of the national list, so you only see breaks your office actually observes.",
   },
   {
     q: "Do I need to create an account to use this tool?",
@@ -110,6 +193,21 @@ const faqSchema = {
     acceptedAnswer: { "@type": "Answer", text: item.a },
   })),
 };
+
+/**
+ * The answers contain real markup, which schema.org permits inside Answer.text
+ * and which the accordion renders — so the same string is inlined into a
+ * script element and into the page body.
+ *
+ * Inside a script element the parser is not looking for tags, it is looking for
+ * the character sequence that ends the element. An answer containing one would
+ * terminate the script early and dump the rest of the JSON into the document as
+ * text, which breaks both the page and the structured data. Escaping every
+ * less-than to its JSON unicode form makes that impossible while still decoding
+ * back to real markup for anything that parses the JSON. JSON.stringify does not
+ * do this on its own.
+ */
+const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
 ---
 
 <Layout title={TITLE} description={DESCRIPTION} path="/">
@@ -117,7 +215,7 @@ const faqSchema = {
     slot="head"
     type="application/ld+json"
     is:inline
-    set:html={JSON.stringify(faqSchema)}
+    set:html={faqJsonLd}
   />
 
   <Navbar />
@@ -626,9 +724,16 @@ const faqSchema = {
                     <path d="m6 9 6 6 6-6" />
                   </svg>
                 </summary>
-                <p class="mt-4 border-t border-hairline pt-3 text-sm leading-relaxed text-body">
-                  {item.a}
-                </p>
+                {/* set:html, not an interpolation: the answers carry <strong>
+                     emphasis that has to render as markup here and reach the
+                     JSON-LD as the same string. Interpolating would escape it
+                     on the page while the schema kept the tags, and a FAQPage
+                     whose markup disagrees with the visible answer is exactly
+                     what Google's spam guidance is aimed at. */}
+                <p
+                  class="mt-4 border-t border-hairline pt-3 text-sm leading-relaxed text-body"
+                  set:html={item.a}
+                />
               </details>
             ))
           }

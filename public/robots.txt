@@ -2,6 +2,12 @@
 #
 # Everything here is public and crawlable. There is no admin area, no user
 # content and no paywall, so there is nothing to fence off.
+#
+# This file is static, so it cannot read `site` from astro.config.mjs the way
+# Layout.astro and the sitemap endpoint do. The origin below is therefore
+# duplicated by necessity, and outputs/sitemap.test.ts pins it to the config
+# value so the two cannot drift — which they had, to a domain the config has
+# never mentioned.
 
 User-agent: *
 Allow: /

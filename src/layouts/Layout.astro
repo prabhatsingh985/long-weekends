@@ -13,15 +13,36 @@ interface Props {
   description: string;
   /** Path only, e.g. "/company-optimizer". Joined onto the canonical origin. */
   path?: string;
+  /**
+   * Keep this page out of search results.
+   *
+   * Only the error pages set it. A static build writes 404.html as a real file
+   * at its own URL, so /404 answers with a 200 and is genuinely indexable.
+   * robots.txt deliberately does not block it either: a crawler forbidden from
+   * fetching a URL never reads the noindex on it, so the URL can still be
+   * indexed — with no snippet and no way to request removal. Crawling has to be
+   * allowed for a noindex to be seen.
+   */
+  noindex?: boolean;
   /** Extra <script>/<link> tags a page needs before its own body runs. */
   preloadScripts?: string[];
 }
 
-const { title, description, path = "/", preloadScripts = [] } = Astro.props;
+const { title, description, path = "/", noindex = false, preloadScripts = [] } =
+  Astro.props;
 
-const SITE = "https://thelongweekends.com";
-const canonical = `${SITE}${path}`;
-const ogImage = `${SITE}/og-image.png`;
+/**
+ * One origin for the whole site, taken from astro.config.mjs.
+ *
+ * The origin used to be a `const SITE = "..."` literal right here, duplicating
+ * the one in the config — and the two had already drifted to different domains,
+ * so the canonical tags and the sitemap were naming different sites. Reading
+ * `Astro.site` removes the second copy: the canonicals, the OG tags and the
+ * sitemap endpoint now cannot disagree, and a config with no `site` throws here
+ * at build time instead of quietly shipping relative canonicals.
+ */
+const canonical = new URL(path, Astro.site).href;
+const ogImage = new URL("/og-image.png", Astro.site).href;
 ---
 
 <!doctype html>
@@ -36,9 +57,37 @@ const ogImage = `${SITE}/og-image.png`;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
 
+    {/* Icon set, generated from the site's own LW mark by
+        scripts/make-favicons.py. public/favicon.svg used to be Astro's stock
+        logo, which is the file every modern browser reaches for first — so the
+        tab showed the framework's mark while the navbar showed ours.
+
+        Order matters for the two rel="icon" lines: a browser takes the first
+        icon it understands and ignores the rest, so the SVG must lead. Safari
+        before 17 and every Windows shell surface need the .ico, and Chrome on
+        Android reaches for a mid-size PNG. Listing all three costs one request
+        at most, because only the winner is fetched.
+
+        The .ico carries 16, 32 and 48. rel="shortcut icon" is legacy —
+        "shortcut" was never a real link type — but IE-era code paths and some
+        feed readers still look for it, and it is the one spelling no modern
+        browser misparses. */}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    {/* iOS ignores the manifest and the rel="icon" links entirely when a page is
+        added to the home screen; this is the only icon it reads. It is
+        full-bleed rather than a rounded tile because iOS composites onto an
+        opaque backdrop and applies its own squircle, so transparent corners
+        come back as a halo. */}
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Long Weekends" />
+
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
