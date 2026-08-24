@@ -62,8 +62,8 @@
 
       </div>
 
-      <!-- PRO FLOATING REGION POPOVER (Z-100) -->
-      <div id="heroRegionPopover" class="hidden absolute top-[calc(100%+10px)] left-0 w-80 bg-[#141417] border border-zinc-700/80 rounded-2xl p-2.5 shadow-2xl shadow-black/90 z-[100] text-left animate-in fade-in zoom-in-95">
+      <!-- PRO FLOATING REGION POPOVER (Z-100 - OPENS UPWARD TO AVOID STICKY BAR COLLISION) -->
+      <div id="heroRegionPopover" class="hidden absolute bottom-[calc(100%+12px)] left-0 w-80 bg-[#141417]/98 border border-zinc-700/80 rounded-2xl p-2.5 shadow-2xl shadow-black/90 z-[100] text-left animate-in fade-in zoom-in-95 backdrop-blur-xl">
         <div class="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider px-3 py-1.5 border-b border-zinc-800/80 mb-1.5 flex items-center justify-between">
           <span>Select Region</span>
           <span class="text-[9px] text-[#ff2b63]">2 Supported</span>
@@ -84,8 +84,8 @@
         </button>
       </div>
 
-      <!-- PRO FLOATING BUDGET POPOVER (Z-100) -->
-      <div id="heroBudgetPopover" class="hidden absolute top-[calc(100%+10px)] right-10 w-84 bg-[#141417] border border-zinc-700/80 rounded-2xl p-2.5 shadow-2xl shadow-black/90 z-[100] text-left animate-in fade-in zoom-in-95">
+      <!-- PRO FLOATING BUDGET POPOVER (Z-100 - OPENS UPWARD TO AVOID STICKY BAR COLLISION) -->
+      <div id="heroBudgetPopover" class="hidden absolute bottom-[calc(100%+12px)] right-0 w-84 bg-[#141417]/98 border border-zinc-700/80 rounded-2xl p-2.5 shadow-2xl shadow-black/90 z-[100] text-left animate-in fade-in zoom-in-95 backdrop-blur-xl">
         <div class="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider px-3 py-1.5 border-b border-zinc-800/80 mb-1.5 flex items-center justify-between">
           <span>Select PTO Leave Budget</span>
           <span class="text-[9px] text-[#ff2b63]">4 Tiers</span>
@@ -180,6 +180,23 @@
         }
       });
     }
+
+    // Dismiss popovers on option selection
+    document.querySelectorAll(".hero-popover-option").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        regionPopover?.classList.add("hidden");
+        if (regionArrow) regionArrow.style.transform = "rotate(0deg)";
+      });
+    });
+
+    document.querySelectorAll(".hero-budget-option").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        budgetPopover?.classList.add("hidden");
+        if (budgetArrow) budgetArrow.style.transform = "rotate(0deg)";
+      });
+    });
 
     document.addEventListener("click", (e) => {
       const target = e.target as Node;
