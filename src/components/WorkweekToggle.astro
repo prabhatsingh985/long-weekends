@@ -13,6 +13,18 @@
  * with aria-label and the script finds the buttons by `.workweek-btn`, then
  * syncs every instance by `data-workweek` VALUE rather than by element
  * identity, so the two copies cannot end up disagreeing.
+ *
+ * Styling deliberately lives in global.css, not in a `<style>` block here. When
+ * this markup was lifted out of Navbar.astro the `.workweek-btn` rules were left
+ * behind in Navbar's SCOPED style block, where Astro compiled them to
+ * `.workweek-btn:where(.astro-<navbar hash>)` — a selector that matches nothing
+ * once the element lives in a different component. Both segments rendered
+ * identically and the selected one was invisible. A class shared across
+ * components has to be styled somewhere shared.
+ *
+ * The classes below therefore carry only geometry and type. Colour, cursor and
+ * transition come from global.css, which is unlayered and so outranks utilities
+ * anyway — `cursor-pointer` and `transition-colors` here would be inert.
  */
 ---
 
@@ -25,14 +37,14 @@
     type="button"
     data-workweek="5"
     aria-pressed="true"
-    class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
+    class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full"
     >5-day</button
   >
   <button
     type="button"
     data-workweek="6"
     aria-pressed="false"
-    class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
+    class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full"
     >6-day</button
   >
 </div>

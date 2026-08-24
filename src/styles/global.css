@@ -404,6 +404,45 @@
   color: var(--ink);
 }
 
+/* --- Work-week switch ----------------------------------------------------- */
+/* These live here rather than in a component `<style>` block, and that matters.
+   They used to sit in Navbar.astro, but the markup moved into
+   WorkweekToggle.astro once the control had to render twice (desktop bar +
+   mobile row). Astro scopes `<style>` per component, so the rules compiled to
+   `.workweek-btn:where(.astro-<navbar hash>)` and matched nothing: both segments
+   rendered with no fill and no colour, and there was no way to see which one was
+   active. A shared class needs to be styled somewhere shared.
+
+   The selected fill mirrors `.pill[aria-pressed="true"]` — an ink fill with
+   inverted text, the single idiom this design uses for "chosen". The previous
+   attempt was a white chip on the `--surface-sunken` track: 1.12:1 of background
+   separation, far too faint at 0.6875rem even had it applied. The ink fill is
+   16.6:1 in light and 17.3:1 in dark against the same track.
+
+   Keyed off aria-pressed, not a helper class, so the visual state and the state
+   screen readers announce cannot drift apart. */
+.workweek-btn {
+  background-color: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background-color 0.18s var(--ease-out-soft),
+    color 0.18s var(--ease-out-soft),
+    box-shadow 0.18s var(--ease-out-soft);
+}
+/* Hover is scoped to the segment that is NOT chosen. Without the :not(),
+   hovering the active segment repainted it in the unselected surface colour,
+   which read as if the click had deselected it. */
+.workweek-btn:hover:not([aria-pressed="true"]) {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+.workweek-btn[aria-pressed="true"] {
+  background-color: var(--ink);
+  color: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
 /* --- Buttons -------------------------------------------------------------- */
 /* These sit in `@layer components` while the rest of this file is unlayered,
    and that is deliberate. Unlayered CSS beats *every* layered rule regardless of

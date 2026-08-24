@@ -190,22 +190,6 @@ const showRegion = !onOptimizer;
   </div>
 </div>
 
-<style>
-  /* Selected segment of the work-week control. Driven by aria-pressed so the
-     accessible state and the visual state can never disagree. */
-  .workweek-btn {
-    color: var(--muted);
-  }
-  .workweek-btn:hover {
-    color: var(--ink);
-  }
-  .workweek-btn[aria-pressed="true"] {
-    background-color: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow-sm);
-  }
-</style>
-
 <script>
   import { createMenu, type MenuHandle } from "../scripts/menu";
 
