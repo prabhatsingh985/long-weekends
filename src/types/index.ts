@@ -1,37 +1,39 @@
-export interface DayPill {
+/** A single day inside a plan, as produced by the solver. */
+export interface PlanDay {
   date: string;
+  /** Short weekday name, e.g. "Mon". */
   dayName: string;
+  /** Zero-padded day of month, e.g. "08". */
   dayNum: string;
-  type: 'weekend' | 'holiday' | 'leave' | 'workday';
-  label: string;
+  type: "weekend" | "holiday" | "leave";
+  /** Holiday name; only present when `type` is "holiday". */
+  label?: string;
 }
 
+/**
+ * A candidate break.
+ *
+ * This used to declare `month`, `state`, `vibe`, `formula`, `themes` and
+ * `recommendedSpots` — fields left over from the retired hardcoded dataset that
+ * the solver has never produced, and it was missing `festivalName` and
+ * `strategy`, which the solver does. It now matches the real shape.
+ */
 export interface VacationPlan {
   id: string;
   title: string;
-  month: string;
   startDate: string;
   endDate: string;
-  leavesRequired: number;
   totalDaysOff: number;
-  state: string[];
+  leavesRequired: number;
+  /** Pre-formatted display string, e.g. "4.0X Efficiency". */
   efficiencyMultiplier: string;
-  vibe: string;
-  formula: string;
-  themes: string[]; // e.g. ['beach', 'party', 'staycation', 'mountains', 'culture', 'international']
-  recommendedSpots: string[];
-  days: DayPill[];
+  /** Raw name of the first holiday in the window. */
+  festivalName: string;
+  strategy: "zero" | "pre" | "post" | "bridge";
+  days: PlanDay[];
 }
 
-export interface AiInsight {
-  query: string;
-  summary: string;
-  strategy: string;
-  recommendedPlaces: string;
-  matchedCount: number;
-}
-
-export type RegionCode = 'ALL' | 'SOUTH' | 'WEST' | 'NORTH' | 'EAST' | 'USA';
+export type RegionCode = "ALL" | "SOUTH" | "WEST" | "NORTH" | "EAST" | "USA";
 
 export interface CalendarDay {
   date: string;

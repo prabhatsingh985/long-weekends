@@ -4,7 +4,9 @@ import holidaysData from "../../holidays_2026.json";
 export const NATIONAL_HOLIDAYS_2026 = holidaysData.national_holidays;
 export const STATE_SPECIFIC_HOLIDAYS = holidaysData.state_specific_holidays;
 
-export type RegionCode = "ALL" | "SOUTH" | "WEST" | "NORTH" | "EAST" | "USA";
+/** Re-exported for convenience; the single definition lives in ../types. It
+ *  used to be imported above AND redeclared here, which is a TS conflict. */
+export type { RegionCode };
 
 export const REGION_STATE_MAP: Record<RegionCode, string[]> = {
   ALL: [],
@@ -15,13 +17,30 @@ export const REGION_STATE_MAP: Record<RegionCode, string[]> = {
   USA: ["USA"],
 };
 
+/** Inclusive bounds of the holiday data we actually hold. */
+export const CALENDAR_START = "2026-01-01";
+export const CALENDAR_END = "2027-01-10";
+
+/**
+ * Today, clamped into the span the holiday data covers.
+ *
+ * The previous version fell back to a hardcoded "2026-08-20" for any date
+ * before 2026 and did nothing at all for dates after the data ends — so from
+ * 2027-01-11 onwards every query silently returned zero plans with no way for
+ * the UI to tell "no matches" apart from "we have run out of calendar".
+ * Callers can now compare against CALENDAR_END to detect that case.
+ */
 export function getTodayIso(): string {
   const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  const today = `${y}-${m}-${d}`;
-  return today >= "2026-01-01" ? today : "2026-08-20";
+  const today = formatLocalIso(now);
+  if (today < CALENDAR_START) return CALENDAR_START;
+  if (today > CALENDAR_END) return CALENDAR_END;
+  return today;
+}
+
+/** True once the bundled calendar can no longer answer "what's next". */
+export function isCalendarExhausted(): boolean {
+  return formatLocalIso(new Date()) > CALENDAR_END;
 }
 
 export const CURRENT_DATE_REF = getTodayIso();
@@ -58,6 +77,11 @@ export function buildCalendarMap(
   });
 
   if (customHolidays && customHolidays.length > 0) {
+    // An uploaded office list REPLACES the national list rather than merging
+    // with it. That is deliberate: a plan built on a gazetted holiday the
+    // user's employer does not observe would tell them to show up to an empty
+    // office, or to burn PTO they did not budget for. The company list is the
+    // authority on which days they actually get.
     customHolidays.forEach((dt) => {
       const festivalName = knownFestivals.get(dt) || "Company Holiday";
       holidayMap.set(dt, festivalName);

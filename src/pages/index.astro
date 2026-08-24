@@ -1,1119 +1,715 @@
 ---
-import "../styles/global.css";
+/**
+ * Homepage: hero search, filter rail, results grid, calendar dialog, SEO prose.
+ *
+ * Rewritten onto Layout.astro. This page used to carry its own <html>, its own
+ * copy of the font links and theme-init script, a second theme-toggle binding
+ * that cancelled out the navbar's one, and ~125 lines of `!important` chip CSS
+ * that duplicated (and contradicted) rules already in global.css.
+ */
+import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import Hero from "../components/Hero.astro";
 import Footer from "../components/Footer.astro";
+import { getTodayIso, solveVacationPlans } from "../data/vacation-solver";
+import { formatDateRange, getBannerTheme, pluralLeaves } from "../scripts/plan-view";
+
+const TITLE =
+  "Next Long Weekend 2026 – Leave Calculator India | The Long Weekends";
+const DESCRIPTION =
+  "Find the next long weekend in 2026 and calculate exact leaves needed to turn holidays into vacations. Plan smarter PTO for every upcoming long weekend.";
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+const today = getTodayIso();
+const curYear = Number(today.slice(0, 4));
+const curMonth = Number(today.slice(5, 7));
+
+/**
+ * The month rail used to be hardcoded to Aug–Dec, so it was wrong for seven
+ * months of the year and would have been wrong for all of 2027. It is now
+ * generated from today: this month to December, then January of next year,
+ * which is as far as the bundled holiday data reaches.
+ */
+const monthTabs: { value: string; label: string; short: string }[] = [
+  { value: "ALL", label: "All months", short: "All" },
+];
+for (let m = curMonth; m <= 12; m++) {
+  monthTabs.push({
+    value: String(m).padStart(2, "0"),
+    label: MONTH_NAMES[m - 1],
+    short: MONTH_NAMES[m - 1].slice(0, 3),
+  });
+}
+if (curMonth > 1) {
+  monthTabs.push({
+    value: "01",
+    label: `January ${curYear + 1}`,
+    short: `Jan ${String(curYear + 1).slice(2)}`,
+  });
+}
+
+/**
+ * Server-rendered highlights.
+ *
+ * This section used to be six hand-written cards naming January 2026 as
+ * "upcoming" — copy that went stale the moment January passed and that a
+ * crawler read as the page's only real content, since the results grid is
+ * rendered on the client. Deriving it from the solver makes it both accurate
+ * and crawlable.
+ */
+const highlightPool = [
+  ...solveVacationPlans({ leaves: 0, workWeek: 5, region: "ALL", fromDate: today }),
+  ...solveVacationPlans({ leaves: 1, workWeek: 5, region: "ALL", fromDate: today }),
+];
+const seenFestival = new Set<string>();
+const highlights = highlightPool
+  .sort((a, b) => a.startDate.localeCompare(b.startDate))
+  .filter((p) => {
+    if (seenFestival.has(p.title)) return false;
+    seenFestival.add(p.title);
+    return true;
+  })
+  .slice(0, 6);
+
+/**
+ * One FAQ source feeding both the visible accordion and the JSON-LD. They had
+ * drifted apart — Q1's schema answer ended with "Visit thelongweekends.com to
+ * see the exact dates" while the visible answer said something else — and
+ * Google requires the rendered answer to match the markup.
+ */
+const FAQ = [
+  {
+    q: "When is the next long weekend in 2026?",
+    a: "The next long weekend depends on today's date. This tool automatically identifies the nearest upcoming long weekend from India's gazetted holidays and your weekend schedule, and names it in the badge at the top of the page along with how many leaves it costs.",
+  },
+  {
+    q: "How many long weekends are there in 2026?",
+    a: "For a standard 5-day work week, India has roughly 10 to 15 long weekend opportunities in 2026, depending on your region and which optional holidays your company observes. With 1 to 3 leave days per trip, many of them stretch into 4 to 9 day breaks.",
+  },
+  {
+    q: "How does the long weekend calculator work?",
+    a: "Pick your leave budget, your region, and your work week. The calculator cross-references gazetted public holidays against your weekends to find every bridge opportunity, then ranks them by value — the most days off for the fewest leaves used.",
+  },
+  {
+    q: "Can I use this tool for my company's holiday list?",
+    a: "Yes. Open the Company Holiday Optimizer and upload your office holiday PDF or image, or paste the text. It extracts your company's holidays and plans around those instead of the national list, so you only see breaks your office actually observes.",
+  },
+  {
+    q: "Do I need to create an account to use this tool?",
+    a: "No. The Long Weekends is free and needs no sign-up. Every calculation runs in your browser — nothing is uploaded and nothing is stored.",
+  },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Next Long Weekend 2026 – Leave Calculator India | The Long Weekends</title>
-  <meta name="description" content="Find the next long weekend in 2026 and calculate exact leaves needed to turn holidays into vacations. Plan smarter PTO for every upcoming long weekend." />
-  
-  <!-- SEO & Open Graph Tags -->
-  <link rel="canonical" href="https://thelongweekends.com/" />
-  <meta property="og:title" content="Next Long Weekend 2026 – Leave Calculator India | The Long Weekends" />
-  <meta property="og:description" content="Find the next long weekend in 2026 and calculate exact leaves needed to turn holidays into vacations. Plan smarter PTO for every upcoming long weekend." />
-  <meta property="og:url" content="https://thelongweekends.com/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="The Long Weekends" />
-  <meta property="og:image" content="https://thelongweekends.com/og-image.png" />
-  
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Next Long Weekend 2026 – Leave Calculator India | The Long Weekends" />
-  <meta name="twitter:description" content="Find the next long weekend in 2026 and calculate exact leaves needed to turn holidays into vacations. Plan smarter PTO for every upcoming long weekend." />
-  <meta name="twitter:image" content="https://thelongweekends.com/og-image.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
-
-  <script is:inline>
-    (function() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    })();
-  </script>
-
-
-  <!-- FAQ Schema (JSON-LD for rich snippets) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "When is the next long weekend in 2026?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The next long weekend depends on today's date. Our tool automatically identifies the nearest upcoming long weekend based on India's gazetted holidays and your weekend schedule. Visit thelongweekends.com to see the exact dates and how many leaves you need."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How many long weekends are there in 2026?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "India has approximately 10–15 long weekend opportunities in 2026 for a standard 5-day work week, depending on your region. With just 1–3 PTO days, many of these can be extended into 4–9 day breaks."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How does the long weekend calculator work?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Select your leave budget (0, 1, 2, or 3+ days), your region, and work-week type. The calculator cross-references gazetted public holidays with your weekends to find every possible bridge opportunity, ranked by efficiency — so you get the most days off for the fewest leaves used."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I use this tool for my company's holiday list?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Visit the Company Holiday Optimizer page and upload your office holiday PDF, image, or paste the text directly. The tool extracts your company-specific holidays and generates a fully personalized long weekend plan."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Do I need to create an account to use this tool?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No. The Long Weekends is completely free and requires no sign-up. All calculations happen instantly in your browser — no data is stored or sent to any server."
-        }
-      }
-    ]
-  }
-  </script>
-
-</head>
-<body class="bg-[#0c0c0e] text-white font-sans antialiased min-h-screen flex flex-col dark">
+<Layout title={TITLE} description={DESCRIPTION} path="/">
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(faqSchema)}
+  />
 
   <Navbar />
   <Hero />
 
-  <!-- Interactive Single-Line Pill Filter Bar (Pro Single Line) -->
-  <section class="sticky top-[4.25rem] z-40 py-3 px-4 sm:px-6 bg-[#0c0c0e]/95 backdrop-blur-md border-b border-zinc-800/80 shadow-xl">
-    <div class="max-w-[1200px] mx-auto flex items-center justify-center gap-2.5 overflow-x-auto no-scrollbar py-0.5">
-      
-      <!-- Left: Leave Budget Pills (Single Line) -->
-      <div class="flex items-center gap-2 shrink-0" id="budgetChipsContainer">
-        <button type="button" class="chip-btn active" data-leaves="0">
-          <span class="text-xs">🆓</span> <span>0 Leaves</span>
-        </button>
-        <button type="button" class="chip-btn" data-leaves="1">
-          <span class="text-xs">🌴</span> <span>1 Leave</span>
-        </button>
-        <button type="button" class="chip-btn" data-leaves="2">
-          <span class="text-xs">✈️</span> <span>2 Leaves</span>
-        </button>
-        <button type="button" class="chip-btn" data-leaves="3">
-          <span class="text-xs">🎉</span> <span>3+ Leaves</span>
-        </button>
+  <!-- ===================================================================
+       Filter bar
+       Sticky under the navbar. Both rows are real button groups with
+       aria-pressed, so the current filter is announced rather than only
+       painted. The old version used divs with click handlers.
+       =================================================================== -->
+  <section
+    aria-label="Filter long weekends"
+    class="sticky top-[4.25rem] z-40 border-b border-hairline bg-page/90 backdrop-blur-lg"
+  >
+    <div class="mx-auto flex max-w-[1280px] flex-col gap-2 px-4 py-3 sm:px-6">
+      <div class="flex items-center gap-3">
+        <span
+          class="hidden shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted sm:block"
+          aria-hidden="true">Budget</span
+        >
+        <div
+          id="budgetRail"
+          role="group"
+          aria-label="Leave budget"
+          class="rail min-w-0 py-0.5"
+        >
+          <button type="button" class="pill" data-leaves="0" aria-pressed="true">
+            <span class="pill-glyph" aria-hidden="true">🆓</span>No leaves
+          </button>
+          <button type="button" class="pill" data-leaves="1" aria-pressed="false">
+            <span class="pill-glyph" aria-hidden="true">🌴</span>1 leave
+          </button>
+          <button type="button" class="pill" data-leaves="2" aria-pressed="false">
+            <span class="pill-glyph" aria-hidden="true">✈️</span>2 leaves
+          </button>
+
+          <!-- A <div role="group">, not a button: the +/- controls are buttons
+               and nesting buttons is invalid HTML. Its selected look comes from
+               `.is-on` rather than aria-pressed. -->
+          <div
+            id="customChipWrapper"
+            role="group"
+            aria-label="Custom number of leaves"
+            class="pill pill-compound"
+          >
+            <button
+              type="button"
+              id="btnDecLeave"
+              class="stepper-btn"
+              aria-label="One leave fewer"><span aria-hidden="true">−</span></button
+            >
+            <button
+              type="button"
+              data-leaves="custom"
+              class="flex items-baseline gap-1 px-0.5"
+            >
+              <span id="customLeavesDisplay" class="font-mono font-bold tabular">3</span>
+              <span class="text-[0.6875rem] font-semibold opacity-80">leaves</span>
+            </button>
+            <button
+              type="button"
+              id="btnIncLeave"
+              class="stepper-btn"
+              aria-label="One leave more"><span aria-hidden="true">+</span></button
+            >
+          </div>
+        </div>
       </div>
 
-      <span class="border-r border-zinc-800 h-6 mx-1 shrink-0"></span>
-
-      <!-- Right: Month Filter Pills (Single Line) -->
-      <div class="flex items-center gap-2 shrink-0" id="monthTabsContainer">
-        <button type="button" class="month-tab-btn active" data-month="ALL">
-          <span class="text-xs">🗓️</span> <span>All Months</span>
-        </button>
-        <button type="button" class="month-tab-btn" data-month="08">
-          <span class="text-xs">☀️</span> <span>August</span>
-        </button>
-        <button type="button" class="month-tab-btn" data-month="09">
-          <span class="text-xs">🌧️</span> <span>September</span>
-        </button>
-        <button type="button" class="month-tab-btn" data-month="10">
-          <span class="text-xs">🍂</span> <span>October</span>
-        </button>
-        <button type="button" class="month-tab-btn" data-month="11">
-          <span class="text-xs">🥭</span> <span>November</span>
-        </button>
-        <button type="button" class="month-tab-btn" data-month="12">
-          <span class="text-xs">🎄</span> <span>December</span>
-        </button>
+      <div class="flex items-center gap-3">
+        <span
+          class="hidden shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted sm:block"
+          aria-hidden="true">Month</span
+        >
+        <div class="relative min-w-0 grow">
+          <span id="monthFadeL" class="rail-fade rail-fade-l" aria-hidden="true"></span>
+          <span id="monthFadeR" class="rail-fade rail-fade-r" aria-hidden="true"></span>
+          <div
+            id="monthRail"
+            role="group"
+            aria-label="Filter by month"
+            class="rail py-0.5"
+          >
+            {
+              monthTabs.map((m) => (
+                <button
+                  type="button"
+                  class="pill"
+                  data-month={m.value}
+                  aria-pressed={m.value === "ALL" ? "true" : "false"}
+                >
+                  <span class="sm:hidden">{m.short}</span>
+                  <span class="hidden sm:inline">{m.label}</span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+        <div class="hidden shrink-0 items-center gap-1 sm:flex">
+          <button
+            type="button"
+            id="monthRailPrev"
+            class="btn-icon"
+            hidden
+            aria-label="Show earlier months"
+          >
+            <svg
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg
+            >
+          </button>
+          <button
+            type="button"
+            id="monthRailNext"
+            class="btn-icon"
+            aria-label="Show later months"
+          >
+            <svg
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg
+            >
+          </button>
+        </div>
       </div>
-
     </div>
   </section>
 
-  <!-- Vacation Grid Results -->
-  <main class="flex-1 py-8 sm:py-10 px-4 sm:px-6 max-w-[1200px] mx-auto w-full">
-    
-    <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-      <div class="flex items-center gap-3">
-        <span class="font-mono text-xs font-bold px-3.5 py-1 bg-[#ff2b63] text-white rounded-full shadow-md" id="resultsBadge">0 Plans</span>
-        <span class="text-xs text-zinc-400 font-medium" id="resultsSubtext">Showing options with 0 leaves</span>
-        
-        <!-- Custom Premium Dropdown -->
-        <div class="relative w-full sm:w-[240px]" id="customSortDropdown">
-          <button type="button" id="sortDropdownBtn" class="flex items-center justify-between w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 hover:text-white text-[11px] sm:text-xs font-bold rounded-full px-4 py-2 outline-none transition-all shadow-sm cursor-pointer">
-            <span id="sortDropdownLabel">Sort: Highest Efficiency</span>
-            <svg id="sortDropdownArrow" class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
-          </button>
-          <!-- Menu -->
-          <div id="sortDropdownMenu" class="absolute right-0 mt-2 w-full bg-[#141417] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50 transition-all duration-200 opacity-0 scale-95 origin-top-right pointer-events-none">
-            <div class="py-1 flex flex-col">
-              <button type="button" class="sort-option w-full text-left px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center justify-between cursor-pointer" data-value="efficiency">
-                Highest Efficiency
-                <svg class="w-4 h-4 text-emerald-400 check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+  <!-- ===================================================================
+       Results
+       =================================================================== -->
+  <main
+    id="main"
+    class="mx-auto w-full max-w-[1280px] grow px-4 py-8 sm:px-6 sm:py-10"
+  >
+    <div
+      id="results"
+      class="mb-5 flex flex-wrap items-end justify-between gap-4 scroll-mt-[12rem]"
+    >
+      <div aria-live="polite">
+        <h2 class="text-xl font-extrabold sm:text-2xl">
+          <span id="resultsBadge">Counting</span>
+        </h2>
+        <p id="resultsSubtext" class="mt-0.5 text-sm text-body"></p>
+      </div>
+
+      <div class="relative">
+        <button
+          type="button"
+          id="sortTrigger"
+          class="btn btn-ghost btn-sm"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="sortMenu"
+        >
+          <svg
+            class="h-3.5 w-3.5 text-muted"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18M6 12h12M10 18h4"></path>
+          </svg>
+          <span class="text-muted">Sort</span>
+          <span id="sortLabel">Best value</span>
+          <svg
+            class="seg-caret h-3 w-3 text-muted"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg
+          >
+        </button>
+
+        <div
+          id="sortMenu"
+          role="menu"
+          aria-labelledby="sortTrigger"
+          hidden
+          class="popover absolute right-0 top-[calc(100%+0.5rem)] z-40 w-[15rem] p-2"
+        >
+          {
+            [
+              { v: "efficiency", label: "Best value", hint: "Most days off per leave" },
+              { v: "days", label: "Longest break", hint: "Biggest total time off" },
+              { v: "date", label: "Soonest first", hint: "Whatever is next" },
+              { v: "cheapest", label: "Fewest leaves", hint: "Guard your balance" },
+            ].map((o, i) => (
+              <button
+                type="button"
+                role="menuitemradio"
+                aria-checked={i === 0 ? "true" : "false"}
+                tabindex={i === 0 ? 0 : -1}
+                class="menu-item"
+                data-sort={o.v}
+                data-label={o.label}
+              >
+                <span class="min-w-0 grow">
+                  <span class="block text-[0.8125rem] font-bold text-ink">{o.label}</span>
+                  <span class="block text-xs text-muted">{o.hint}</span>
+                </span>
+                <svg
+                  data-check
+                  class:list={["h-4 w-4 shrink-0 text-brand-text", { hidden: i !== 0 }]}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m5 13 4 4L19 7" />
+                </svg>
               </button>
-              <button type="button" class="sort-option w-full text-left px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center justify-between cursor-pointer" data-value="date">
-                Chronological (Dates)
-                <svg class="w-4 h-4 text-emerald-400 hidden check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-              </button>
-            </div>
-          </div>
+            ))
+          }
         </div>
       </div>
-      <div class="results-legend-bar flex items-center gap-4 text-xs text-zinc-400 font-semibold">
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></span><span>Weekend</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span><span>Public Holiday</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span><span>Apply Leave (PTO)</span></div>
-      </div>
     </div>
 
-    <!-- Live Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
-
-    <!-- Empty State -->
-    <div class="hidden text-center py-20 px-4 sm:px-6 bg-[#141417] border border-zinc-800 rounded-2xl shadow-xl" id="emptyState">
-      <div class="w-16 h-16 rounded-full bg-zinc-900 text-3xl flex items-center justify-center mx-auto mb-4 border border-zinc-800">🏖️</div>
-      <h3 class="font-extrabold text-lg text-white mb-2">No Long Weekend Found for this Budget</h3>
-      <p class="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">Try selecting another leave budget (e.g. 1, 2, or 3+ leaves) or select "All Months" to view all available bridge vacations.</p>
+    <!-- Legend. The day ribbon on every card is the densest thing on the page,
+         so it gets an explicit key rather than expecting colour to explain
+         itself. Each entry names its state in words as well. -->
+    <div
+      class="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-control border border-hairline bg-surface-soft px-3.5 py-2.5"
+    >
+      <span class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted">
+        Each strip reads
+      </span>
+      <span class="flex items-center gap-2 text-xs font-bold text-body">
+        <span class="dot dot-holiday" aria-hidden="true"></span>Public holiday
+      </span>
+      <span class="flex items-center gap-2 text-xs font-bold text-body">
+        <span class="dot dot-weekend" aria-hidden="true"></span>Weekend
+      </span>
+      <span class="flex items-center gap-2 text-xs font-bold text-body">
+        <span class="dot dot-pto" aria-hidden="true"></span>Your leave (dashed)
+      </span>
     </div>
 
+    <div id="vacationGrid" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+    <!-- An empty result is a dead end unless it offers a way out, so the button
+         is wired to whichever fix actually applies. -->
+    <div id="emptyState" hidden class="card mx-auto max-w-lg p-8 text-center">
+      <span class="mb-3 inline-block text-4xl" aria-hidden="true">🗓️</span>
+      <h3 id="emptyStateTitle" class="text-lg font-extrabold">Nothing here yet</h3>
+      <p id="emptyStateSub" class="mx-auto mt-1.5 max-w-sm text-sm text-body"></p>
+      <button type="button" id="emptyStateAction" class="btn btn-brand btn-sm mt-5">
+        Show every month
+      </button>
+    </div>
   </main>
 
-  <!-- Interactive Calendar View Modal / Popover -->
-  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative animate-in fade-in zoom-in-95 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
-      <button type="button" id="btnCloseCalendarModal" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-sm cursor-pointer transition-all">✕</button>
-      
-      <!-- Modal Header -->
-      <div class="mb-3 sm:mb-5 pr-6">
-        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-bold border border-blue-200 mb-1 sm:mb-1.5">
-          <span>🗓️ Month Calendar View</span>
+  <!-- ===================================================================
+       Calendar dialog
+       =================================================================== -->
+  <div id="calendarModal" class="dialog-backdrop" hidden>
+    <div
+      id="calendarDialog"
+      class="dialog-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="calModalTitle"
+      aria-describedby="calModalDates"
+      tabindex="-1"
+    >
+      <header
+        class="flex shrink-0 items-start justify-between gap-4 border-b border-hairline p-4 sm:p-5"
+      >
+        <div class="min-w-0">
+          <h2 id="calModalTitle" class="text-base font-extrabold sm:text-lg">
+            Calendar
+          </h2>
+          <p
+            id="calModalDates"
+            class="mt-0.5 font-mono text-xs font-semibold text-muted"
+          >
+          </p>
         </div>
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight" id="calModalTitle">Vacation Calendar</h3>
-        <p class="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight" id="calModalDates">Dates</p>
-      </div>
-
-      <!-- Calendar Container (Single or Dual Month) -->
-      <div id="calModalContent" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6"></div>
-
-      <!-- Compact One-Line Legend -->
-      <div class="flex items-center justify-center gap-2 sm:gap-4 py-2 sm:py-2.5 px-2 sm:px-4 bg-slate-50 rounded-xl border border-slate-200 text-[10px] sm:text-xs font-semibold text-slate-700 flex-wrap leading-none">
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500"></span>
-          <span>Public Holiday</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500"></span>
-          <span>Apply PTO</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-blue-500"></span>
-          <span>Weekend Off</span>
-        </div>
-      </div>
+        <button
+          type="button"
+          id="btnCloseCalendarModal"
+          class="btn-icon shrink-0"
+          aria-label="Close calendar"
+        >
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg
+          >
+        </button>
+      </header>
+      <div id="calModalContent" class="overflow-y-auto p-4 sm:p-5"></div>
     </div>
   </div>
 
-  
-  <!-- SEO Content Section — placed below the interactive tool -->
-  <section class="py-16 sm:py-24 px-4 sm:px-6 bg-white dark:bg-[#0b0f19] border-t border-slate-200/80 dark:border-slate-800/80 transition-colors">
-    <div class="max-w-[850px] mx-auto">
-
-      <!-- Section Intro -->
-      <div class="mb-12">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-bold border border-blue-200/60 dark:border-blue-800/60 mb-3">
-          🗓️ 2026 Vacation Planner
-        </span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
-          When Is the Next Long Weekend?
-        </h2>
-        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-          If you're wondering <strong>when is the next long weekend</strong>, you're not alone — it's one of the most searched questions by working professionals in India every single month. The answer changes constantly as holidays pass and new ones approach. That's exactly why we built this tool: so you never have to manually check calendars or count days again.
+  <!-- ===================================================================
+       Reference content
+       =================================================================== -->
+  <section
+    class="border-t border-hairline bg-surface px-4 py-16 sm:px-6 sm:py-20"
+    aria-labelledby="reference-heading"
+  >
+    <div class="mx-auto max-w-[52rem]">
+      <span class="tag tag-brand mb-4">🗓️ 2026 vacation planner</span>
+      <h2
+        id="reference-heading"
+        class="mb-4 text-2xl font-extrabold sm:text-3xl lg:text-4xl"
+      >
+        When is the next long weekend?
+      </h2>
+      <div class="prose-body flex flex-col gap-4">
+        <p>
+          If you're wondering <strong>when the next long weekend is</strong>,
+          you're in good company — it's among the most-searched questions by
+          working professionals in India every month. The answer keeps moving as
+          holidays pass and new ones approach, which is exactly why this page
+          recalculates it instead of listing it.
         </p>
-        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Our calculator automatically identifies the <strong>next long weekend</strong> based on today's date, your selected country (India or United States), and official gazetted public holidays. Whether it's a 3-day break over a regular Saturday–Sunday–Monday or a 9-day mega-vacation that bridges Diwali into a full week off, you'll see every option ranked by efficiency — most days off for the fewest leaves used.
-        </p>
-      </div>
-
-      <hr class="border-slate-200 dark:border-slate-800/80 my-10" />
-
-      <!-- Upcoming Long Weekends -->
-      <div class="mb-12">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
-          Upcoming Long Weekends in 2026
-        </h2>
-        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-          Both India and the United States offer incredible public holiday calendars in 2026. Whether you're working in India or the US, there are <strong class="text-slate-900 dark:text-white">10–15 long weekend opportunities</strong> on a standard 5-day work week — with even more options when you bridge 1–2 PTO days. Key highlights include:
-        </p>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 my-6">
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">January 2026</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
-            </div>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Republic Day & MLK Day</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Guaranteed 3-day long weekends with 0 leaves required.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400">Spring 2026</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
-            </div>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Holi & Good Friday Breaks</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">3 to 5 day spring getaways with minimal PTO usage.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">May & July 2026</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇺🇸 USA</span>
-            </div>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Memorial Day & 4th of July</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Classic US summer long weekends over Friday/Monday holidays.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">August & Sept 2026</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
-            </div>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Independence Day & Labor Day</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Late summer 3-day and mid-week bridge opportunities.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Nov 2026</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇺🇸 USA</span>
-            </div>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Thanksgiving & Black Friday</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">4-day long weekend taking just 1 day PTO on Black Friday.</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400">Oct – Dec 2026</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">🇮🇳 & 🇺🇸</span>
-            </div>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Diwali & Christmas Getaways</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">The grand year-end holiday sweeps to recharge for 2027.</p>
-          </div>
-        </div>
-
-        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Use the country selector and leave-budget options above to filter by your location and available PTO, and instantly see every <strong>upcoming long weekend</strong> customized for you.
+        <p>
+          The calculator identifies the <strong>next long weekend</strong> from
+          today's date, your country (India or the United States) and the
+          official gazetted holiday list. Whether that's a three-day
+          Saturday–Sunday–Monday or a nine-day stretch that bridges Diwali into
+          a full week, every option is ranked by value: the most days off for the
+          fewest leaves spent.
         </p>
       </div>
 
-      <hr class="border-slate-200 dark:border-slate-800/80 my-10" />
+      <hr class="my-10 border-hairline" />
 
-      <!-- How It Works -->
-      <div class="mb-12">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
-          How the Long Weekend Calculator Works
-        </h2>
-        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-          The Long Weekends is a free, no-sign-up tool designed specifically for Indian corporate professionals. Here's how to maximize your leave balance:
+      <h2 class="mb-4 text-2xl font-extrabold sm:text-3xl">
+        Long weekends still ahead
+      </h2>
+      <p class="prose-body mb-6">
+        Generated from the gazetted list when this page was built, for a
+        five-day work week with at most one leave day spent. Change the budget
+        above to see the rest.
+      </p>
+
+      <ul class="flex flex-col divide-y divide-hairline border-y border-hairline">
+        {
+          highlights.map((plan) => {
+            const theme = getBannerTheme(plan);
+            return (
+              <li class="flex items-center gap-4 py-3.5">
+                <span class="text-xl shrink-0" aria-hidden="true">{theme.motif}</span>
+                <span class="min-w-0 grow">
+                  <span class="block truncate text-sm font-bold text-ink">
+                    {plan.title}
+                  </span>
+                  <span class="block font-mono text-xs font-semibold text-muted tabular">
+                    {formatDateRange(plan.startDate, plan.endDate)}
+                  </span>
+                </span>
+                <span class="shrink-0 text-right">
+                  <span class="block font-mono text-base font-bold text-ink tabular">
+                    {plan.totalDaysOff}
+                  </span>
+                  <span class="block text-[0.625rem] font-bold uppercase tracking-wider text-muted">
+                    days off
+                  </span>
+                </span>
+                <span class="hidden shrink-0 sm:block">
+                  {plan.leavesRequired === 0 ? (
+                    <span class="tag tag-holiday">Free</span>
+                  ) : (
+                    <span class="tag tag-pto">{pluralLeaves(plan.leavesRequired)}</span>
+                  )}
+                </span>
+              </li>
+            );
+          })
+        }
+      </ul>
+
+      <hr class="my-10 border-hairline" />
+
+      <h2 class="mb-4 text-2xl font-extrabold sm:text-3xl">
+        How the calculator works
+      </h2>
+      <p class="prose-body mb-6">
+        Three steps, in order — this one really is a sequence.
+      </p>
+      <ol class="flex flex-col gap-3">
+        {
+          [
+            {
+              t: "Set your leave budget",
+              d: "Zero, one, two, or a custom number of days you're willing to spend on a single trip.",
+            },
+            {
+              t: "Pick your region and work week",
+              d: "India (pan-India IT) or the United States (federal), on a five- or six-day week.",
+            },
+            {
+              t: "Read the strips",
+              d: "Every card shows the exact dates, which days are free, and which ones cost you leave.",
+            },
+          ].map((step, i) => (
+            <li class="flex items-start gap-3.5 rounded-card border border-hairline bg-surface-soft p-4">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-ink font-mono text-xs font-extrabold text-surface">
+                {i + 1}
+              </span>
+              <span>
+                <span class="block text-sm font-bold text-ink">{step.t}</span>
+                <span class="mt-0.5 block text-xs text-body">{step.d}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <hr class="my-10 border-hairline" />
+
+      <h2 class="mb-4 text-2xl font-extrabold sm:text-3xl">
+        Why this math is worth doing
+      </h2>
+      <div class="prose-body flex flex-col gap-4">
+        <p>
+          Most companies in India and the United States offer 15 to 24 paid
+          leaves a year. That sounds generous until it has to cover sick days,
+          emergencies and family obligations. What's left over is often barely a
+          week of actual holiday.
         </p>
-        <div class="space-y-3">
-          <div class="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
-            <div>
-              <h4 class="font-bold text-slate-900 dark:text-white text-sm">Select your leave budget</h4>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Choose 0, 1, 2, 3, or a custom number of PTO days you're willing to use per trip.</p>
-            </div>
-          </div>
-          <div class="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
-            <div>
-              <h4 class="font-bold text-slate-900 dark:text-white text-sm">Pick your region & work week</h4>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Select India (Pan-India IT) or United States (US Federal), and toggle 5-day or 6-day work weeks.</p>
-            </div>
-          </div>
-          <div class="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/70 dark:border-slate-800">
-            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
-            <div>
-              <h4 class="font-bold text-slate-900 dark:text-white text-sm">Browse your visual results</h4>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Every option shows exact dates, public holidays, and weekend bridges ranked by efficiency.</p>
-            </div>
-          </div>
-        </div>
+        <p>
+          <strong>Long weekends change the arithmetic.</strong> Placing one to
+          three leave days around holidays and weekends you already have unlocks
+          four- to nine-day breaks without draining the balance. It isn't about
+          working less — it's about where the days land.
+        </p>
       </div>
 
-      <hr class="border-slate-200 dark:border-slate-800/80 my-10" />
-
-      <!-- Why Long Weekends Matter -->
-      <div class="mb-16">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
-          Why Long Weekends Matter for Indian Professionals
+      <div class="mt-14 border-t border-hairline pt-10">
+        <span
+          class="mb-1 block font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text"
+          >Got questions?</span
+        >
+        <h2 class="mb-6 text-2xl font-extrabold sm:text-3xl">
+          Frequently asked questions
         </h2>
-        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-          Most corporate companies in India and the United States offer 15–24 paid leaves per year. That sounds generous until you realize it has to cover sick days, personal emergencies, and family obligations. The average corporate employee ends up with barely a week of true vacation time.
-        </p>
-        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          <strong class="text-slate-900 dark:text-white">Long weekends change the math entirely.</strong> By strategically placing 1–3 PTO days around existing public holidays and weekends, you can unlock 4–9 day breaks without depleting your leave balance. It's not about working less — it's about planning smarter.
-        </p>
-      </div>
 
-      <!-- FAQ Section (Ultra-Modern Card Accordion Style) -->
-      <div class="pt-6 border-t border-slate-200 dark:border-slate-800">
-        <div class="flex items-center justify-between gap-4 mb-8 flex-wrap">
-          <div>
-            <span class="text-xs font-mono font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase block mb-1">Got Questions?</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Frequently Asked Questions
-            </h2>
-          </div>
-          <span class="text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-200/80 dark:border-slate-700">
-            5 Common Answers
-          </span>
-        </div>
-
-        <div class="space-y-3.5">
-          
-          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
-            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
-              <span class="flex items-center gap-3">
-                <span class="w-6 h-6 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 text-xs flex items-center justify-center font-mono shrink-0">Q1</span>
-                When is the next long weekend in 2026?
-              </span>
-              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </summary>
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
-              The next long weekend depends on today's date. Our tool automatically identifies the nearest upcoming long weekend based on India's gazetted holidays and your weekend schedule. Check the live countdown badge at the top of this page for an instant answer.
-            </p>
-          </details>
-
-          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
-            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
-              <span class="flex items-center gap-3">
-                <span class="w-6 h-6 rounded-lg bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 text-xs flex items-center justify-center font-mono shrink-0">Q2</span>
-                How many long weekends are there in 2026?
-              </span>
-              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </summary>
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
-              For a standard 5-day work week, India has approximately 10–15 long weekend opportunities in 2026, depending on your region and which optional holidays your company observes. With just 1–3 PTO days per trip, many of these can be extended into 4–9 day vacations.
-            </p>
-          </details>
-
-          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
-            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
-              <span class="flex items-center gap-3">
-                <span class="w-6 h-6 rounded-lg bg-amber-500/10 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs flex items-center justify-center font-mono shrink-0">Q3</span>
-                How does the long weekend calculator work?
-              </span>
-              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </summary>
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
-              Select your leave budget (0, 1, 2, or 3+ days), your region, and work-week type. The calculator cross-references gazetted public holidays with your weekends to find every possible bridge opportunity, ranked by efficiency — so you get the most days off for the fewest leaves used.
-            </p>
-          </details>
-
-          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
-            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
-              <span class="flex items-center gap-3">
-                <span class="w-6 h-6 rounded-lg bg-purple-500/10 dark:bg-purple-400/10 text-purple-600 dark:text-purple-400 text-xs flex items-center justify-center font-mono shrink-0">Q4</span>
-                Can I use this tool for my company's holiday list?
-              </span>
-              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </summary>
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
-              Yes! Visit the <a href="/company-optimizer" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Company Holiday Optimizer</a> page and upload your office holiday PDF, image, or paste the text directly. The tool extracts your company-specific holidays and generates a fully personalized long weekend plan.
-            </p>
-          </details>
-
-          <details class="group rounded-2xl bg-slate-50 dark:bg-[#151f32] border border-slate-200/80 dark:border-slate-800 p-5 [&_[data-chevron]]:open:rotate-180 transition-all cursor-pointer shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
-            <summary class="flex items-center justify-between gap-4 font-bold text-base text-slate-900 dark:text-white list-none select-none">
-              <span class="flex items-center gap-3">
-                <span class="w-6 h-6 rounded-lg bg-pink-500/10 dark:bg-pink-400/10 text-pink-600 dark:text-pink-400 text-xs flex items-center justify-center font-mono shrink-0">Q5</span>
-                Do I need to create an account to use this tool?
-              </span>
-              <svg data-chevron class="w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-            </summary>
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
-              No. The Long Weekends is completely free and requires no sign-up. All calculations happen instantly in your browser — no data is stored or sent to any server.
-            </p>
-          </details>
-
+        <div class="flex flex-col gap-3">
+          {
+            FAQ.map((item) => (
+              <details class="group card p-5">
+                <summary
+                  class="flex cursor-pointer list-none items-center justify-between gap-4 text-[0.9375rem] font-bold text-ink"
+                >
+                  <span>{item.q}</span>
+                  <svg
+                    class="h-5 w-5 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </summary>
+                <p class="mt-4 border-t border-hairline pt-3 text-sm leading-relaxed text-body">
+                  {item.a}
+                </p>
+              </details>
+            ))
+          }
         </div>
       </div>
-
     </div>
   </section>
 
   <Footer />
+</Layout>
 
-  <style>
-    .chip-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 9px 18px;
-      border-radius: 9999px !important;
-      font-size: 0.75rem;
-      font-weight: 700;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      background-color: #18181b;
-      border: 1px solid #27272a;
-      color: #d4d4d8;
-      white-space: nowrap;
-      user-select: none;
+<script>
+  import {
+    getTodayIso,
+    buildCalendarMap,
+    solveVacationPlans,
+    type RegionCode,
+  } from "../data/vacation-solver";
+  import { mountResults } from "../scripts/results";
+
+  // Region and work week live in the navbar; the results grid listens rather
+  // than reaching into the navbar's DOM the way the old code did.
+  let region: RegionCode = "ALL";
+  let workWeek = 5;
+  const today = getTodayIso();
+
+  const results = mountResults({
+    solve: (leaves) =>
+      solveVacationPlans({ leaves, workWeek, region, month: "ALL", fromDate: today }),
+    // Shades weekends and holidays outside the plan in the modal grid.
+    calendar: () => buildCalendarMap(region, workWeek),
+    todayIso: today,
+  });
+
+  function scrollToResults() {
+    document.getElementById("results")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  document.addEventListener("lw:region", (e) => {
+    region = (e as CustomEvent).detail.region as RegionCode;
+    results?.refresh();
+  });
+
+  document.addEventListener("lw:workweek", (e) => {
+    workWeek = (e as CustomEvent).detail.workWeek as number;
+    results?.refresh();
+  });
+
+  // The hero capsule carries its own region and budget; pressing its button
+  // pushes both here, and echoes the region back so the navbar agrees.
+  document.addEventListener("lw:search", (e) => {
+    const detail = (e as CustomEvent).detail as { region: RegionCode; leaves: number };
+    region = detail.region;
+    document.dispatchEvent(
+      new CustomEvent("lw:setregion", { detail: { region } })
+    );
+    results?.setLeaves(detail.leaves);
+    scrollToResults();
+  });
+
+  /** Applies ?region=/?leaves=/?month= — the shape the footer links use. */
+  function applyParams(params: URLSearchParams) {
+    const r = params.get("region");
+    if (r === "ALL" || r === "USA") {
+      region = r;
+      document.dispatchEvent(new CustomEvent("lw:setregion", { detail: { region } }));
+      results?.refresh();
     }
 
-    .chip-btn:hover {
-      border-color: #3f3f46;
-      color: #ffffff;
-      background-color: #27272a;
+    const leaves = params.get("leaves");
+    if (leaves !== null) results?.setLeaves(Number(leaves) || 0);
+
+    // Driven by clicking the pill so there is exactly one code path for
+    // changing month — and so a month with nothing in it stays inert.
+    const month = params.get("month");
+    if (month) {
+      document
+        .querySelector<HTMLButtonElement>(`#monthRail [data-month="${month}"]`)
+        ?.click();
     }
-
-    .chip-btn.active {
-      background-color: #ffffff !important;
-      border-color: #ffffff !important;
-      color: #09090b !important;
-      font-weight: 800 !important;
-      border-radius: 9999px !important;
-      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25) !important;
-    }
-
-    .chip-btn.active * {
-      color: #09090b !important;
-      font-weight: 800 !important;
-    }
-
-    .month-tab-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 9px 18px;
-      border-radius: 9999px !important;
-      font-size: 0.75rem;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      background-color: #18181b;
-      border: 1px solid #27272a;
-      color: #d4d4d8;
-      white-space: nowrap;
-      user-select: none;
-    }
-
-    .month-tab-btn:hover {
-      border-color: #3f3f46;
-      color: #ffffff;
-      background-color: #27272a;
-    }
-
-    .month-tab-btn.active {
-      background-color: #ffffff !important;
-      border-color: #ffffff !important;
-      color: #09090b !important;
-      font-weight: 800 !important;
-      border-radius: 9999px !important;
-      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25) !important;
-    }
-
-    .month-tab-btn.active * {
-      color: #09090b !important;
-      font-weight: 800 !important;
-    }
-
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
-
-  <script>
-    import { solveVacationPlans, CURRENT_DATE_REF } from "../data/vacation-solver";
-
-    let state = {
-      selectedRegion: "ALL",
-      workWeek: 5,
-      selectedLeaves: 0,
-      selectedMonth: "ALL",
-      currentPlans: [] as any[],
-      sortBy: "efficiency"
-    };
-
-    
-    function setupThemeToggle() {
-      const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
-      toggleBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const isDark = document.documentElement.classList.toggle('dark');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          updateThemeIcons();
-        });
-      });
-
-      function updateThemeIcons() {
-        const isDark = document.documentElement.classList.contains('dark');
-        document.querySelectorAll('.theme-icon-moon').forEach(el => {
-          if (isDark) el.classList.add('hidden'); else el.classList.remove('hidden');
-        });
-        document.querySelectorAll('.theme-icon-sun').forEach(el => {
-          if (isDark) el.classList.remove('hidden'); else el.classList.add('hidden');
-        });
-      }
-
-      updateThemeIcons();
-    }
-
-    function init() {
-      setupThemeToggle();
-
-      // Read initial URL parameters (e.g. ?region=USA)
-      const params = new URLSearchParams(window.location.search);
-      if (params.has("region")) {
-        const r = params.get("region");
-        if (r && ["ALL", "USA", "SOUTH", "WEST", "NORTH", "EAST"].includes(r)) {
-          state.selectedRegion = r;
-          const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
-          if (regionSelect) {
-            regionSelect.value = r;
-          }
-          const flag = document.getElementById("brandFlag");
-          if (flag) {
-            flag.textContent = r === "USA" ? "🇺🇸" : "🇮🇳";
-          }
-        }
-      }
-      if (params.has("leaves")) {
-        const l = parseInt(params.get("leaves") || "0", 10);
-        if (!isNaN(l)) state.selectedLeaves = l;
-      }
-      if (params.has("month")) {
-        const m = params.get("month");
-        if (m) state.selectedMonth = m;
-      }
-
-      bindEvents();
-      render();
-    }
-
-    function bindEvents() {
-      // Intercept Footer links for smooth transition without reload on homepage
-      document.querySelectorAll(".footer-filter-link").forEach((link) => {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-          const url = new URL((link as HTMLAnchorElement).href);
-          const params = new URLSearchParams(url.search);
-          
-          let changed = false;
-          if (params.has("region")) {
-            const r = params.get("region");
-            if (["ALL", "USA", "SOUTH", "WEST", "NORTH", "EAST"].includes(r)) {
-              state.selectedRegion = r;
-              const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
-              if (regionSelect) {
-                regionSelect.value = r;
-                const flag = document.getElementById("brandFlag");
-                if (flag) {
-                  flag.textContent = r === "USA" ? "🇺🇸" : "🇮🇳";
-                }
-                regionSelect.dispatchEvent(new Event("change"));
-              }
-              changed = true;
-            }
-          }
-          if (params.has("leaves")) {
-            const l = parseInt(params.get("leaves") || "0", 10);
-            if (!isNaN(l)) {
-              state.selectedLeaves = l;
-              changed = true;
-            }
-          }
-          if (params.has("month")) {
-            const m = params.get("month");
-            if (m) {
-              state.selectedMonth = m;
-              changed = true;
-            }
-          }
-
-          if (changed) {
-            updateActiveUI();
-            render();
-            // Scroll to the main UI area so user sees the change
-            document.getElementById("main-content-area")?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Let's scroll to top if main-content-area is not there
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        });
-      });
-  
-      // Custom Dropdown Logic
-      const dropdownBtn = document.getElementById("sortDropdownBtn");
-      const dropdownMenu = document.getElementById("sortDropdownMenu");
-      const dropdownLabel = document.getElementById("sortDropdownLabel");
-      const sortOptions = document.querySelectorAll(".sort-option");
-
-      if (dropdownBtn && dropdownMenu) {
-        dropdownBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const isHidden = dropdownMenu.classList.contains("hidden");
-          if (isHidden) {
-            dropdownMenu.classList.remove("hidden", "pointer-events-none");
-            setTimeout(() => dropdownMenu.classList.remove("opacity-0", "scale-95"), 10);
-          } else {
-            dropdownMenu.classList.add("opacity-0", "scale-95");
-            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
-          }
-        });
-
-        document.addEventListener("click", (e) => {
-          if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.classList.add("opacity-0", "scale-95");
-            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
-          }
-        });
-
-        sortOptions.forEach(option => {
-          option.addEventListener("click", () => {
-            const value = option.dataset.value;
-            if (!value) return;
-
-            const text = value === "efficiency" ? "Sort: Highest Efficiency" : "Sort: Chronological (Dates)";
-            if (dropdownLabel) dropdownLabel.textContent = text;
-
-            sortOptions.forEach(opt => {
-              const icon = opt.querySelector(".check-icon");
-              if (icon) {
-                if (opt === option) icon.classList.remove("hidden");
-                else icon.classList.add("hidden");
-              }
-            });
-
-            state.sortBy = value;
-            dropdownMenu.classList.add("opacity-0", "scale-95");
-            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
-            
-            render();
-          });
-        });
-      }
-      const regionSelect = document.getElementById("navRegionSelector") as HTMLSelectElement;
-      const btn5Day = document.getElementById("btnWorkweek5");
-      const btn6Day = document.getElementById("btnWorkweek6");
-
-      if (regionSelect) {
-        regionSelect.addEventListener("change", (e) => {
-          const val = (e.target as HTMLSelectElement).value;
-          state.selectedRegion = val;
-          const flag = document.getElementById("brandFlag");
-          if (flag) {
-            flag.textContent = val === "USA" ? "🇺🇸" : "🇮🇳";
-          }
-          render();
-        });
-      }
-
-      if (btn5Day && btn6Day) {
-        btn5Day.addEventListener("click", () => {
-          btn5Day.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white";
-          btn6Day.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]";
-          state.workWeek = 5;
-          render();
-        });
-        btn6Day.addEventListener("click", () => {
-          btn6Day.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all bg-[#171717] text-white";
-          btn5Day.className = "px-2.5 py-1 text-xs font-medium rounded-sm transition-all text-[#666666] hover:text-[#171717]";
-          state.workWeek = 6;
-          render();
-        });
-      }
-
-      document.querySelectorAll(".chip-btn").forEach((chip) => {
-        if (chip.id === "customChipWrapper") return;
-        chip.addEventListener("click", () => {
-          const leaves = parseInt((chip as HTMLElement).dataset.leaves || "0", 10);
-          state.selectedLeaves = leaves;
-          updateActiveUI();
-        });
-      });
-
-      const customWrapper = document.getElementById("customChipWrapper");
-      const customInput = document.getElementById("customLeavesInput") as HTMLInputElement;
-      const customDisplay = document.getElementById("customLeavesDisplay");
-      const btnInc = document.getElementById("btnIncLeave");
-      const btnDec = document.getElementById("btnDecLeave");
-
-      if (customWrapper && customInput && customDisplay) {
-        customWrapper.addEventListener("click", () => {
-          const val = Math.max(parseInt(customInput.value || "4", 10), 4);
-          state.selectedLeaves = val;
-          updateActiveUI();
-        });
-        if (btnInc) {
-          btnInc.addEventListener("click", (e) => {
-            e.stopPropagation();
-            let val = parseInt(customInput.value || "4", 10);
-            if (val < 15) val += 1;
-            customInput.value = String(val);
-            customDisplay.textContent = String(val);
-            state.selectedLeaves = val;
-            updateActiveUI();
-          });
-        }
-        if (btnDec) {
-          btnDec.addEventListener("click", (e) => {
-            e.stopPropagation();
-            let val = parseInt(customInput.value || "4", 10);
-            if (val > 4) val -= 1;
-            customInput.value = String(val);
-            customDisplay.textContent = String(val);
-            state.selectedLeaves = val;
-            updateActiveUI();
-          });
-        }
-      }
-
-      document.querySelectorAll(".month-tab-btn").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          state.selectedMonth = (tab as HTMLElement).dataset.month || "ALL";
-          updateActiveUI();
-        });
-      });
-
-      // Calendar Modal bindings
-      const calModal = document.getElementById("calendarModal");
-      const btnCloseCal = document.getElementById("btnCloseCalendarModal");
-      if (calModal && btnCloseCal) {
-        btnCloseCal.addEventListener("click", () => calModal.classList.add("hidden"));
-        calModal.addEventListener("click", (e) => {
-          if (e.target === calModal) calModal.classList.add("hidden");
-        });
-      }
-
-      
-
-      // Escape key to dismiss modals
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          if (calModal) calModal.classList.add("hidden");
-          
-        }
-      });
-    }
-
-    function updateActiveUI() {
-      document.querySelectorAll(".chip-btn").forEach((c) => c.classList.remove("active"));
-      const customChip = document.getElementById("customChipWrapper");
-      const customInput = document.getElementById("customLeavesInput") as HTMLInputElement;
-      const customDisplay = document.getElementById("customLeavesDisplay");
-
-      if (state.selectedLeaves <= 3) {
-        const matchingChip = document.querySelector(`.chip-btn[data-leaves="${state.selectedLeaves}"]`);
-        if (matchingChip) matchingChip.classList.add("active");
-      } else {
-        if (customChip && customInput && customDisplay) {
-          customChip.classList.add("active");
-          customInput.value = String(state.selectedLeaves);
-          customDisplay.textContent = String(state.selectedLeaves);
-        }
-      }
-
-      document.querySelectorAll(".month-tab-btn").forEach((t) => {
-        if (((t as HTMLElement).dataset.month || "ALL") === state.selectedMonth) t.classList.add("active");
-        else t.classList.remove("active");
-      });
-
-      render();
-    }
-
-    function formatDateRange(startStr: string, endStr: string) {
-      const s = new Date(startStr + "T00:00:00");
-      const e = new Date(endStr + "T00:00:00");
-      return s.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + " – " + e.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-    }
-
-    function renderMonthGrid(year: number, monthIndex: number, daysMap: Map<string, any>) {
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const firstDay = new Date(year, monthIndex, 1).getDay();
-      const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-      const monOffset = (firstDay + 6) % 7;
-      const monthTitle = `${monthNames[monthIndex]} ${year}`;
-
-      let cellsHtml = "";
-      for (let i = 0; i < monOffset; i++) {
-        cellsHtml += `<div class="h-8"></div>`;
-      }
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const mm = String(monthIndex + 1).padStart(2, "0");
-        const dd = String(d).padStart(2, "0");
-        const iso = `${year}-${mm}-${dd}`;
-        const dayOfWeek = new Date(year, monthIndex, d).getDay();
-        const isNormalWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-        let cellStyle = "text-slate-400 bg-transparent";
-        let dotHtml = "";
-        let tooltipText = "";
-
-        if (daysMap.has(iso)) {
-          const item = daysMap.get(iso);
-          if (item.type === "holiday") {
-            cellStyle = "bg-emerald-100 text-emerald-950 font-bold border border-emerald-300 ring-2 ring-emerald-400/30";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block mt-0.5"></span>';
-            tooltipText = item.label || "Gazetted Holiday";
-          } else if (item.type === "leave") {
-            cellStyle = "bg-amber-100 text-amber-950 font-bold border border-amber-300 ring-2 ring-amber-400/30";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-amber-600 inline-block mt-0.5"></span>';
-            tooltipText = "Apply PTO Leave";
-          } else if (item.type === "weekend") {
-            cellStyle = "bg-blue-100/80 text-blue-950 font-bold border border-blue-300";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block mt-0.5"></span>';
-            tooltipText = "Weekend Off";
-          }
-        } else if (isNormalWeekend) {
-          cellStyle = "text-slate-600 bg-slate-100/60 font-medium";
-        }
-
-        cellsHtml += `
-          <div class="h-8 rounded-lg flex flex-col items-center justify-center text-xs transition-all relative group/calcell select-none ${cellStyle}">
-            <span>${d}</span>
-            ${dotHtml}
-            ${tooltipText ? `
-              <div class="hidden group-hover/calcell:block absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-900 text-white text-[10px] font-medium rounded shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                ${tooltipText}
-              </div>
-            ` : ""}
-          </div>
-        `;
-      }
-
-      return `
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="text-xs font-bold text-slate-800 text-center mb-3 tracking-tight pb-2 border-b border-slate-100">
-            ${monthTitle}
-          </div>
-          <div class="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-slate-400">
-            <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
-          </div>
-          <div class="grid grid-cols-7 gap-1">
-            ${cellsHtml}
-          </div>
-        </div>
-      `;
-    }
-
-    function openCalendarModal(plan: any) {
-      const modal = document.getElementById("calendarModal");
-      const mTitle = document.getElementById("calModalTitle");
-      const mDates = document.getElementById("calModalDates");
-      const mContent = document.getElementById("calModalContent");
-
-      if (!modal || !mTitle || !mDates || !mContent) return;
-
-      mTitle.textContent = plan.title;
-      mDates.textContent = `🗓️ ${formatDateRange(plan.startDate, plan.endDate)} · ${plan.totalDaysOff} Consecutive Days Off`;
-
-      const daysMap = new Map();
-      plan.days.forEach((d: any) => daysMap.set(d.date, d));
-
-      const startD = new Date(plan.startDate + "T00:00:00");
-      const endD = new Date(plan.endDate + "T00:00:00");
-
-      const startY = startD.getFullYear();
-      const startM = startD.getMonth();
-      const endY = endD.getFullYear();
-      const endM = endD.getMonth();
-
-      let calendarsHtml = "";
-      if (startY === endY && startM === endM) {
-        mContent.className = "grid grid-cols-1 max-w-sm mx-auto w-full gap-4 mb-6";
-        calendarsHtml = renderMonthGrid(startY, startM, daysMap);
-      } else {
-        mContent.className = "grid grid-cols-1 md:grid-cols-2 gap-4 mb-6";
-        calendarsHtml = renderMonthGrid(startY, startM, daysMap) + renderMonthGrid(endY, endM, daysMap);
-      }
-
-      mContent.innerHTML = calendarsHtml;
-      modal.classList.remove("hidden");
-    }
-
-    function render() {
-      const grid = document.getElementById("vacationGrid");
-      const empty = document.getElementById("emptyState");
-      const badge = document.getElementById("resultsBadge");
-      const subtext = document.getElementById("resultsSubtext");
-
-      const plans = solveVacationPlans({
-        leaves: state.selectedLeaves,
-        workWeek: state.workWeek,
-        region: state.selectedRegion as any,
-        month: state.selectedMonth,
-        fromDate: CURRENT_DATE_REF
-      });
-
-      
-      if (state.sortBy === "efficiency") {
-        plans.sort((a, b) => {
-          if (b.totalDaysOff !== a.totalDaysOff) return b.totalDaysOff - a.totalDaysOff;
-          return a.startDate.localeCompare(b.startDate);
-        });
-      } else {
-        plans.sort((a, b) => a.startDate.localeCompare(b.startDate));
-      }
-      state.currentPlans = plans;
-
-      if (badge) badge.textContent = plans.length + (plans.length === 1 ? " Plan" : " Plans");
-      if (subtext) subtext.textContent = "Showing options with " + state.selectedLeaves + (state.selectedLeaves === 1 ? " leave" : " leaves") + " (Min 3 days continuous off)";
-
-      if (!grid || !empty) return;
-
-      if (plans.length === 0) {
-        grid.innerHTML = "";
-        empty.classList.remove("hidden");
-        return;
-      }
-
-      empty.classList.add("hidden");
-
-      grid.innerHTML = plans.map((plan, planIdx) => {
-        const pillsHtml = plan.days.map((d) => {
-          if (d.type === "holiday") {
-            return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-emerald-50 hover:bg-emerald-100/70 text-emerald-900 border border-emerald-200 hover:border-emerald-300 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700">${d.dayName}</span>
-                <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100/90 text-emerald-800 mt-1 truncate max-w-full">Holiday</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                  ${d.label || "Gazetted Public Holiday"}
-                </div>
-              </div>
-            `;
-          } else if (d.type === "weekend") {
-            return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-blue-50/70 hover:bg-blue-100/60 text-blue-900 border border-blue-200/80 hover:border-blue-300 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-blue-700">${d.dayName}</span>
-                <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-blue-100/80 text-blue-800 mt-1">Weekend</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                  Weekly Weekend Off
-                </div>
-              </div>
-            `;
-          } else {
-            return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-amber-50 hover:bg-amber-100/70 text-amber-900 border border-amber-300 hover:border-amber-400 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-amber-700">${d.dayName}</span>
-                <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-200/90 text-amber-950 mt-1 font-bold">Take PTO</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                  Apply 1 Day Leave (PTO)
-                </div>
-              </div>
-            `;
-          }
-        }).join("");
-
-        const topBadge = plan.leavesRequired === 0
-          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">⚡ 0 Leaves Needed</span>`
-          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">🎯 ${plan.leavesRequired} ${plan.leavesRequired === 1 ? "Leave" : "Leaves"} Needed (${plan.efficiencyMultiplier})</span>`;
-
-        let bottomBarHtml = "";
-        if (plan.leavesRequired === 0) {
-          bottomBarHtml = `
-            <div class="bg-emerald-50/70 border border-emerald-200 rounded-lg p-2.5 flex items-center gap-2 mt-0.5">
-              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
-              <div class="text-xs font-medium text-emerald-950">
-                <span class="font-bold">Direct Weekend Bridge</span> · No PTO required
-              </div>
-            </div>
-          `;
-        } else {
-          const leaveDays = plan.days.filter(d => d.type === "leave").map(d => `${d.dayName} ${d.dayNum}`).join(", ");
-          bottomBarHtml = `
-            <div class="bg-amber-50/70 border border-amber-200 rounded-lg p-2.5 flex items-center gap-2 mt-0.5">
-              <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">🎯</span>
-              <div class="text-xs font-medium text-amber-950">
-                <span class="font-bold">Apply PTO:</span> <span class="underline decoration-amber-500">${leaveDays}</span>
-              </div>
-            </div>
-          `;
-        }
-
-        return `
-          <div class="bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 group relative">
-            <div>
-              <!-- Top Bar -->
-              <div class="flex items-center justify-between gap-2 mb-2">
-                ${topBadge}
-                
-                <div class="flex items-center gap-1.5">
-                  <span class="days-off-badge inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
-                    🔥 ${plan.totalDaysOff} Days Off
-                  </span>
-                  <button 
-                    type="button" 
-                    class="btn-open-cal p-1.5 px-2 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 hover:border-slate-300 transition-all flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 shadow-2xs" 
-                    title="View Month Calendar Grid"
-                    data-idx="${planIdx}"
-                  >
-                    <span class="text-xs">🗓️</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Main Details -->
-              <h3 class="font-bold text-base text-slate-900 tracking-tight mb-1 group-hover:text-blue-600 transition-colors">
-                ${plan.title}
-              </h3>
-              <div class="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mb-2.5">
-                <span>🗓️</span>
-                <span class="font-bold text-slate-800">${formatDateRange(plan.startDate, plan.endDate)}</span>
-                
-              </div>
-
-              <!-- Interactive Day-by-Day Ribbon -->
-              <div class="flex w-full gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
-                ${pillsHtml}
-              </div>
-            </div>
-
-            <!-- Actionable Bottom Bar -->
-            <div>
-              ${bottomBarHtml}
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      // Bind calendar view modal triggers
-      document.querySelectorAll(".btn-open-cal").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const idx = parseInt((btn as HTMLElement).dataset.idx || "0", 10);
-          const selectedPlan = state.currentPlans[idx];
-          if (selectedPlan) {
-            openCalendarModal(selectedPlan);
-          }
-        });
-      });
-
-      
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
-  </script>
-</body>
-</html>
+  }
+
+  applyParams(new URLSearchParams(window.location.search));
+
+  // Footer links point at "/?leaves=2" and friends. On this page that is a
+  // filter change, not a navigation, so handle it in place.
+  document.querySelectorAll<HTMLAnchorElement>(".footer-filter-link").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      const url = new URL(a.href, window.location.href);
+      if (url.pathname !== window.location.pathname) return;
+      e.preventDefault();
+      window.history.replaceState(null, "", url.search || url.pathname);
+      applyParams(url.searchParams);
+      scrollToResults();
+    });
+  });
+</script>

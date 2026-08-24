@@ -1,78 +1,289 @@
 ---
+/**
+ * Site header.
+ *
+ * Two things changed structurally:
+ *
+ * 1. The theme toggle lives here and ONLY here. index.astro used to bind a
+ *    second listener to the same button, so a click toggled twice and
+ *    cancelled itself out.
+ * 2. Region and work-week changes are broadcast as `lw:region` / `lw:workweek`
+ *    events on `document` instead of pages reaching in by element id. That is
+ *    what fixes the mobile region <select>, which was never wired to anything.
+ */
+const pathname = Astro.url.pathname;
+const onOptimizer = pathname.includes("company-optimizer");
+
+/* The region control picks which public-holiday list to use. On the optimizer
+   an uploaded office list replaces that list entirely, so the control would sit
+   there doing nothing — it is left out rather than left dead. */
+const showRegion = !onOptimizer;
 ---
-<header class="sticky top-0 z-50 bg-[#0c0c0e]/95 backdrop-blur-md border-b border-zinc-800/80 transition-colors">
-  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 min-h-[4.25rem] py-3 sm:py-0 flex flex-wrap items-center justify-between gap-3">
-    
-    <!-- Brand Logo -->
-    <a href="/" class="flex items-center gap-2.5 group text-decoration-none">
-      <div class="w-9 h-9 rounded-lg bg-[#ff2b63] text-white flex items-center justify-center font-mono font-extrabold text-sm shadow-md group-hover:scale-105 transition-transform">
-        LW
-      </div>
-      <div class="flex flex-col">
-        <span class="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5 whitespace-nowrap">
-          The Long Weekends <span id="brandFlag" class="text-xs">🇮🇳</span>
-        </span>
-      </div>
+
+<header
+  class="sticky top-0 z-50 bg-surface/85 backdrop-blur-lg border-b border-hairline"
+>
+  <div
+    class="max-w-[1280px] mx-auto px-4 sm:px-6 h-[4.25rem] flex items-center justify-between gap-3"
+  >
+    <!-- Brand -->
+    <a
+      href="/"
+      class="flex items-center gap-2.5 group shrink-0 no-underline"
+      aria-label="The Long Weekends — home"
+    >
+      <span
+        class="w-9 h-9 rounded-[0.625rem] bg-brand text-white flex items-center justify-center font-mono font-extrabold text-[0.8125rem] shadow-card group-hover:scale-105 transition-transform"
+        aria-hidden="true">LW</span
+      >
+      <span class="flex items-baseline gap-1.5 min-w-0">
+        <span
+          class="font-extrabold text-[0.9375rem] sm:text-[1.0625rem] tracking-tight text-ink whitespace-nowrap"
+          >The Long Weekends</span
+        >
+        <span
+          id="brandRegionText"
+          class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text"
+          >{onOptimizer ? "OFFICE" : "IN"}</span
+        >
+      </span>
     </a>
 
-    <!-- Center Capsule Controls (Region + Workweek) -->
-    <div class="hidden md:flex items-center gap-3 rounded-full border border-zinc-800 bg-zinc-900/80 px-4 py-1.5 shadow-inner">
-      <!-- Region Selector -->
-      <div class="flex items-center gap-2 text-xs">
-        <span class="font-mono font-bold text-[10px] uppercase tracking-widest text-zinc-500">Region</span>
-        <select id="navRegionSelector" class="bg-transparent border-none text-white text-xs font-bold outline-none cursor-pointer pr-1 hover:text-[#ff2b63] transition-colors">
-          <option value="ALL" class="bg-zinc-900 text-white" selected>Pan-India IT</option>
-          <option value="USA" class="bg-zinc-900 text-white">United States (US Federal)</option>
-        </select>
-      </div>
+    <!-- Desktop controls -->
+    <div
+      class="hidden lg:flex items-center gap-3 rounded-full border border-hairline bg-surface-soft px-4 py-1.5"
+    >
+      {
+        showRegion && (
+          <Fragment>
+            <div class="flex items-center gap-2">
+              <label
+                for="navRegionSelector"
+                class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
+              >
+                Region
+              </label>
+              <select
+                id="navRegionSelector"
+                data-region-select
+                class="bg-transparent border-0 text-ink text-[0.8125rem] font-bold outline-none cursor-pointer pr-1 hover:text-brand-text transition-colors"
+              >
+                <option value="ALL" selected>
+                  Pan-India IT
+                </option>
+                <option value="USA">United States</option>
+              </select>
+            </div>
 
-      <span class="border-r border-zinc-800 h-4"></span>
-
-      <!-- Workweek Toggle -->
-      <div class="flex items-center gap-2 text-xs">
-        <span class="font-mono font-bold text-[10px] uppercase tracking-widest text-zinc-500">Workweek</span>
-        <div class="flex items-center gap-1 bg-zinc-950 p-0.5 rounded-full border border-zinc-800">
-          <button type="button" id="btnWorkweek5" class="px-2.5 py-0.5 text-[11px] font-bold rounded-full transition-all bg-white text-zinc-950 shadow-xs cursor-pointer">5-Day</button>
-          <button type="button" id="btnWorkweek6" class="px-2.5 py-0.5 text-[11px] font-medium rounded-full transition-all text-zinc-400 hover:text-white cursor-pointer">6-Day</button>
+            <span class="w-px h-4 bg-hairline-strong" aria-hidden="true" />
+          </Fragment>
+        )
+      }
+      <div class="flex items-center gap-2">
+        <span
+          id="workweekLabel"
+          class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
+          >Workweek</span
+        >
+        <div
+          role="group"
+          aria-labelledby="workweekLabel"
+          class="flex items-center gap-0.5 bg-surface-sunken p-0.5 rounded-full border border-hairline"
+        >
+          <button
+            type="button"
+            id="btnWorkweek5"
+            data-workweek="5"
+            aria-pressed="true"
+            class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
+            >5-day</button
+          >
+          <button
+            type="button"
+            id="btnWorkweek6"
+            data-workweek="6"
+            aria-pressed="false"
+            class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
+            >6-day</button
+          >
         </div>
       </div>
     </div>
 
-    <!-- Right Controls (Search Icon + Mobile Region + Theme) -->
-    <div class="flex items-center gap-2.5">
-      <!-- Mobile Region Selector -->
-      <div class="flex md:hidden items-center">
-        <select id="navRegionSelectorMobile" class="bg-zinc-900 border border-zinc-800 text-white text-xs font-bold rounded-full px-3 py-1 outline-none cursor-pointer">
-          <option value="ALL" selected>🇮🇳 India</option>
-          <option value="USA">🇺🇸 USA</option>
-        </select>
-      </div>
+    <!-- Right controls -->
+    <div class="flex items-center gap-2">
+      {
+        onOptimizer ? (
+          <a
+            href="/"
+            class="hidden sm:inline-flex btn btn-ghost btn-sm no-underline"
+          >
+            <span aria-hidden="true">←</span> National calendar
+          </a>
+        ) : (
+          <a
+            href="/company-optimizer"
+            class="hidden sm:inline-flex btn btn-ghost btn-sm no-underline"
+          >
+            <span aria-hidden="true">🏢</span> Office holidays
+          </a>
+        )
+      }
 
-      <!-- Quick Search Scroll Button -->
-      <button
-        type="button"
-        id="quickSearchBtn"
-        class="w-9 h-9 rounded-full bg-[#ff2b63] hover:bg-[#e11d48] text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer"
-        title="Search Vacations"
-      >
-        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      <!-- Mobile region selector — now actually functional -->
+      {
+        showRegion && (
+          <div class="lg:hidden">
+            <label for="navRegionSelectorMobile" class="sr-only">
+              Region
+            </label>
+            <select
+              id="navRegionSelectorMobile"
+              data-region-select
+              class="bg-surface-soft border border-hairline text-ink text-[0.75rem] font-bold rounded-full pl-3 pr-2 py-1.5 outline-none cursor-pointer"
+            >
+              <option value="ALL" selected>
+                🇮🇳 India
+              </option>
+              <option value="USA">🇺🇸 USA</option>
+            </select>
+          </div>
+        )
+      }
+
+      <button type="button" id="themeToggleBtn" class="btn-icon" aria-label="Switch to dark theme">
+        <svg
+          class="theme-icon-moon w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+        </svg>
+        <svg
+          class="theme-icon-sun w-4 h-4 hidden"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+          ></path>
         </svg>
       </button>
-
-      <!-- Theme Toggle Button -->
-      <button
-        type="button"
-        id="themeToggleBtn"
-        class="theme-toggle-btn w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white hover:border-zinc-700 transition-all flex items-center justify-center cursor-pointer"
-        title="Toggle Theme"
-        aria-label="Toggle Theme"
-      >
-        <span class="theme-icon-moon text-xs">🌙</span>
-        <span class="theme-icon-sun hidden text-xs">☀️</span>
-      </button>
     </div>
-
   </div>
 </header>
 
+<style>
+  /* Selected segment of the work-week control. Driven by aria-pressed so the
+     accessible state and the visual state can never disagree. */
+  .workweek-btn {
+    color: var(--muted);
+  }
+  .workweek-btn:hover {
+    color: var(--ink);
+  }
+  .workweek-btn[aria-pressed="true"] {
+    background-color: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+</style>
+
+<script>
+  // ---------------------------------------------------------------- theme ----
+  function applyThemeIcons() {
+    const dark = document.documentElement.classList.contains("dark");
+    document.querySelectorAll(".theme-icon-moon").forEach((el) => el.classList.toggle("hidden", dark));
+    document.querySelectorAll(".theme-icon-sun").forEach((el) => el.classList.toggle("hidden", !dark));
+    const btn = document.getElementById("themeToggleBtn");
+    if (btn) {
+      btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+    }
+  }
+
+  function initTheme() {
+    const btn = document.getElementById("themeToggleBtn");
+    if (!btn || btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1"; // guard against double-binding
+    btn.addEventListener("click", () => {
+      const dark = document.documentElement.classList.toggle("dark");
+      try {
+        localStorage.setItem("theme", dark ? "dark" : "light");
+      } catch {
+        /* storage unavailable — theme still applies for this page view */
+      }
+      applyThemeIcons();
+    });
+    applyThemeIcons();
+  }
+
+  // --------------------------------------------------------------- region ----
+  function initRegion() {
+    const selects = Array.from(
+      document.querySelectorAll<HTMLSelectElement>("[data-region-select]")
+    );
+
+    selects.forEach((sel) => {
+      if (sel.dataset.bound === "1") return;
+      sel.dataset.bound = "1";
+      sel.addEventListener("change", () => {
+        const region = sel.value;
+        // Keep the desktop and mobile selects in agreement.
+        selects.forEach((other) => {
+          if (other !== sel) other.value = region;
+        });
+        const chip = document.getElementById("brandRegionText");
+        if (chip) chip.textContent = region === "USA" ? "US" : "IN";
+        document.dispatchEvent(new CustomEvent("lw:region", { detail: { region } }));
+      });
+    });
+  }
+
+  /** Lets a page set the region programmatically (e.g. from ?region=USA). */
+  function initRegionSync() {
+    document.addEventListener("lw:setregion", (e) => {
+      const region = (e as CustomEvent<{ region: string }>).detail.region;
+      document
+        .querySelectorAll<HTMLSelectElement>("[data-region-select]")
+        .forEach((sel) => {
+          sel.value = region;
+        });
+      const chip = document.getElementById("brandRegionText");
+      if (chip) chip.textContent = region === "USA" ? "US" : "IN";
+    });
+  }
+
+  // ------------------------------------------------------------- workweek ----
+  function initWorkweek() {
+    const btns = Array.from(document.querySelectorAll<HTMLButtonElement>(".workweek-btn"));
+    btns.forEach((btn) => {
+      if (btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", () => {
+        btns.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+        const workWeek = Number(btn.dataset.workweek) || 5;
+        document.dispatchEvent(new CustomEvent("lw:workweek", { detail: { workWeek } }));
+      });
+    });
+  }
+
+  function init() {
+    initTheme();
+    initRegion();
+    initRegionSync();
+    initWorkweek();
+  }
+
+  init();
+  document.addEventListener("astro:page-load", init);
+</script>

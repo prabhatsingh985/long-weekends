@@ -1,23 +1,94 @@
+---
+/**
+ * The single shared document shell.
+ *
+ * Both pages previously inlined their own <html>, font links and theme-init
+ * script — byte-identical copies that had already drifted apart. Everything
+ * document-level now lives here.
+ */
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path only, e.g. "/company-optimizer". Joined onto the canonical origin. */
+  path?: string;
+  /** Extra <script>/<link> tags a page needs before its own body runs. */
+  preloadScripts?: string[];
+}
+
+const { title, description, path = "/", preloadScripts = [] } = Astro.props;
+
+const SITE = "https://thelongweekends.com";
+const canonical = `${SITE}${path}`;
+const ogImage = `${SITE}/og-image.png`;
+---
+
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>The Long Weekends | Maximize Your Vacations</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- No maximum-scale / user-scalable=no: blocking pinch-zoom fails
+         WCAG 1.4.4 and the old Layout.astro did exactly that. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Long Weekends" />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Paints the correct theme colour in browser UI before first paint. -->
+    <meta name="theme-color" content="#fcfcfd" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0b0e" media="(prefers-color-scheme: dark)" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Playfair Display was requested on every page and never used; dropping
+         it removes a font family from the critical path. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    {preloadScripts.map((src) => <script is:inline src={src}></script>)}
+
+    <!--
+      Theme resolution must run before first paint, otherwise a dark-mode user
+      sees a white flash. Kept inline and synchronous on purpose.
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem("theme");
+          var dark =
+            saved === "dark" ||
+            (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+        } catch (e) {
+          /* private mode / storage disabled — fall through to light */
+        }
+      })();
+    </script>
+
+    <slot name="head" />
+  </head>
+
+  <body class="min-h-screen flex flex-col">
+    <a class="skip-link" href="#main">Skip to results</a>
+    <slot />
+  </body>
+</html>

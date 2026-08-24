@@ -1,1315 +1,1341 @@
 ---
-import "../styles/global.css";
+/**
+ * Company Holiday Optimizer.
+ *
+ * Rewritten onto Layout.astro + Navbar + the shared results controller. The old
+ * version carried its own <html>, its own header (so this page had no theme
+ * toggle at all), a second copy of the card and calendar markup that had
+ * already drifted from the homepage's, and ~110 lines of hardcoded slate/
+ * emerald/amber CSS that ignored the dark theme entirely.
+ *
+ * The page has two states. Until an office holiday list exists there is nothing
+ * to plan around, so the filters and grid stay out of the DOM flow and a prompt
+ * explains what to do. Once dates are detected the same filter rail and cards as
+ * the homepage appear.
+ */
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
+import { getTodayIso, CALENDAR_START, CALENDAR_END } from "../data/vacation-solver";
+
+const TITLE =
+  "Company Holiday Optimizer – Office Long Weekend Planner | The Long Weekends";
+const DESCRIPTION =
+  "Upload your company holiday list to find every long weekend for your office. Generate a personalized leave plan with 0–3+ PTO days in 2026.";
+
+/* pdf.js and tesseract.js are read by the page script as globals, so they have
+   to be present before it runs — Layout emits these as blocking head tags. */
+const VENDOR_SCRIPTS = [
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+  "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js",
+];
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+const today = getTodayIso();
+const curYear = Number(today.slice(0, 4));
+const curMonth = Number(today.slice(5, 7));
+
+const monthTabs: { value: string; label: string; short: string }[] = [
+  { value: "ALL", label: "All months", short: "All" },
+];
+for (let m = curMonth; m <= 12; m++) {
+  monthTabs.push({
+    value: String(m).padStart(2, "0"),
+    label: MONTH_NAMES[m - 1],
+    short: MONTH_NAMES[m - 1].slice(0, 3),
+  });
+}
+if (curMonth > 1) {
+  monthTabs.push({
+    value: "01",
+    label: `January ${curYear + 1}`,
+    short: `Jan ${String(curYear + 1).slice(2)}`,
+  });
+}
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Company Holiday Optimizer – Office Long Weekend Planner | The Long Weekends</title>
-  <meta name="description" content="Upload your company holiday list to find every long weekend for your office. Generate a personalized leave plan with 0–3+ PTO days in 2026." />
-  
-  <!-- SEO & Open Graph Tags -->
-  <link rel="canonical" href="https://thelongweekends.com/company-optimizer" />
-  <meta property="og:title" content="Company Holiday Optimizer – Office Long Weekend Planner | The Long Weekends" />
-  <meta property="og:description" content="Upload your company holiday list to find every long weekend for your office. Generate a personalized leave plan with 0–3+ PTO days in 2026." />
-  <meta property="og:url" content="https://thelongweekends.com/company-optimizer" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="The Long Weekends" />
-  <meta property="og:image" content="https://thelongweekends.com/og-image.png" />
-  
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Company Holiday Optimizer – Office Long Weekend Planner | The Long Weekends" />
-  <meta name="twitter:description" content="Upload your company holiday list to find every long weekend for your office. Generate a personalized leave plan with 0–3+ PTO days in 2026." />
-  <meta name="twitter:image" content="https://thelongweekends.com/og-image.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
-  
-  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script is:inline src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<Layout
+  title={TITLE}
+  description={DESCRIPTION}
+  path="/company-optimizer"
+  preloadScripts={VENDOR_SCRIPTS}
+>
+  <Navbar />
 
-  <script is:inline>
-    (function() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    })();
-  </script>
-
-</head>
-<body class="bg-[#fafafa] text-[#171717] font-sans antialiased min-h-screen flex flex-col">
-
-  <!-- Header with Navigation Back to National Calendar -->
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-xs">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 min-h-[4rem] py-2 sm:py-0 flex flex-wrap items-center justify-between gap-2 sm:gap-4">
-      <a href="/" class="flex items-center gap-3 group text-decoration-none">
-        <div class="w-9 h-9 rounded-md bg-slate-900 text-white flex items-center justify-center font-mono font-bold text-sm shadow-xs">
-          LW
-        </div>
-        <div class="flex flex-col">
-          <span class="font-semibold text-[15px] sm:text-lg tracking-tight text-[#171717] flex items-center gap-1.5 whitespace-nowrap">
-            The Long Weekends <span class="text-xs">🇮🇳</span>
-          </span>
-          <span class="caption-mono text-[9px] sm:text-[10px] text-[#888888] tracking-widest whitespace-nowrap uppercase">thelongweekends.com</span>
-        </div>
-      </a>
-
-      <div class="flex items-center gap-3">
-        <a 
-          href="/" 
-          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition-all no-underline"
-        >
-          <span>←</span>
-          <span class="hidden sm:inline">Back to National Calendar</span><span class="sm:hidden">National Calendar</span>
-        </a>
-      </div>
+  <!-- ===================================================================
+       Upload
+       =================================================================== -->
+  <section class="relative overflow-hidden border-b border-hairline px-4 pb-12 pt-10 sm:px-6 sm:pb-14 sm:pt-12">
+    <div
+      class="pointer-events-none absolute -left-32 -top-40 h-[26rem] w-[26rem] rounded-full bg-brand/8 blur-3xl"
+      aria-hidden="true"
+    >
     </div>
-  </header>
 
-  <!-- Hero Section & Multi-Format Ingestion Uploader -->
-  <section class="relative py-8 sm:py-10 sm:py-14 px-4 sm:px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
-    <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="max-w-[1200px] mx-auto relative z-10 flex flex-col items-center text-center">
-      
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-4 shadow-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>✨ Custom Vacation Planner for Your Office</span>
-      </div>
+    <div class="relative mx-auto flex max-w-[52rem] flex-col items-center text-center">
+      <span class="tag tag-brand mb-5">
+        <span class="dot dot-holiday" aria-hidden="true"></span>
+        Plans built from your own office list
+      </span>
 
-      <h1 class="text-[28px] leading-tight sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-3">
-        Add Your Office Holidays
+      <h1 class="mb-4 max-w-[40rem] text-[2rem] font-extrabold leading-[1.1] sm:text-[2.75rem]">
+        Plan around <span class="text-brand-text">your office</span> holidays
       </h1>
-      <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-medium">
-        Upload your office holiday list, screenshot, or PDF below. We will automatically find the best long weekends and guilt-free mini vacations tailored just for your team!
+
+      <p class="mb-9 max-w-[36rem] text-base leading-relaxed text-body sm:text-lg">
+        Most companies observe their own list, not the full gazetted one. Upload
+        it, paste it, or add dates by hand and we'll rebuild every long weekend
+        around the days you actually get. Nothing leaves your browser.
       </p>
 
-      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-xs w-full max-w-[950px] text-left">
-        
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 p-1.5 bg-slate-100 border border-slate-200/60 rounded-2xl mb-6 w-full sm:w-fit shadow-inner mx-auto">
-          <button type="button" class="tab-btn active w-full sm:w-auto text-center" data-tab="tab-upload">📄 Upload Document / Screenshot</button>
-          <button type="button" class="tab-btn w-full sm:w-auto text-center" data-tab="tab-text">📝 Paste Holiday List / Email</button>
-        </div>
-
-        <div id="tab-upload" class="tab-content active">
-          <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-slate-800 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-all bg-white hover:bg-slate-50 relative">
-            <input type="file" id="fileUploadInput" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" class="hidden" />
-            <div class="text-4xl mb-3" id="dropZoneIcon">📁</div>
-            <div class="text-sm font-bold text-slate-900 mb-1" id="dropZoneTitle">Click to Upload PDF or Drop a Screenshot</div>
-            <div class="text-xs text-slate-500" id="dropZoneSub">Supports PDF documents, screenshots, or photos of your holiday list</div>
-            
-            <div id="uploadSpinner" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center p-6 z-10">
-              <div class="w-8 h-8 border-3 border-slate-900 border-t-transparent rounded-full animate-spin mb-3"></div>
-              <div class="text-xs font-bold text-slate-900" id="spinnerText">Reading your holiday list...</div>
-              <div class="text-[10px] text-slate-500 mt-1" id="spinnerSub">Finding your vacation dates...</div>
-            </div>
-          </div>
-
-          <div id="fileUploadStatus" class="hidden mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-semibold flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
-            <span id="fileUploadStatusText">Added holidays successfully!</span>
-          </div>
-        </div>
-
-        <div id="tab-text" class="tab-content hidden">
-          <textarea 
-            id="companyTextPaste" 
-            rows="5" 
-            placeholder="Paste your company holiday list, email or table here...&#10;e.g.&#10;01st Jan - New Year&#10;26 Jan 2026 - Republic Day&#10;4 March 2026 - Holi&#10;8th-9th Nov - Diwali&#10;25 Dec 2026 - Christmas" 
-            class="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-900 font-mono outline-none focus:border-slate-800 shadow-inner"
-          ></textarea>
-        </div>
-
-        <div id="detectedDatesBox" class="mt-5 pt-4 border-t border-slate-200 hidden">
-          <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-slate-900">Active Office Holidays (<span id="detectedCount">0</span>):</span>
-              <span class="text-[10px] text-emerald-700 bg-emerald-100 font-bold px-2 py-0.5 rounded-full" id="activeStatusPill">Active</span>
-            </div>
-            <button type="button" id="btnClearDates" class="text-xs text-red-600 hover:underline font-semibold cursor-pointer">Clear All Dates</button>
-          </div>
-          
-          <div id="detectedPills" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2.5 bg-white rounded-xl border border-slate-200 mb-3"></div>
-
-          <div class="flex items-center gap-2 pt-2 border-t border-slate-200">
-            <span class="text-[11px] font-semibold text-slate-600 shrink-0">+ Add Date:</span>
-            <input type="date" id="manualDateInput" min="2026-01-01" max="2027-01-10" value="2026-01-01" class="bg-white border border-slate-300 text-slate-900 text-xs font-mono px-2.5 py-1 rounded-md outline-none" />
-            <button type="button" id="btnAddManualDate" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-md cursor-pointer transition-all">+ Add Date</button>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Interactive Leave Budget Selector (Favorite Layout) -->
-  <section class="py-5 px-4 sm:px-6 bg-white border-b border-[#ebebeb] shadow-xs hidden" id="budgetSection">
-    <div class="max-w-[1200px] mx-auto">
-      
-            <!-- Filter Header -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-        <div class="flex items-center gap-2">
-          <span class="text-base">🎯</span>
-          <span class="font-bold text-sm text-[#171717]">Select Your Leave Budget</span>
-        </div>
-        
-        <!-- Month Tabs (Moved to Header Row) -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar" id="monthTabsContainer">
-          <button type="button" class="month-tab-btn active" data-month="ALL">All</button>
-          <button type="button" class="month-tab-btn" data-month="08">Aug</button>
-          <button type="button" class="month-tab-btn" data-month="09">Sep</button>
-          <button type="button" class="month-tab-btn" data-month="10">Oct</button>
-          <button type="button" class="month-tab-btn" data-month="11">Nov</button>
-          <button type="button" class="month-tab-btn" data-month="12">Dec</button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6" id="budgetChipsContainer">
-        <button type="button" class="chip-btn active" data-leaves="0">
-          <span class="chip-title">0 Leaves</span>
-          <span class="chip-desc">Free 3-Day Breaks</span>
-        </button>
-        <button type="button" class="chip-btn" data-leaves="1">
-          <span class="chip-title">1 Leave</span>
-          <span class="chip-desc">Smart 4-Day Bridge</span>
-        </button>
-        <button type="button" class="chip-btn" data-leaves="2">
-          <span class="chip-title">2 Leaves</span>
-          <span class="chip-desc">5-6 Day Vacations</span>
-        </button>
-        <button type="button" class="chip-btn" data-leaves="3">
-          <span class="chip-title">3 Leaves</span>
-          <span class="chip-desc">6+ Day Festival</span>
-        </button>
-        
-        <div class="chip-btn custom-chip" id="customChipWrapper">
-          <div class="flex items-center justify-between w-full">
-            <span class="chip-title">Custom</span>
-            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 border border-amber-500/20">4+ PTO</span>
-          </div>
-          <div class="stepper-box flex items-center justify-between w-full mt-1 bg-slate-100/90 border border-slate-200/80 rounded-lg px-2 py-0.5 transition-colors">
-            <button type="button" id="btnDecLeave" class="stepper-btn font-bold text-xs hover:text-slate-900 cursor-pointer select-none text-slate-600">−</button>
-            <span class="stepper-val text-xs font-mono font-bold text-slate-800 select-none"><span id="customLeavesDisplay">4</span> Leaves</span>
-            <input type="hidden" id="customLeavesInput" value="4" />
-            <button type="button" id="btnIncLeave" class="stepper-btn font-bold text-xs hover:text-slate-900 cursor-pointer select-none text-slate-600">+</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Vacation Grid / Empty Prompt Section -->
-  <main class="flex-1 py-8 sm:py-10 px-4 sm:px-6 max-w-[1200px] mx-auto w-full hidden" id="gridSection">
-    
-    <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-      <div class="flex items-center gap-3">
-        <span class="font-mono text-xs font-bold px-3 py-1 bg-slate-900 text-white rounded-full" id="resultsBadge">0 Plans</span>
-        <span class="text-xs text-slate-600 font-medium" id="resultsSubtext">Showing options with 0 leaves</span>
-        
-        <!-- Custom Premium Dropdown -->
-        <div class="relative w-full sm:w-[240px]" id="customSortDropdown">
-          <button type="button" id="sortDropdownBtn" class="flex items-center justify-between w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 text-[11px] sm:text-xs font-bold rounded-full px-4 py-2 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all shadow-sm">
-            <span id="sortDropdownLabel">Sort: Highest Efficiency</span>
-            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+      <div class="panel w-full p-4 text-left sm:p-6">
+        <!-- Two ways in. Real tabs: aria-selected carries the state and the
+             panels are wired with aria-controls, so this is navigable by
+             keyboard and announced correctly. -->
+        <div
+          id="inputTabs"
+          role="tablist"
+          aria-label="How to add your office holidays"
+          class="tabs mx-auto mb-5 w-full sm:w-fit"
+        >
+          <button
+            type="button"
+            role="tab"
+            id="tabUploadBtn"
+            class="tab-btn"
+            data-tab="tab-upload"
+            aria-selected="true"
+            aria-controls="tab-upload"
+          >
+            <span aria-hidden="true">📄</span> Upload a file
           </button>
-          <!-- Menu (Hidden by default) -->
-          <div id="sortDropdownMenu" class="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 transition-all duration-200 opacity-0 scale-95 origin-top-right pointer-events-none hidden">
-            <div class="py-1 flex flex-col">
-              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="efficiency">
-                Highest Efficiency
-                <svg class="w-4 h-4 text-emerald-500 check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-              </button>
-              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="date">
-                Chronological (Dates)
-                <svg class="w-4 h-4 text-emerald-500 hidden check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-              </button>
+          <button
+            type="button"
+            role="tab"
+            id="tabTextBtn"
+            class="tab-btn"
+            data-tab="tab-text"
+            aria-selected="false"
+            tabindex="-1"
+            aria-controls="tab-text"
+          >
+            <span aria-hidden="true">📝</span> Paste the list
+          </button>
+        </div>
+        <div id="tab-upload" role="tabpanel" aria-labelledby="tabUploadBtn">
+          <!-- A real <label> wrapping a real <input type="file">: the old
+               version was a div with a click handler, so it could not be
+               reached by Tab or activated from the keyboard at all. The input is
+               nested rather than linked with `for`, because doing both makes
+               some browsers open the file picker twice. -->
+          <label id="dropZone" class="dropzone">
+            <input
+              type="file"
+              id="fileUploadInput"
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv"
+              class="sr-only"
+            />
+            <span class="mb-2 block text-3xl" aria-hidden="true">📥</span>
+            <span id="dropZoneTitle" class="block text-sm font-bold text-ink">
+              Choose a file, or drop one here
+            </span>
+            <span id="dropZoneSub" class="mt-1 block text-xs text-muted">
+              PDF, screenshot, photo, or a plain text list — read on your device
+            </span>
+
+            <span
+              id="uploadSpinner"
+              hidden
+              class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-card bg-surface/95 p-6 backdrop-blur-sm"
+            >
+              <span class="spinner" aria-hidden="true"></span>
+              <span id="spinnerText" class="text-xs font-bold text-ink">
+                Reading your holiday list…
+              </span>
+              <span id="spinnerSub" class="text-[0.6875rem] text-muted">
+                This runs on your device, so it can take a moment
+              </span>
+            </span>
+          </label>
+
+          <p
+            id="fileUploadStatus"
+            hidden
+            class="note note-ok mt-3"
+            role="status"
+            aria-live="polite"
+          >
+            <span aria-hidden="true">✓</span>
+            <span id="fileUploadStatusText">Added your holidays</span>
+          </p>
+        </div>
+
+        <div id="tab-text" role="tabpanel" aria-labelledby="tabTextBtn" hidden>
+          <label for="companyTextPaste" class="mb-2 block text-xs font-bold text-ink">
+            Paste your holiday list, or the email it came in
+          </label>
+          <textarea
+            id="companyTextPaste"
+            rows="6"
+            placeholder={"1 Jan — New Year\n26 Jan 2026 — Republic Day\n4 March 2026 — Holi\n8–9 Nov — Diwali\n25 Dec 2026 — Christmas"}
+            class="field font-mono text-xs leading-relaxed"></textarea>
+          <p class="mt-2 text-xs text-muted">
+            Dates are picked up as you type. Most formats work — 8 Nov, Nov 8th,
+            08/11/2026, or a range like 8–9 Nov.
+          </p>
+        </div>
+
+        <!-- Detected dates. Editable, because OCR gets things wrong and a plan
+             built on a date the user never gets is worse than no plan. -->
+        <div id="detectedDatesBox" hidden class="mt-5 border-t border-hairline pt-4">
+          <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0">
+              <h2 class="flex items-center gap-2 text-sm font-bold text-ink">
+                Your office holidays
+                <span class="tag tag-holiday">
+                  <span id="detectedCount">0</span> found
+                </span>
+              </h2>
+              <p
+                id="activeStatusPill"
+                role="status"
+                aria-live="polite"
+                class="mt-0.5 text-xs text-muted"
+              >
+              </p>
             </div>
+            <button type="button" id="btnClearDates" class="btn btn-ghost btn-sm">
+              Clear all
+            </button>
+          </div>
+
+          <p class="mb-2 text-xs text-muted">
+            Remove anything that was read wrong — the plans below are built only
+            from these days.
+          </p>
+
+          <div
+            id="detectedPills"
+            class="mb-3 flex max-h-36 flex-wrap gap-1.5 overflow-y-auto rounded-control border border-hairline bg-surface-soft p-2.5"
+          >
+          </div>
+
+          <div class="flex flex-wrap items-end gap-2 border-t border-hairline pt-3">
+            <div class="min-w-0">
+              <label
+                for="manualDateInput"
+                class="mb-1 block font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
+              >
+                Missing one?
+              </label>
+              <input
+                type="date"
+                id="manualDateInput"
+                min={CALENDAR_START}
+                max={CALENDAR_END}
+                value={today}
+                class="field font-mono text-xs sm:w-[11rem]"
+              />
+            </div>
+            <button type="button" id="btnAddManualDate" class="btn btn-ghost btn-sm">
+              Add this date
+            </button>
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-4 text-xs text-slate-600 font-medium">
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-500"></span><span>Weekend</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span><span>Company / Public Holiday</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span><span>Apply PTO</span></div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       Filter bar — mirrors the homepage exactly, including the ids the
+       shared controller in scripts/results.ts binds to.
+       =================================================================== -->
+  <section
+    id="budgetSection"
+    hidden
+    aria-label="Filter your office long weekends"
+    class="sticky top-[4.25rem] z-40 border-b border-hairline bg-page/90 backdrop-blur-lg"
+  >
+    <div class="mx-auto flex max-w-[1280px] flex-col gap-2 px-4 py-3 sm:px-6">
+      <div class="flex items-center gap-3">
+        <span
+          class="hidden shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted sm:block"
+          aria-hidden="true">Budget</span
+        >
+        <div id="budgetRail" role="group" aria-label="Leave budget" class="rail min-w-0 py-0.5">
+          <button type="button" class="pill" data-leaves="0" aria-pressed="true">
+            <span class="pill-glyph" aria-hidden="true">🆓</span>No leaves
+          </button>
+          <button type="button" class="pill" data-leaves="1" aria-pressed="false">
+            <span class="pill-glyph" aria-hidden="true">🌴</span>1 leave
+          </button>
+          <button type="button" class="pill" data-leaves="2" aria-pressed="false">
+            <span class="pill-glyph" aria-hidden="true">✈️</span>2 leaves
+          </button>
+
+          <div
+            id="customChipWrapper"
+            role="group"
+            aria-label="Custom number of leaves"
+            class="pill pill-compound"
+          >
+            <button type="button" id="btnDecLeave" class="stepper-btn" aria-label="One leave fewer">
+              <span aria-hidden="true">−</span>
+            </button>
+            <button type="button" data-leaves="custom" class="flex items-baseline gap-1 px-0.5">
+              <span id="customLeavesDisplay" class="font-mono font-bold tabular">3</span>
+              <span class="text-[0.6875rem] font-semibold opacity-80">leaves</span>
+            </button>
+            <button type="button" id="btnIncLeave" class="stepper-btn" aria-label="One leave more">
+              <span aria-hidden="true">+</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span
+          class="hidden shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted sm:block"
+          aria-hidden="true">Month</span
+        >
+        <div class="relative min-w-0 grow">
+          <span id="monthFadeL" class="rail-fade rail-fade-l" aria-hidden="true"></span>
+          <span id="monthFadeR" class="rail-fade rail-fade-r" aria-hidden="true"></span>
+          <div id="monthRail" role="group" aria-label="Filter by month" class="rail py-0.5">
+            {
+              monthTabs.map((m) => (
+                <button
+                  type="button"
+                  class="pill"
+                  data-month={m.value}
+                  aria-pressed={m.value === "ALL" ? "true" : "false"}
+                >
+                  <span class="sm:hidden">{m.short}</span>
+                  <span class="hidden sm:inline">{m.label}</span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+        <div class="hidden shrink-0 items-center gap-1 sm:flex">
+          <button
+            type="button"
+            id="monthRailPrev"
+            class="btn-icon"
+            hidden
+            aria-label="Show earlier months"
+          >
+            <svg
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg
+            >
+          </button>
+          <button
+            type="button"
+            id="monthRailNext"
+            class="btn-icon"
+            aria-label="Show later months"
+          >
+            <svg
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg
+            >
+          </button>
+        </div>
       </div>
     </div>
+  </section>
 
-    <!-- Live Grid (Shown ONLY when company dates exist) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
-
-    <!-- Empty State -->
-    <div class="text-center py-20 px-4 sm:px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
-      <div class="w-16 h-16 rounded-full bg-slate-50 text-3xl flex items-center justify-center mx-auto mb-4 border border-slate-200">🏢</div>
-      <h3 class="font-bold text-lg text-slate-900 mb-2" id="emptyStateTitle">No Office Holidays Added Yet</h3>
-      <p class="text-xs text-slate-500 max-w-md mx-auto leading-relaxed" id="emptyStateSub">
-        Simply upload or paste your office holiday schedule in the box above to see all your potential long weekends!
+  <!-- ===================================================================
+       Results
+       =================================================================== -->
+  <main id="main" class="mx-auto w-full max-w-[1280px] grow px-4 py-8 sm:px-6 sm:py-10">
+    <!-- Shown until an office list exists. Separate from the results empty
+         state, which answers a different question ("no plans for this
+         budget") and offers a different way out. -->
+    <div id="noDatesPrompt" class="card mx-auto max-w-lg p-8 text-center">
+      <span class="mb-3 inline-block text-4xl" aria-hidden="true">🏢</span>
+      <h2 class="text-lg font-extrabold">No office holidays yet</h2>
+      <p class="mx-auto mt-1.5 max-w-sm text-sm text-body">
+        Add your list above and every long weekend your office actually gets
+        will appear here, ranked by how much time off each leave day buys.
+      </p>
+      <p class="mt-5 text-xs text-muted">
+        Only need the national list? <a
+          href="/"
+          class="font-bold text-brand-text underline">Use the main calendar</a
+        >.
       </p>
     </div>
 
+    <div id="gridSection" hidden>
+      <div id="results" class="mb-5 flex flex-wrap items-end justify-between gap-4 scroll-mt-[12rem]">
+        <div aria-live="polite">
+          <h2 class="text-xl font-extrabold sm:text-2xl">
+            <span id="resultsBadge">Counting</span>
+          </h2>
+          <p id="resultsSubtext" class="mt-0.5 text-sm text-body"></p>
+        </div>
+
+        <div class="relative">
+          <button
+            type="button"
+            id="sortTrigger"
+            class="btn btn-ghost btn-sm"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="sortMenu"
+          >
+            <svg
+              class="h-3.5 w-3.5 text-muted"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18M6 12h12M10 18h4"></path>
+            </svg>
+            <span class="text-muted">Sort</span>
+            <span id="sortLabel">Best value</span>
+            <svg
+              class="seg-caret h-3 w-3 text-muted"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg
+            >
+          </button>
+
+          <div
+            id="sortMenu"
+            role="menu"
+            aria-labelledby="sortTrigger"
+            hidden
+            class="popover absolute right-0 top-[calc(100%+0.5rem)] z-40 w-[15rem] p-2"
+          >
+            {
+              [
+                { v: "efficiency", label: "Best value", hint: "Most days off per leave" },
+                { v: "days", label: "Longest break", hint: "Biggest total time off" },
+                { v: "date", label: "Soonest first", hint: "Whatever is next" },
+                { v: "cheapest", label: "Fewest leaves", hint: "Guard your balance" },
+              ].map((o, i) => (
+                <button
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={i === 0 ? "true" : "false"}
+                  tabindex={i === 0 ? 0 : -1}
+                  class="menu-item"
+                  data-sort={o.v}
+                  data-label={o.label}
+                >
+                  <span class="min-w-0 grow">
+                    <span class="block text-[0.8125rem] font-bold text-ink">{o.label}</span>
+                    <span class="block text-xs text-muted">{o.hint}</span>
+                  </span>
+                  <svg
+                    data-check
+                    class:list={["h-4 w-4 shrink-0 text-brand-text", { hidden: i !== 0 }]}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m5 13 4 4L19 7" />
+                  </svg>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-control border border-hairline bg-surface-soft px-3.5 py-2.5"
+      >
+        <span class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted">
+          Each strip reads
+        </span>
+        <span class="flex items-center gap-2 text-xs font-bold text-body">
+          <span class="dot dot-holiday" aria-hidden="true"></span>Office holiday
+        </span>
+        <span class="flex items-center gap-2 text-xs font-bold text-body">
+          <span class="dot dot-weekend" aria-hidden="true"></span>Weekend
+        </span>
+        <span class="flex items-center gap-2 text-xs font-bold text-body">
+          <span class="dot dot-pto" aria-hidden="true"></span>Your leave (dashed)
+        </span>
+      </div>
+
+      <div id="vacationGrid" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+      <div id="emptyState" hidden class="card mx-auto max-w-lg p-8 text-center">
+        <span class="mb-3 inline-block text-4xl" aria-hidden="true">🗓️</span>
+        <h3 id="emptyStateTitle" class="text-lg font-extrabold">Nothing here yet</h3>
+        <p id="emptyStateSub" class="mx-auto mt-1.5 max-w-sm text-sm text-body"></p>
+        <button type="button" id="emptyStateAction" class="btn btn-brand btn-sm mt-5">
+          Show every month
+        </button>
+      </div>
+    </div>
   </main>
 
-  <!-- Interactive Calendar View Modal / Popover -->
-  <div id="calendarModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative animate-in fade-in zoom-in-95 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
-      <button type="button" id="btnCloseCalendarModal" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-sm cursor-pointer transition-all">✕</button>
-      
-      <div class="mb-3 sm:mb-5 pr-6">
-        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-bold border border-blue-200 mb-1 sm:mb-1.5">
-          <span>🗓️ Month Calendar View</span>
+  <!-- ===================================================================
+       Calendar dialog
+       =================================================================== -->
+  <div id="calendarModal" class="dialog-backdrop" hidden>
+    <div
+      id="calendarDialog"
+      class="dialog-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="calModalTitle"
+      aria-describedby="calModalDates"
+      tabindex="-1"
+    >
+      <header
+        class="flex shrink-0 items-start justify-between gap-4 border-b border-hairline p-4 sm:p-5"
+      >
+        <div class="min-w-0">
+          <h2 id="calModalTitle" class="text-base font-extrabold sm:text-lg">Calendar</h2>
+          <p id="calModalDates" class="mt-0.5 font-mono text-xs font-semibold text-muted"></p>
         </div>
-        <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight" id="calModalTitle">Vacation Calendar</h3>
-        <p class="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight" id="calModalDates">Dates</p>
-      </div>
-
-      <div id="calModalContent" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6"></div>
-
-      <div class="flex items-center justify-center gap-2 sm:gap-4 py-2 sm:py-2.5 px-2 sm:px-4 bg-slate-50 rounded-xl border border-slate-200 text-[10px] sm:text-xs font-semibold text-slate-700 flex-wrap leading-none">
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500"></span>
-          <span>Company / Public Holiday</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500"></span>
-          <span>Apply PTO</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-blue-500"></span>
-          <span>Weekend Off</span>
-        </div>
-      </div>
+        <button
+          type="button"
+          id="btnCloseCalendarModal"
+          class="btn-icon shrink-0"
+          aria-label="Close calendar"
+        >
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg
+          >
+        </button>
+      </header>
+      <div id="calModalContent" class="overflow-y-auto p-4 sm:p-5"></div>
     </div>
   </div>
 
+  <!-- ===================================================================
+       Reference content
+       =================================================================== -->
+  <section
+    class="border-t border-hairline bg-surface px-4 py-16 sm:px-6 sm:py-20"
+    aria-labelledby="optimizer-reference"
+  >
+    <div class="mx-auto max-w-[52rem]">
+      <span class="tag tag-brand mb-4">🏢 Office holiday planning</span>
+      <h2 id="optimizer-reference" class="mb-4 text-2xl font-extrabold sm:text-3xl">
+        Why your office list beats the national one
+      </h2>
+      <div class="prose-body flex flex-col gap-4">
+        <p>
+          India gazettes far more public holidays than any single employer
+          observes. A typical company picks 10 to 14 of them and adds a couple of
+          its own, which means a plan built on the national list will sometimes
+          tell you to take a Monday off that your office was already closed for —
+          or worse, that you have a free Friday when you're expected at your desk.
+        </p>
+        <p>
+          <strong>So the uploaded list replaces the national one entirely</strong>,
+          rather than merging with it. Every break below is built only from days
+          you actually get, plus your weekends, plus the leave you choose to spend.
+        </p>
+      </div>
+
+      <hr class="my-10 border-hairline" />
+
+      <h2 class="mb-4 text-2xl font-extrabold sm:text-3xl">What you can upload</h2>
+      <div class="prose-body flex flex-col gap-4">
+        <p>
+          The HR holiday circular as a PDF, a screenshot of the intranet page, a
+          photo of the notice on the wall, the text of the email, or a CSV export.
+          Text-based PDFs are read directly; scans, screenshots and photos go
+          through optical character recognition. Both run inside your browser —
+          the file is never sent anywhere, which is also why a large scan takes a
+          few seconds.
+        </p>
+        <p>
+          Recognition is imperfect, especially on coloured text and low-resolution
+          screenshots, so every detected date is listed as a chip you can remove,
+          and you can add anything that was missed by hand. It's worth a
+          ten-second glance before you trust the plans.
+        </p>
+      </div>
+
+      <hr class="my-10 border-hairline" />
+
+      <h2 class="mb-4 text-2xl font-extrabold sm:text-3xl">
+        Working a six-day week?
+      </h2>
+      <p class="prose-body">
+        Switch the workweek control in the header to 6-day and everything
+        recalculates with Sunday as your only weekly day off. Bridges get shorter
+        and rarer, but the ones that survive are usually worth more per leave day
+        spent.
+      </p>
+    </div>
+  </section>
+
   <Footer />
+</Layout>
 
-  <style>
-    
-    .chip-btn {
-      background: #ffffff;
-      border: 1px solid #ebebeb;
-      border-radius: 16px;
-      padding: 8px 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      text-align: left;
-      min-height: 76px;
-      justify-content: space-between;
-    }
-    .chip-btn:hover {
-      border-color: #cbd5e1;
-      background: #f8fafc;
-    }
-    .chip-btn.active {
-      background: #171717;
-      border-color: #171717;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-    }
-    .chip-btn.active .chip-title { color: #ffffff; }
-    .chip-btn.active .chip-desc { color: #94a3b8; }
-    .chip-btn.active .stepper-box {
-      background: #262626;
-      border-color: #404040;
-    }
-    .chip-btn.active .stepper-btn {
-      color: #ffffff;
-    }
-    .chip-btn.active .stepper-val {
-      color: #ffffff;
-    }
-    .chip-title { font-size: 0.95rem; font-weight: 700; color: #171717; }
-    .chip-desc { font-size: 0.72rem; color: #666666; margin-top: 2px; }
-    
-    .month-tab-btn {
-      padding: 6px 16px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      border-radius: 9999px;
-      background: transparent;
-      color: #666666;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-    .month-tab-btn:hover { color: #171717; background: #ffffff; border-color: #ebebeb; }
-    .month-tab-btn.active { background: #171717; color: #ffffff; border-color: #171717; }
-      /* Premium Month Tabs (Pill Style) */
-    .month-tab-btn {
-      font-size: 13px;
-      font-weight: 600;
-      color: #475569;
-      padding: 4px 14px;
-      border-radius: 9999px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      white-space: nowrap;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .month-tab-btn:hover:not(.active) {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-      color: #0f172a;
-    }
-    .month-tab-btn.active {
-      background: #0f172a; /* Solid black active state */
-      border-color: #0f172a;
-      color: #ffffff;
-      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
-    }
-    
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  
-    .tab-btn {
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 10px;
-      background: transparent;
-      color: #64748b;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .tab-btn:hover:not(.active) {
-      color: #0f172a;
-      background: rgba(255, 255, 255, 0.5);
-    }
-    .tab-btn.active {
-      background: #ffffff;
-      color: #0f172a;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    }
-    
-    #dropZone {
-      background: #f8fafc;
-      border: 2px dashed #cbd5e1;
-      transition: all 0.2s ease;
-    }
-    #dropZone:hover {
-      border-color: #0f172a;
-      background: #ffffff;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-    }
+<script>
+  import {
+    solveVacationPlans,
+    buildCalendarMap,
+    getTodayIso,
+    CALENDAR_START,
+    CALENDAR_END,
+  } from "../data/vacation-solver";
+  import { mountResults, type ResultsHandle } from "../scripts/results";
 
-  </style>
+  /* pdf.js and tesseract.js arrive as globals from the head. */
+  declare const pdfjsLib: any;
+  declare const Tesseract: any;
 
-  <script>
-    import { solveVacationPlans, CURRENT_DATE_REF } from "../data/vacation-solver";
+  if (typeof pdfjsLib !== "undefined") {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
 
-    declare const pdfjsLib: any;
-    declare const Tesseract: any;
+  /* ======================================================================
+     Reference data
+     ====================================================================== */
 
-    if (typeof pdfjsLib !== "undefined") {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  /** Named festivals, for lines that give a name but no usable date. */
+  const FESTIVAL_DATE_MAP_2026: Record<string, string[]> = {
+    "new year": ["2026-01-01"],
+    "republic day": ["2026-01-26"],
+    "maha shivratri": ["2026-02-16"],
+    shivratri: ["2026-02-16"],
+    holi: ["2026-03-04"],
+    "eid-ul-fitr": ["2026-03-21"],
+    "eid ul fitr": ["2026-03-21"],
+    "eid-al-fitr": ["2026-03-21"],
+    "id-ul-fitr": ["2026-03-21"],
+    "mahavir jayanti": ["2026-03-31"],
+    "good friday": ["2026-04-03"],
+    "buddha purnima": ["2026-05-01"],
+    "eid-al-adha": ["2026-05-27"],
+    "eid-ul-adha": ["2026-05-27"],
+    "eid ul adha": ["2026-05-27"],
+    bakrid: ["2026-05-27"],
+    muharram: ["2026-06-26"],
+    "independence day": ["2026-08-15"],
+    "raksha bandhan": ["2026-08-28"],
+    rakhi: ["2026-08-28"],
+    janmashtami: ["2026-09-04"],
+    "gandhi jayanti": ["2026-10-02"],
+    dussehra: ["2026-10-20"],
+    vijayadashami: ["2026-10-20"],
+    diwali: ["2026-11-08", "2026-11-09"],
+    deepavali: ["2026-11-08", "2026-11-09"],
+    "guru nanak": ["2026-11-24"],
+    christmas: ["2026-12-25"],
+    xmas: ["2026-12-25"],
+  };
+
+  /* Keyed on the first three letters, which is why the OCR misspellings all
+     resolve: "augst" -> "aug", "septmber" -> "sep", and so on. */
+  const MONTH_MAP: Record<string, string> = {
+    jan: "01",
+    feb: "02",
+    mar: "03",
+    apr: "04",
+    may: "05",
+    jun: "06",
+    jul: "07",
+    aug: "08",
+    sep: "09",
+    oct: "10",
+    nov: "11",
+    dec: "12",
+  };
+
+  const state = {
+    workWeek: 5,
+    customHolidays: [] as string[],
+  };
+
+  /* ======================================================================
+     Date parsing
+     ======================================================================
+     The old version rewrote its own subject string in the middle of a
+     `while (re.exec(...))` loop. A /g regex tracks `lastIndex` as an offset
+     into the string it was handed, so editing that string mid-scan shifted
+     every later match — dates were skipped, and occasionally re-counted.
+
+     The fix is collect-then-blank: gather all matches up front with
+     `matchAll`, then paint the consumed spans over with an equal-length run of
+     spaces. Offsets stay valid, and later patterns still see intact word
+     boundaries where earlier ones took a bite.
+  */
+
+  /** Replaces `len` characters at `start` with the same number of spaces. */
+  function blank(text: string, start: number, len: number): string {
+    return text.slice(0, start) + " ".repeat(len) + text.slice(start + len);
+  }
+
+  /**
+   * Applies `re` to `text`. `onMatch` returns true if it actually used the
+   * match, in which case that span is blanked so no later pattern reads it a
+   * second time. Rejected matches stay visible on purpose — "Aug 40" fails the
+   * range check here but should still be available to the single-date rules.
+   */
+  function consume(
+    text: string,
+    re: RegExp,
+    onMatch: (m: RegExpMatchArray) => boolean
+  ): string {
+    let out = text;
+    for (const m of Array.from(text.matchAll(re))) {
+      if (m.index === undefined) continue;
+      if (onMatch(m)) out = blank(out, m.index, m[0].length);
     }
+    return out;
+  }
 
-    const FESTIVAL_DATE_MAP_2026: Record<string, string[]> = {
-      "new year": ["2026-01-01"],
-      "republic day": ["2026-01-26"],
-      "maha shivratri": ["2026-02-16"],
-      "shivratri": ["2026-02-16"],
-      "holi": ["2026-03-04"],
-      "eid-ul-fitr": ["2026-03-21"],
-      "eid ul fitr": ["2026-03-21"],
-      "eid-al-fitr": ["2026-03-21"],
-      "id-ul-fitr": ["2026-03-21"],
-      "mahavir jayanti": ["2026-03-31"],
-      "good friday": ["2026-04-03"],
-      "buddha purnima": ["2026-05-01"],
-      "eid-al-adha": ["2026-05-27"],
-      "eid-ul-adha": ["2026-05-27"],
-      "eid ul adha": ["2026-05-27"],
-      "bakrid": ["2026-05-27"],
-      "muharram": ["2026-06-26"],
-      "independence day": ["2026-08-15"],
-      "raksha bandhan": ["2026-08-28"],
-      "rakhi": ["2026-08-28"],
-      "janmashtami": ["2026-09-04"],
-      "gandhi jayanti": ["2026-10-02"],
-      "dussehra": ["2026-10-20"],
-      "vijayadashami": ["2026-10-20"],
-      "diwali": ["2026-11-08", "2026-11-09"],
-      "deepavali": ["2026-11-08", "2026-11-09"],
-      "guru nanak": ["2026-11-24"],
-      "christmas": ["2026-12-25"],
-      "xmas": ["2026-12-25"]
+  const inWindow = (iso: string) => iso >= CALENDAR_START && iso <= CALENDAR_END;
+
+  /**
+   * Pulls every date it can recognise out of arbitrary text — a pasted email,
+   * a PDF text layer, or the output of OCR. Returns sorted ISO strings, and an
+   * empty array when there is nothing to find. It never invents a date: a
+   * fabricated holiday is worse than a missing one, because the user has no
+   * reason to doubt it.
+   */
+  function parseUniversalDates(rawText: string): string[] {
+    const datesSet = new Set<string>();
+    if (!rawText || !rawText.trim()) return [];
+
+    const cleanedFullText = rawText
+      .replace(/[*#~|]/g, " ")
+      .replace(/\r\n/g, "\n")
+      .replace(/\t/g, " ");
+
+    const lines = cleanedFullText.split(/[\r\n]+/);
+    // Each line on its own, then the whole thing as one run: a table that OCR
+    // flattened onto a single line still parses, and so does a date that got
+    // split across two.
+    const textChunks = [...lines, cleanedFullText.replace(/\n+/g, " ")];
+
+    /* Month names, including the misspellings OCR reliably produces. */
+    const mName =
+      "(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?" +
+      "|Aug(?:ust|st)?|Sep(?:tember|tmber|t)?|Oct(?:ober|omber)?" +
+      "|Nov(?:ember|mber)?|Dec(?:ember|mber)?)";
+    const dPat = "(0?[1-9]|[12]\\d|3[01])(?:st|nd|rd|th)?";
+    const yPat = "(202[6-7]|2[67])";
+    /* Range separators. This used to be the character class `[-–—to]+`, which
+       matches a lone "t" or "o" — so "Oct 2" parsed as a range. Spelled out as
+       a non-capturing alternation, all the group numbers below are unchanged. */
+    const sep = "\\s*(?:-{1,2}|–|—|to|thru|through|till|until)\\s*";
+    const yTail = "(?:\\s*[,/\\s]\\s*" + yPat + ")?";
+
+    const year = (raw: string | undefined) => {
+      const y = raw || "2026";
+      return y.length === 2 ? "20" + y : y;
     };
+    const sameMonth = (a: string, b: string) =>
+      a.slice(0, 3).toLowerCase() === b.slice(0, 3).toLowerCase();
 
-    const MONTH_MAP: Record<string, string> = {
-      jan: "01", january: "01",
-      feb: "02", february: "02",
-      mar: "03", march: "03",
-      apr: "04", april: "04",
-      may: "05",
-      jun: "06", june: "06",
-      jul: "07", july: "07",
-      aug: "08", august: "08", augst: "08",
-      sep: "09", sept: "09", september: "09", septmber: "09",
-      oct: "10", october: "10", octomber: "10",
-      nov: "11", november: "11", novmber: "11",
-      dec: "12", december: "12", decmber: "12"
-    };
+    for (const chunk of textChunks) {
+      let clean = chunk.replace(/\s+/g, " ").trim();
+      if (!clean) continue;
 
-    let state = {
-      selectedRegion: "ALL",
-      workWeek: 5,
-      selectedLeaves: 0,
-      selectedMonth: "ALL",
-      customHolidays: [] as string[],
-      currentPlans: [] as any[],
-      sortBy: "efficiency"
-    };
+      // Character-level OCR repairs, before anything is matched.
+      clean = clean
+        .replace(/\b2[oO]2[67]\b/g, "2026")
+        .replace(/\b2[lI|]\b/g, "21")
+        .replace(/\b2[sS]\b/g, "25");
 
-    
-    function setupThemeToggle() {
-      const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
-      toggleBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const isDark = document.documentElement.classList.toggle('dark');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          updateThemeIcons();
-        });
-      });
+      let foundDateInChunk = false;
 
-      function updateThemeIcons() {
-        const isDark = document.documentElement.classList.contains('dark');
-        document.querySelectorAll('.theme-icon-moon').forEach(el => {
-          if (isDark) el.classList.add('hidden'); else el.classList.remove('hidden');
-        });
-        document.querySelectorAll('.theme-icon-sun').forEach(el => {
-          if (isDark) el.classList.remove('hidden'); else el.classList.add('hidden');
-        });
-      }
-
-      updateThemeIcons();
-    }
-
-    function init() {
-      setupThemeToggle();
-      state.customHolidays = [];
-      bindEvents();
-      renderDetectedDates(state.customHolidays);
-      render();
-    }
-
-    function parseUniversalDates(rawText: string): string[] {
-      const datesSet = new Set<string>();
-      if (!rawText) return ["2026-01-01"];
-
-      // Always include 1st Jan 2026 by default
-      datesSet.add("2026-01-01");
-
-      const cleanedFullText = rawText
-        .replace(/[*#~|]/g, " ")
-        .replace(/\r\n/g, "\n")
-        .replace(/\t/g, " ");
-
-      const lines = cleanedFullText.split(/[\r\n]+/);
-      const textChunks = [...lines, cleanedFullText.replace(/\n+/g, " ")];
-
-      for (let chunk of textChunks) {
-        let clean = chunk.replace(/\s+/g, " ").trim();
-        if (!clean) continue;
-
-        // Fix OCR character repairs
-        clean = clean.replace(/\b2[oO]2[67]\b/g, "2026");
-        clean = clean.replace(/\b2[lI|]\b/g, "21");
-        clean = clean.replace(/\b2[sS]\b/g, "25");
-
-        let foundDateInChunk = false;
-
-        function addRange(startDay: number, endDay: number, monthKey: string, yyyy: string, matchStr: string) {
-          const mm = MONTH_MAP[monthKey.toLowerCase().substring(0,3)];
-          if (mm && startDay <= endDay && (endDay - startDay <= 15)) {
-            for (let d = startDay; d <= endDay; d++) {
-              datesSet.add(yyyy + "-" + mm + "-" + String(d).padStart(2, "0"));
-            }
-            foundDateInChunk = true;
-            clean = clean.replace(matchStr, " [EXTRACTED] ");
-          }
+      /** A span of consecutive days, e.g. the two days of Diwali. */
+      const addRange = (
+        startDay: number,
+        endDay: number,
+        monthKey: string,
+        yyyy: string
+      ): boolean => {
+        const mm = MONTH_MAP[monthKey.slice(0, 3).toLowerCase()];
+        // A "range" longer than a fortnight is far likelier to be two unrelated
+        // numbers that happen to sit either side of a dash.
+        if (!mm || startDay > endDay || endDay - startDay > 15) return false;
+        for (let d = startDay; d <= endDay; d++) {
+          datesSet.add(`${yyyy}-${mm}-${String(d).padStart(2, "0")}`);
         }
+        foundDateInChunk = true;
+        return true;
+      };
 
-        function addDate(dd: string, monthKey: string, yyyy: string, matchStr: string) {
-          const mm = MONTH_MAP[monthKey.toLowerCase().substring(0,3)];
-          if (mm) {
-            datesSet.add(yyyy + "-" + mm + "-" + dd.padStart(2, "0"));
-            foundDateInChunk = true;
-            clean = clean.replace(matchStr, " [EXTRACTED] ");
-          }
-        }
+      const addDate = (dd: string, monthKey: string, yyyy: string): boolean => {
+        const mm = MONTH_MAP[monthKey.slice(0, 3).toLowerCase()];
+        if (!mm) return false;
+        datesSet.add(`${yyyy}-${mm}-${dd.padStart(2, "0")}`);
+        foundDateInChunk = true;
+        return true;
+      };
 
-        const mName = "(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust|st)?|Sep(?:tember|t)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)";
-        const dPat = "(0?[1-9]|[12]\\d|3[01])(?:st|nd|rd|th)?";
-        const yPat = "(202[6-7]|2[67])";
-        const sep = "\\s*[-–—to]+\\s*"; 
+      /* --- ranges first, so "8–9 Nov" is not read as two stray days ------- */
 
-        let match;
+      // Month DD – Month DD YYYY
+      clean = consume(
+        clean,
+        new RegExp(
+          `\\b${mName}\\s+${dPat}${sep}${mName}\\s+${dPat}${yTail}\\b`,
+          "gi"
+        ),
+        (m) =>
+          sameMonth(m[1], m[3]) &&
+          addRange(parseInt(m[2], 10), parseInt(m[4], 10), m[1], year(m[5]))
+      );
 
-        // R1: Month DD - Month DD YYYY
-        const r1 = new RegExp("\\b" + mName + "\\s+" + dPat + sep + mName + "\\s+" + dPat + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
-        while ((match = r1.exec(clean)) !== null) {
-          const mm1 = match[1]; const d1 = parseInt(match[2]); const mm2 = match[3]; const d2 = parseInt(match[4]);
-          let yyyy = match[5] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
-          if (mm1.toLowerCase().substring(0,3) === mm2.toLowerCase().substring(0,3)) {
-            addRange(d1, d2, mm1, yyyy, match[0]);
-          }
-        }
+      // Month DD – DD YYYY
+      clean = consume(
+        clean,
+        new RegExp(`\\b${mName}\\s+${dPat}${sep}${dPat}${yTail}\\b`, "gi"),
+        (m) => addRange(parseInt(m[2], 10), parseInt(m[3], 10), m[1], year(m[4]))
+      );
 
-        // R2: Month DD - DD YYYY
-        const r2 = new RegExp("\\b" + mName + "\\s+" + dPat + sep + dPat + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
-        while ((match = r2.exec(clean)) !== null) {
-          const mm = match[1]; const d1 = parseInt(match[2]); const d2 = parseInt(match[3]);
-          let yyyy = match[4] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
-          addRange(d1, d2, mm, yyyy, match[0]);
-        }
+      // DD Month – DD Month YYYY
+      clean = consume(
+        clean,
+        new RegExp(
+          `\\b${dPat}\\s+${mName}${sep}${dPat}\\s+${mName}${yTail}\\b`,
+          "gi"
+        ),
+        (m) =>
+          sameMonth(m[2], m[4]) &&
+          addRange(parseInt(m[1], 10), parseInt(m[3], 10), m[2], year(m[5]))
+      );
 
-        // R3: DD Month - DD Month YYYY
-        const r3 = new RegExp("\\b" + dPat + "\\s+" + mName + sep + dPat + "\\s+" + mName + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
-        while ((match = r3.exec(clean)) !== null) {
-          const d1 = parseInt(match[1]); const mm1 = match[2]; const d2 = parseInt(match[3]); const mm2 = match[4];
-          let yyyy = match[5] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
-          if (mm1.toLowerCase().substring(0,3) === mm2.toLowerCase().substring(0,3)) {
-            addRange(d1, d2, mm1, yyyy, match[0]);
-          }
-        }
+      // DD – DD Month YYYY
+      clean = consume(
+        clean,
+        new RegExp(`\\b${dPat}${sep}${dPat}\\s+${mName}${yTail}\\b`, "gi"),
+        (m) => addRange(parseInt(m[1], 10), parseInt(m[2], 10), m[3], year(m[4]))
+      );
 
-        // R4: DD - DD Month YYYY
-        const r4 = new RegExp("\\b" + dPat + sep + dPat + "\\s+" + mName + "(?:\\s*[,/\\s]\\s*" + yPat + ")?\\b", "gi");
-        while ((match = r4.exec(clean)) !== null) {
-          const d1 = parseInt(match[1]); const d2 = parseInt(match[2]); const mm = match[3];
-          let yyyy = match[4] || "2026"; if(yyyy.length === 2) yyyy = "20"+yyyy;
-          addRange(d1, d2, mm, yyyy, match[0]);
-        }
-        
-        // Now single dates
-        
-        // ISO: YYYY-MM-DD
-        const isoRegex = /\b(202[6-7])[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g;
-        while ((match = isoRegex.exec(clean)) !== null) {
-          datesSet.add(match[1] + "-" + match[2].padStart(2, '0') + "-" + match[3].padStart(2, '0'));
+      /* --- then single dates --------------------------------------------- */
+
+      // YYYY-MM-DD
+      clean = consume(
+        clean,
+        /\b(202[6-7])[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g,
+        (m) => {
+          datesSet.add(
+            `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`
+          );
           foundDateInChunk = true;
-          clean = clean.replace(match[0], " [EXTRACTED] ");
+          return true;
         }
+      );
 
-        // Numerical: DD/MM/YYYY
-        const numDateRegex = /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](202[6-7]|2[67])\b/g;
-        while ((match = numDateRegex.exec(clean)) !== null) {
-          let yyyy = match[3]; if (yyyy.length === 2) yyyy = "20" + yyyy;
-          datesSet.add(yyyy + "-" + match[2].padStart(2, '0') + "-" + match[1].padStart(2, '0'));
+      // DD/MM/YYYY — day-first, which is how it is written in India.
+      clean = consume(
+        clean,
+        /\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](202[6-7]|2[67])\b/g,
+        (m) => {
+          datesSet.add(
+            `${year(m[3])}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`
+          );
           foundDateInChunk = true;
-          clean = clean.replace(match[0], " [EXTRACTED] ");
+          return true;
         }
+      );
 
-        // Named Month: DD Month YYYY
-        const namedMonthRegex = new RegExp("\\b" + dPat + "\\s*[-/\\s,.]+\\s*" + mName + "\\b(?:\\s*[-/\\s,.]*\\s*" + yPat + ")?", "gi");
-        while ((match = namedMonthRegex.exec(clean)) !== null) {
-          const dd = match[1]; const mm = match[2]; 
-          let yyyy = match[3] || "2026"; if (yyyy.length === 2) yyyy = "20" + yyyy;
-          addDate(dd, mm, yyyy, match[0]);
-        }
+      // DD Month YYYY
+      clean = consume(
+        clean,
+        new RegExp(
+          `\\b${dPat}\\s*[-/\\s,.]+\\s*${mName}\\b(?:\\s*[-/\\s,.]*\\s*${yPat})?`,
+          "gi"
+        ),
+        (m) => addDate(m[1], m[2], year(m[3]))
+      );
 
-        // Reversed Named Month: Month DD YYYY
-        const revNamedMonthRegex = new RegExp("\\b" + mName + "\\s*[-/\\s,.]+\\s*" + dPat + "\\b(?:\\s*[,/\\s.]*\\s*" + yPat + ")?", "gi");
-        while ((match = revNamedMonthRegex.exec(clean)) !== null) {
-          const mm = match[1]; const dd = match[2];
-          let yyyy = match[3] || "2026"; if (yyyy.length === 2) yyyy = "20" + yyyy;
-          addDate(dd, mm, yyyy, match[0]);
-        }
+      // Month DD YYYY
+      clean = consume(
+        clean,
+        new RegExp(
+          `\\b${mName}\\s*[-/\\s,.]+\\s*${dPat}\\b(?:\\s*[,/\\s.]*\\s*${yPat})?`,
+          "gi"
+        ),
+        (m) => addDate(m[2], m[1], year(m[3]))
+      );
 
-        // Fallback: Check Festival Entity Map ONLY if NO explicit date was found in this line
-        if (!foundDateInChunk) {
-          const cleanLower = clean.toLowerCase();
-          for (const [festName, dates] of Object.entries(FESTIVAL_DATE_MAP_2026)) {
-            const regex = new RegExp(`\\b${festName.replace(/-/g, "[- ]")}\\b`, "i");
-            if (regex.test(cleanLower)) {
-              dates.forEach(d => datesSet.add(d));
-            }
-          }
+      /* --- named festivals, only where no date was found ------------------
+         Guarded on `foundDateInChunk` so "Diwali — 20 Oct" trusts the date the
+         employer printed rather than the almanac date for Diwali. */
+      if (!foundDateInChunk) {
+        const cleanLower = clean.toLowerCase();
+        for (const [festName, dates] of Object.entries(FESTIVAL_DATE_MAP_2026)) {
+          const re = new RegExp(`\\b${festName.replace(/-/g, "[- ]")}\\b`, "i");
+          if (re.test(cleanLower)) dates.forEach((d) => datesSet.add(d));
         }
       }
-
-      return Array.from(datesSet).sort();
     }
 
-    function renderDetectedDates(dates: string[]) {
-      const box = document.getElementById("detectedDatesBox");
-      const pills = document.getElementById("detectedPills");
-      const count = document.getElementById("detectedCount");
+    // Anything outside the planning window cannot produce a plan, so it is
+    // dropped rather than shown as a chip that quietly does nothing.
+    return Array.from(datesSet).filter(inWindow).sort();
+  }
 
-      if (!box || !pills || !count) return;
-      count.textContent = String(dates.length);
+  /* ======================================================================
+     Detected-date chips
+     ====================================================================== */
+  const el = <T extends HTMLElement>(id: string) =>
+    document.getElementById(id) as T | null;
 
-      if (dates.length === 0) {
-        box.classList.add("hidden");
-        return;
-      }
+  const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const MON = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
 
-      box.classList.remove("hidden");
+  /** Local, not UTC: `new Date(iso)` lands a day early west of Greenwich. */
+  function formatChip(iso: string): string {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return `${DOW[dt.getDay()]} ${d} ${MON[m - 1]}`;
+  }
 
-      pills.innerHTML = dates.map(d => {
-        const dateObj = new Date(d + "T00:00:00");
-        const formatted = dateObj.toLocaleDateString("en-IN", { day: "numeric", month: "short", weekday: "short" });
-        return `
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold bg-slate-50 border border-slate-300 text-slate-900 rounded-lg shadow-xs hover:border-slate-800 transition-all">
-            <span>${formatted} (${d})</span>
-            <button type="button" class="btn-remove-date text-red-500 hover:text-red-700 font-bold ml-1 cursor-pointer" data-date="${d}" title="Remove this date">✕</button>
-          </span>
-        `;
-      }).join("");
+  function renderDetectedDates() {
+    const box = el("detectedDatesBox");
+    const pills = el("detectedPills");
+    const count = el("detectedCount");
+    const status = el("activeStatusPill");
+    if (!box || !pills || !count) return;
 
-      document.querySelectorAll(".btn-remove-date").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const targetDate = (btn as HTMLElement).dataset.date;
-          state.customHolidays = state.customHolidays.filter(dt => dt !== targetDate);
-          renderDetectedDates(state.customHolidays);
-          render();
-        });
-      });
+    const dates = state.customHolidays;
+    count.textContent = String(dates.length);
+    box.hidden = dates.length === 0;
+    if (status) {
+      status.textContent =
+        dates.length === 0
+          ? ""
+          : `Planning around ${dates.length} ${dates.length === 1 ? "day" : "days"}`;
+    }
+    if (dates.length === 0) {
+      pills.innerHTML = "";
+      return;
     }
 
-    function bindEvents() {
-      // Custom Dropdown Logic
-      const dropdownBtn = document.getElementById("sortDropdownBtn");
-      const dropdownMenu = document.getElementById("sortDropdownMenu");
-      const dropdownLabel = document.getElementById("sortDropdownLabel");
-      const sortOptions = document.querySelectorAll(".sort-option");
+    pills.innerHTML = dates
+      .map(
+        (d) => `<span class="date-chip">
+          ${formatChip(d)}
+          <button type="button" class="date-chip-x btn-remove-date" data-date="${d}"
+            aria-label="Remove ${formatChip(d)}">
+            <span aria-hidden="true">✕</span>
+          </button>
+        </span>`
+      )
+      .join("");
 
-      if (dropdownBtn && dropdownMenu) {
-        dropdownBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const isHidden = dropdownMenu.classList.contains("hidden");
-          if (isHidden) {
-            dropdownMenu.classList.remove("hidden", "pointer-events-none");
-            setTimeout(() => dropdownMenu.classList.remove("opacity-0", "scale-95"), 10);
-          } else {
-            dropdownMenu.classList.add("opacity-0", "scale-95");
-            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
-          }
-        });
-
-        document.addEventListener("click", (e) => {
-          if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.classList.add("opacity-0", "scale-95");
-            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
-          }
-        });
-
-        sortOptions.forEach(option => {
-          option.addEventListener("click", () => {
-            const value = option.dataset.value;
-            if (!value) return;
-
-            const text = value === "efficiency" ? "Sort: Highest Efficiency" : "Sort: Chronological (Dates)";
-            if (dropdownLabel) dropdownLabel.textContent = text;
-
-            sortOptions.forEach(opt => {
-              const icon = opt.querySelector(".check-icon");
-              if (icon) {
-                if (opt === option) icon.classList.remove("hidden");
-                else icon.classList.add("hidden");
-              }
-            });
-
-            state.sortBy = value;
-            dropdownMenu.classList.add("opacity-0", "scale-95");
-            setTimeout(() => dropdownMenu.classList.add("hidden", "pointer-events-none"), 200);
-            
-            render();
-          });
-        });
-      }
-      const dropZone = document.getElementById("dropZone");
-      const fileInput = document.getElementById("fileUploadInput") as HTMLInputElement;
-      const textArea = document.getElementById("companyTextPaste") as HTMLTextAreaElement;
-      const btnClear = document.getElementById("btnClearDates");
-      const fileStatus = document.getElementById("fileUploadStatus");
-      const fileStatusText = document.getElementById("fileUploadStatusText");
-      const spinner = document.getElementById("uploadSpinner");
-      const spinnerText = document.getElementById("spinnerText");
-
-      const manualDateInput = document.getElementById("manualDateInput") as HTMLInputElement;
-      const btnAddManualDate = document.getElementById("btnAddManualDate");
-
-      if (btnAddManualDate && manualDateInput) {
-        btnAddManualDate.addEventListener("click", () => {
-          const val = manualDateInput.value;
-          if (val && !state.customHolidays.includes(val)) {
-            state.customHolidays.push(val);
-            state.customHolidays.sort();
-            renderDetectedDates(state.customHolidays);
-            render();
-          }
-        });
-      }
-
-      document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
-          const target = document.getElementById((btn as HTMLElement).dataset.tab || "");
-          if (target) target.classList.remove("hidden");
-        });
+    pills.querySelectorAll<HTMLElement>(".btn-remove-date").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.customHolidays = state.customHolidays.filter(
+          (d) => d !== btn.dataset.date
+        );
+        commitDates();
       });
+    });
+  }
 
-      if (textArea) {
-        textArea.addEventListener("input", () => {
-          const text = textArea.value;
-          const dates = parseUniversalDates(text);
-          state.customHolidays = dates;
-          renderDetectedDates(dates);
-          render();
-        });
-      }
+  /* ======================================================================
+     Two-state page
+     ====================================================================== */
+  let results: ResultsHandle | null = null;
 
-      if (dropZone && fileInput) {
-        dropZone.addEventListener("click", () => fileInput.click());
-        dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("border-slate-800"); });
-        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("border-slate-800"));
-        dropZone.addEventListener("drop", (e) => {
-          e.preventDefault();
-          dropZone.classList.remove("border-slate-800");
-          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleCleanFileParsing(e.dataTransfer.files[0]);
-          }
-        });
+  /** Single funnel for every change to the office list. */
+  function commitDates() {
+    state.customHolidays = Array.from(new Set(state.customHolidays))
+      .filter(inWindow)
+      .sort();
+    renderDetectedDates();
+    syncSections();
+    results?.refresh();
+  }
 
-        fileInput.addEventListener("change", (e) => {
-          const target = e.target as HTMLInputElement;
-          if (target && target.files && target.files[0]) {
-            handleCleanFileParsing(target.files[0]);
-          }
-        });
-      }
+  function syncSections() {
+    const has = state.customHolidays.length > 0;
+    const prompt = el("noDatesPrompt");
+    const budget = el("budgetSection");
+    const grid = el("gridSection");
+    if (prompt) prompt.hidden = has;
+    if (budget) budget.hidden = !has;
+    if (grid) grid.hidden = !has;
 
-      function preprocessImageForOcr(imageFile: File): Promise<HTMLCanvasElement> {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(imageFile);
-        img.onload = () => {
-          URL.revokeObjectURL(url);
-          const canvas = document.createElement("canvas");
-          let scale = 1;
-          if (img.width < 1600) {
-            scale = 1600 / img.width;
-          } else if (img.width > 2600) {
-            scale = 2000 / img.width;
-          }
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
+    // The month rail measured itself while the section was still hidden, so
+    // every width read back as zero and the overflow arrows stayed down. One
+    // resize event is enough to make it measure again.
+    if (has) window.dispatchEvent(new Event("resize"));
+  }
 
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            resolve(canvas);
-            return;
-          }
+  /* ======================================================================
+     Input modes
+     ====================================================================== */
+  function initTabs() {
+    const tablist = el("inputTabs");
+    if (!tablist) return;
+    const tabs = Array.from(
+      tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    );
 
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const select = (tab: HTMLButtonElement, moveFocus: boolean) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute("aria-selected", String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(t.dataset.tab || "");
+        if (panel) panel.hidden = !on;
+      });
+      if (moveFocus) tab.focus();
+    };
 
-          // Enhance text contrast (especially for colored/red card text like Christmas, Eid)
-          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imgData.data;
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            
-            // Standard luminance
-            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
-            
-            // Red-text enhancement: If pixel is predominantly red text on light background
-            if (r > g + 40 && r > b + 40) {
-              gray = Math.max(0, gray - 50); // darken red text
-            }
-
-            // High-contrast thresholding
-            const val = gray < 145 ? Math.max(0, gray * 0.5) : Math.min(255, gray * 1.3);
-            data[i] = val;
-            data[i + 1] = val;
-            data[i + 2] = val;
-          }
-          ctx.putImageData(imgData, 0, 0);
-          resolve(canvas);
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(tab, false));
+      tab.addEventListener("keydown", (e) => {
+        const map: Record<string, number> = {
+          ArrowRight: (i + 1) % tabs.length,
+          ArrowLeft: (i - 1 + tabs.length) % tabs.length,
+          Home: 0,
+          End: tabs.length - 1,
         };
-        img.onerror = reject;
-        img.src = url;
+        const next = map[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        select(tabs[next], true);
       });
+    });
+  }
+
+  /* ======================================================================
+     File reading — all of it on-device
+     ====================================================================== */
+
+  /** Upscales, greys and thresholds an image so OCR has a fighting chance.
+   *  Holiday circulars love low-contrast red text on cream, which Tesseract
+   *  reads as noise until the red is pushed dark. */
+  function preprocessImageForOcr(imageFile: File): Promise<HTMLCanvasElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(imageFile);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement("canvas");
+        let scale = 1;
+        if (img.width < 1600) scale = 1600 / img.width;
+        else if (img.width > 2600) scale = 2000 / img.width;
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(canvas);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          if (r > g + 40 && r > b + 40) gray = Math.max(0, gray - 50);
+          const val = gray < 145 ? Math.max(0, gray * 0.5) : Math.min(255, gray * 1.3);
+          data[i] = val;
+          data[i + 1] = val;
+          data[i + 2] = val;
+        }
+        ctx.putImageData(imgData, 0, 0);
+        resolve(canvas);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  function setStatus(kind: "ok" | "warn", message: string) {
+    const status = el("fileUploadStatus");
+    const text = el("fileUploadStatusText");
+    if (!status || !text) return;
+    status.classList.toggle("note-ok", kind === "ok");
+    status.classList.toggle("note-warn", kind === "warn");
+    text.textContent = message;
+    status.hidden = false;
+  }
+
+  function setBusy(busy: boolean, title = "", sub = "") {
+    const spinner = el("uploadSpinner");
+    const zone = el("dropZone");
+    const input = el<HTMLInputElement>("fileUploadInput");
+    if (spinner) spinner.hidden = !busy;
+    if (zone) zone.setAttribute("aria-busy", String(busy));
+    // Disabling the input while a file is being read stops a second drop from
+    // interleaving with the first and mixing two lists together.
+    if (input) input.disabled = busy;
+    if (busy) {
+      const t = el("spinnerText");
+      const s = el("spinnerSub");
+      if (t && title) t.textContent = title;
+      if (s && sub) s.textContent = sub;
     }
+  }
 
-    async function handleCleanFileParsing(file: File) {
-        if (!spinner || !spinnerText || !fileStatus || !fileStatusText) return;
-        spinner.classList.remove("hidden");
-        spinnerText.textContent = `Opening "${file.name}"...`;
+  function progress(message: string) {
+    const t = el("spinnerText");
+    if (t) t.textContent = message;
+  }
 
-        let fullExtractedText = "";
+  async function handleCleanFileParsing(file: File) {
+    setBusy(true, `Opening “${file.name}”…`, "Everything happens on your device");
+    let text = "";
 
-        try {
-          if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-            spinnerText.textContent = "Reading your PDF document...";
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+    try {
+      const isPdf =
+        file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-              spinnerText.textContent = `Scanning page ${pageNum} of ${pdf.numPages}...`;
-              const page = await pdf.getPage(pageNum);
-              const textContent = await page.getTextContent();
-              const pageStrings = textContent.items.map((item: any) => item.str).join(" ");
-              fullExtractedText += "\n" + pageStrings;
+      if (isPdf) {
+        progress("Reading your PDF…");
+        const buffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) })
+          .promise;
 
-              if (pageStrings.trim().length < 40 && typeof Tesseract !== "undefined") {
-                spinnerText.textContent = `Reading holiday dates from page ${pageNum}...`;
-                const viewport = page.getViewport({ scale: 1.8 });
-                const canvas = document.createElement("canvas");
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                const ctx = canvas.getContext("2d");
-                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                
-                const ocrResult = await Tesseract.recognize(canvas, "eng");
-                fullExtractedText += "\n" + ocrResult.data.text;
-              }
-            }
-          } else if (file.type.startsWith("image/")) {
-            spinnerText.textContent = "Scanning your holiday image...";
-            const preprocessedCanvas = await preprocessImageForOcr(file);
-            const ocrResult = await Tesseract.recognize(preprocessedCanvas, "eng");
-            fullExtractedText = ocrResult.data.text;
-          } else {
-            fullExtractedText = await file.text();
+        for (let n = 1; n <= pdf.numPages; n++) {
+          progress(`Reading page ${n} of ${pdf.numPages}…`);
+          const page = await pdf.getPage(n);
+          const content = await page.getTextContent();
+          const pageText = content.items.map((i: any) => i.str).join(" ");
+          text += "\n" + pageText;
+
+          // A near-empty text layer means the page is a scan, not typed text.
+          if (pageText.trim().length < 40 && typeof Tesseract !== "undefined") {
+            progress(`Page ${n} is a scan — recognising the text…`);
+            const viewport = page.getViewport({ scale: 1.8 });
+            const canvas = document.createElement("canvas");
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({
+              canvasContext: canvas.getContext("2d"),
+              viewport,
+            }).promise;
+            const ocr = await Tesseract.recognize(canvas, "eng");
+            text += "\n" + ocr.data.text;
           }
-
-          const dates = parseUniversalDates(fullExtractedText);
-          state.customHolidays = dates;
-
-          fileStatus.classList.remove("hidden");
-          if (dates.length > 0) {
-            fileStatusText.textContent = `Added ${dates.length} office holidays from "${file.name}"`;
-          } else {
-            fileStatusText.textContent = `Uploaded "${file.name}". No dates detected. Use "+ Add Date" below to add manually.`;
-          }
-
-          renderDetectedDates(dates);
-          render();
-          if (dates.length > 0) {
-            setTimeout(() => {
-              const box = document.getElementById("detectedDatesBox");
-              if (box) {
-                // Scroll specifically to the box so it aligns nicely with the header
-                box.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }, 300); // Small delay to let Astro finish rendering the DOM
-          }
-        } catch (err: any) {
-          console.error("Deep parsing error:", err);
-          fileStatus.classList.remove("hidden");
-          fileStatusText.textContent = `Could not read "${file.name}". You can paste your text or add dates manually.`;
-          renderDetectedDates(state.customHolidays);
-          render();
-        } finally {
-          spinner.classList.add("hidden");
         }
-      }
-
-      if (btnClear) {
-        btnClear.addEventListener("click", () => {
-          state.customHolidays = [];
-          if (textArea) textArea.value = "";
-          if (fileStatus) fileStatus.classList.add("hidden");
-          renderDetectedDates([]);
-          render();
-        });
-      }
-
-      document.querySelectorAll(".chip-btn").forEach(chip => {
-        if (chip.id === "customChipWrapper") return;
-        chip.addEventListener("click", () => {
-          document.querySelectorAll(".chip-btn").forEach(c => c.classList.remove("active"));
-          chip.classList.add("active");
-          state.selectedLeaves = parseInt((chip as HTMLElement).dataset.leaves || "0", 10);
-          render();
-        });
-      });
-
-      const customWrapper = document.getElementById("customChipWrapper");
-      const customInput = document.getElementById("customLeavesInput") as HTMLInputElement;
-      const customDisplay = document.getElementById("customLeavesDisplay");
-      const btnInc = document.getElementById("btnIncLeave");
-      const btnDec = document.getElementById("btnDecLeave");
-
-      if (customWrapper && customInput && customDisplay) {
-        customWrapper.addEventListener("click", () => {
-          document.querySelectorAll(".chip-btn").forEach(c => c.classList.remove("active"));
-          customWrapper.classList.add("active");
-          state.selectedLeaves = Math.max(parseInt(customInput.value || "4", 10), 4);
-          render();
-        });
-        if (btnInc) {
-          btnInc.addEventListener("click", (e) => {
-            e.stopPropagation();
-            document.querySelectorAll(".chip-btn").forEach(c => c.classList.remove("active"));
-            customWrapper.classList.add("active");
-            let val = parseInt(customInput.value || "4", 10);
-            if (val < 15) val += 1;
-            customInput.value = String(val);
-            customDisplay.textContent = String(val);
-            state.selectedLeaves = val;
-            render();
-          });
-        }
-        if (btnDec) {
-          btnDec.addEventListener("click", (e) => {
-            e.stopPropagation();
-            document.querySelectorAll(".chip-btn").forEach(c => c.classList.remove("active"));
-            customWrapper.classList.add("active");
-            let val = parseInt(customInput.value || "4", 10);
-            if (val > 4) val -= 1;
-            customInput.value = String(val);
-            customDisplay.textContent = String(val);
-            state.selectedLeaves = val;
-            render();
-          });
-        }
-      }
-
-      document.querySelectorAll(".month-tab-btn").forEach(tab => {
-        tab.addEventListener("click", () => {
-          document.querySelectorAll(".month-tab-btn").forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          state.selectedMonth = (tab as HTMLElement).dataset.month || "ALL";
-          render();
-        });
-      });
-
-      // Calendar Modal bindings
-      const calModal = document.getElementById("calendarModal");
-      const btnCloseCal = document.getElementById("btnCloseCalendarModal");
-      if (calModal && btnCloseCal) {
-        btnCloseCal.addEventListener("click", () => calModal.classList.add("hidden"));
-        calModal.addEventListener("click", (e) => {
-          if (e.target === calModal) calModal.classList.add("hidden");
-        });
-      }
-
-      // Escape key to dismiss modals
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          if (calModal) calModal.classList.add("hidden");
-        }
-      });
-    }
-
-    function formatDateRange(startStr: string, endStr: string) {
-      const s = new Date(startStr + "T00:00:00");
-      const e = new Date(endStr + "T00:00:00");
-      return s.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + " – " + e.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-    }
-
-    function renderMonthGrid(year: number, monthIndex: number, daysMap: Map<string, any>) {
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const firstDay = new Date(year, monthIndex, 1).getDay();
-      const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-      const monOffset = (firstDay + 6) % 7;
-      const monthTitle = `${monthNames[monthIndex]} ${year}`;
-
-      let cellsHtml = "";
-      for (let i = 0; i < monOffset; i++) {
-        cellsHtml += `<div class="h-8"></div>`;
-      }
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const mm = String(monthIndex + 1).padStart(2, "0");
-        const dd = String(d).padStart(2, "0");
-        const iso = `${year}-${mm}-${dd}`;
-        const dayOfWeek = new Date(year, monthIndex, d).getDay();
-        const isNormalWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-        let cellStyle = "text-slate-400 bg-transparent";
-        let dotHtml = "";
-        let tooltipText = "";
-
-        if (daysMap.has(iso)) {
-          const item = daysMap.get(iso);
-          if (item.type === "holiday") {
-            cellStyle = "bg-emerald-100 text-emerald-950 font-bold border border-emerald-300 ring-2 ring-emerald-400/30";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block mt-0.5"></span>';
-            tooltipText = item.label || "Company Holiday";
-          } else if (item.type === "leave") {
-            cellStyle = "bg-amber-100 text-amber-950 font-bold border border-amber-300 ring-2 ring-amber-400/30";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-amber-600 inline-block mt-0.5"></span>';
-            tooltipText = "Apply PTO Leave";
-          } else if (item.type === "weekend") {
-            cellStyle = "bg-blue-100/80 text-blue-950 font-bold border border-blue-300";
-            dotHtml = '<span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block mt-0.5"></span>';
-            tooltipText = "Weekend Off";
-          }
-        } else if (isNormalWeekend) {
-          cellStyle = "text-slate-600 bg-slate-100/60 font-medium";
-        }
-
-        cellsHtml += `
-          <div class="h-8 rounded-lg flex flex-col items-center justify-center text-xs transition-all relative group/calcell select-none ${cellStyle}">
-            <span>${d}</span>
-            ${dotHtml}
-            ${tooltipText ? `
-              <div class="hidden group-hover/calcell:block absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-900 text-white text-[10px] font-medium rounded shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                ${tooltipText}
-              </div>
-            ` : ""}
-          </div>
-        `;
-      }
-
-      return `
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="text-xs font-bold text-slate-800 text-center mb-3 tracking-tight pb-2 border-b border-slate-100">
-            ${monthTitle}
-          </div>
-          <div class="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-slate-400">
-            <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
-          </div>
-          <div class="grid grid-cols-7 gap-1">
-            ${cellsHtml}
-          </div>
-        </div>
-      `;
-    }
-
-    function openCalendarModal(plan: any) {
-      const modal = document.getElementById("calendarModal");
-      const mTitle = document.getElementById("calModalTitle");
-      const mDates = document.getElementById("calModalDates");
-      const mContent = document.getElementById("calModalContent");
-
-      if (!modal || !mTitle || !mDates || !mContent) return;
-
-      mTitle.textContent = plan.title;
-      mDates.textContent = `🗓️ ${formatDateRange(plan.startDate, plan.endDate)} · ${plan.totalDaysOff} Consecutive Days Off`;
-
-      const daysMap = new Map();
-      plan.days.forEach((d: any) => daysMap.set(d.date, d));
-
-      const startD = new Date(plan.startDate + "T00:00:00");
-      const endD = new Date(plan.endDate + "T00:00:00");
-
-      const startY = startD.getFullYear();
-      const startM = startD.getMonth();
-      const endY = endD.getFullYear();
-      const endM = endD.getMonth();
-
-      let calendarsHtml = "";
-      if (startY === endY && startM === endM) {
-        mContent.className = "grid grid-cols-1 max-w-sm mx-auto w-full gap-4 mb-6";
-        calendarsHtml = renderMonthGrid(startY, startM, daysMap);
+      } else if (file.type.startsWith("image/")) {
+        progress("Recognising the text in your image…");
+        const canvas = await preprocessImageForOcr(file);
+        const ocr = await Tesseract.recognize(canvas, "eng");
+        text = ocr.data.text;
       } else {
-        mContent.className = "grid grid-cols-1 md:grid-cols-2 gap-4 mb-6";
-        calendarsHtml = renderMonthGrid(startY, startM, daysMap) + renderMonthGrid(endY, endM, daysMap);
+        text = await file.text();
       }
 
-      mContent.innerHTML = calendarsHtml;
-      modal.classList.remove("hidden");
-    }
+      const dates = parseUniversalDates(text);
+      state.customHolidays = dates;
+      commitDates();
 
-    function render() {
-      const budgetSection = document.getElementById("budgetSection");
-      const gridSection = document.getElementById("gridSection");
-      
-      if (!state.customHolidays || state.customHolidays.length === 0) {
-        if (budgetSection) budgetSection.classList.add("hidden");
-        if (gridSection) gridSection.classList.add("hidden");
+      if (dates.length > 0) {
+        setStatus(
+          "ok",
+          `Found ${dates.length} ${dates.length === 1 ? "date" : "dates"} in “${file.name}”. Check them below — recognition is not perfect.`
+        );
+        el("detectedDatesBox")?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
       } else {
-        if (budgetSection) budgetSection.classList.remove("hidden");
-        if (gridSection) gridSection.classList.remove("hidden");
+        setStatus(
+          "warn",
+          `Read “${file.name}” but found no dates. Paste the list as text, or add the dates by hand below.`
+        );
       }
+    } catch (err) {
+      console.error("Could not read the uploaded file:", err);
+      setStatus(
+        "warn",
+        `Could not read “${file.name}”. Try the paste tab, or add dates by hand below.`
+      );
+      commitDates();
+    } finally {
+      setBusy(false);
+    }
+  }
 
-      const grid = document.getElementById("vacationGrid");
-      const empty = document.getElementById("emptyState");
-      const badge = document.getElementById("resultsBadge");
-      const subtext = document.getElementById("resultsSubtext");
+  function initUpload() {
+    const zone = el("dropZone");
+    const input = el<HTMLInputElement>("fileUploadInput");
+    if (!zone || !input) return;
 
-      if (!state.customHolidays || state.customHolidays.length === 0) {
-        if (grid) grid.innerHTML = "";
-        if (empty) {
-          empty.classList.remove("hidden");
-          const emptyTitle = document.getElementById("emptyStateTitle");
-          const emptySub = document.getElementById("emptyStateSub");
-          if (emptyTitle) emptyTitle.textContent = "No Office Holidays Added Yet";
-          if (emptySub) emptySub.textContent = "Simply upload or paste your office holiday schedule in the box above to see all your potential long weekends!";
-        }
-        if (badge) badge.textContent = "0 Plans";
-        if (subtext) subtext.textContent = "Add your office holidays above to see your personalized long weekends";
+    input.addEventListener("change", () => {
+      const file = input.files?.[0];
+      if (file) handleCleanFileParsing(file);
+      // Cleared so re-picking the same file still fires `change`.
+      input.value = "";
+    });
+
+    // dragenter as well as dragover: the highlight should appear the moment the
+    // pointer crosses the edge, not on the next mouse move.
+    ["dragenter", "dragover"].forEach((evt) =>
+      zone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        zone.classList.add("is-dragging");
+      })
+    );
+    ["dragleave", "dragend"].forEach((evt) =>
+      zone.addEventListener(evt, () => zone.classList.remove("is-dragging"))
+    );
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zone.classList.remove("is-dragging");
+      const file = (e as DragEvent).dataTransfer?.files?.[0];
+      if (file) handleCleanFileParsing(file);
+    });
+  }
+
+  function initPaste() {
+    const area = el<HTMLTextAreaElement>("companyTextPaste");
+    if (!area) return;
+
+    // Debounced: parsing runs over every line plus the whole blob, which is
+    // wasteful on each keystroke of a long paste.
+    let timer = 0;
+    area.addEventListener("input", () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        state.customHolidays = parseUniversalDates(area.value);
+        commitDates();
+      }, 250);
+    });
+  }
+
+  function initManualDate() {
+    const input = el<HTMLInputElement>("manualDateInput");
+    const btn = el<HTMLButtonElement>("btnAddManualDate");
+    if (!input || !btn) return;
+
+    const add = () => {
+      const value = input.value;
+      if (!value) return;
+      if (!inWindow(value)) {
+        setStatus("warn", "That date is outside the 2026 planning window.");
         return;
       }
-
-      const plans = solveVacationPlans({
-        leaves: state.selectedLeaves,
-        workWeek: state.workWeek,
-        region: state.selectedRegion as any,
-        month: state.selectedMonth,
-        fromDate: CURRENT_DATE_REF,
-        customHolidays: state.customHolidays
-      });
-
-      
-      if (state.sortBy === "efficiency") {
-        plans.sort((a, b) => {
-          if (b.totalDaysOff !== a.totalDaysOff) return b.totalDaysOff - a.totalDaysOff;
-          return a.startDate.localeCompare(b.startDate);
-        });
-      } else {
-        plans.sort((a, b) => a.startDate.localeCompare(b.startDate));
-      }
-      state.currentPlans = plans;
-
-      if (badge) badge.textContent = plans.length + (plans.length === 1 ? " Plan" : " Plans");
-      if (subtext) subtext.textContent = "Showing options with " + state.selectedLeaves + (state.selectedLeaves === 1 ? " leave" : " leaves") + " using " + state.customHolidays.length + " office holidays";
-
-      if (!grid || !empty) return;
-
-      if (plans.length === 0) {
-        grid.innerHTML = "";
-        const empty = document.getElementById("emptyState");
-        if(empty) empty.classList.remove("hidden");
-        const emptyTitle = document.getElementById("emptyStateTitle");
-        const emptySub = document.getElementById("emptyStateSub");
-        if (emptyTitle) emptyTitle.textContent = "No Long Weekend Found for this Leave Budget";
-        if (emptySub) emptySub.textContent = "Try selecting a different leave count (e.g. 1, 2, or 3 leaves) or check another month.";
+      if (state.customHolidays.includes(value)) {
+        setStatus("ok", `${formatChip(value)} is already on your list.`);
         return;
       }
+      state.customHolidays.push(value);
+      commitDates();
+      setStatus("ok", `Added ${formatChip(value)}.`);
+    };
 
-      empty.classList.add("hidden");
+    btn.addEventListener("click", add);
+    // Enter in a date field would otherwise do nothing at all here.
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        add();
+      }
+    });
+  }
 
-      grid.innerHTML = plans.map((plan, planIdx) => {
-        const pillsHtml = plan.days.map((d) => {
-          if (d.type === "holiday") {
-            return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-emerald-50 hover:bg-emerald-100/70 text-emerald-900 border border-emerald-200 hover:border-emerald-300 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-700">${d.dayName}</span>
-                <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100/90 text-emerald-800 mt-1 truncate max-w-full">Holiday</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                  ${d.label || "Company Holiday"}
-                </div>
-              </div>
-            `;
-          } else if (d.type === "weekend") {
-            return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-blue-50/70 hover:bg-blue-100/60 text-blue-900 border border-blue-200/80 hover:border-blue-300 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-blue-700">${d.dayName}</span>
-                <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-blue-100/80 text-blue-800 mt-1">Weekend</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                  Weekly Weekend Off
-                </div>
-              </div>
-            `;
-          } else {
-            return `
-              <div class="flex-1 min-w-[50px] rounded-xl py-1.5 px-2 flex flex-col items-center justify-center text-center transition-colors bg-amber-50 hover:bg-amber-100/70 text-amber-900 border border-amber-300 hover:border-amber-400 group/day relative cursor-default select-none">
-                <span class="text-[9px] font-bold uppercase tracking-wider text-amber-700">${d.dayName}</span>
-                <span class="text-xs font-bold font-mono mt-0">${d.dayNum}</span>
-                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-200/90 text-amber-950 mt-1 font-bold">Take PTO</span>
-                <div class="hidden group-hover/day:block absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
-                  Apply 1 Day Leave (PTO)
-                </div>
-              </div>
-            `;
-          }
-        }).join("");
+  function initClear() {
+    el("btnClearDates")?.addEventListener("click", () => {
+      state.customHolidays = [];
+      const area = el<HTMLTextAreaElement>("companyTextPaste");
+      if (area) area.value = "";
+      const status = el("fileUploadStatus");
+      if (status) status.hidden = true;
+      commitDates();
+      el("tabUploadBtn")?.focus();
+    });
+  }
 
-        const topBadge = plan.leavesRequired === 0
-          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">⚡ 0 Leaves Needed</span>`
-          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">🎯 ${plan.leavesRequired} ${plan.leavesRequired === 1 ? "Leave" : "Leaves"} Needed (${plan.efficiencyMultiplier})</span>`;
+  /* ======================================================================
+     Mount
+     ====================================================================== */
+  function init() {
+    const today = getTodayIso();
 
-        let bottomBarHtml = "";
-        if (plan.leavesRequired === 0) {
-          bottomBarHtml = `
-            <div class="bg-emerald-50/70 border border-emerald-200 rounded-lg p-2.5 flex items-center gap-2 mt-0.5">
-              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
-              <div class="text-xs font-medium text-emerald-950">
-                <span class="font-bold">Direct Weekend Bridge</span> · No PTO required
-              </div>
-            </div>
-          `;
-        } else {
-          const leaveDays = plan.days.filter(d => d.type === "leave").map(d => `${d.dayName} ${d.dayNum}`).join(", ");
-          bottomBarHtml = `
-            <div class="bg-amber-50/70 border border-amber-200 rounded-lg p-2.5 flex items-center gap-2 mt-0.5">
-              <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">🎯</span>
-              <div class="text-xs font-medium text-amber-950">
-                <span class="font-bold">Apply PTO:</span> <span class="underline decoration-amber-500">${leaveDays}</span>
-              </div>
-            </div>
-          `;
-        }
+    initTabs();
+    initUpload();
+    initPaste();
+    initManualDate();
+    initClear();
 
-        return `
-          <div class="bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 group relative">
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-2">
-                ${topBadge}
-                
-                <div class="flex items-center gap-1.5">
-                  <span class="days-off-badge inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
-                    🔥 ${plan.totalDaysOff} Days Off
-                  </span>
-                  <button 
-                    type="button" 
-                    class="btn-open-cal p-1.5 px-2 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 hover:border-slate-300 transition-all flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 shadow-2xs" 
-                    title="View Month Calendar Grid"
-                    data-idx="${planIdx}"
-                  >
-                    <span class="text-xs">🗓️</span>
-                  </button>
-                </div>
-              </div>
+    results = mountResults({
+      // An empty list has to short-circuit: the solver treats a zero-length
+      // customHolidays array as "no custom list given" and falls back to the
+      // national one, which would fill this page with holidays the office may
+      // not observe.
+      solve: (leaves) =>
+        state.customHolidays.length === 0
+          ? []
+          : solveVacationPlans({
+              leaves,
+              workWeek: state.workWeek,
+              month: "ALL",
+              fromDate: today,
+              customHolidays: state.customHolidays,
+            }),
+      calendar: () =>
+        state.customHolidays.length === 0
+          ? null
+          : buildCalendarMap("ALL", state.workWeek, state.customHolidays),
+      todayIso: today,
+    });
 
-              <h3 class="font-bold text-base text-slate-900 tracking-tight mb-1 group-hover:text-blue-600 transition-colors">
-                ${plan.title}
-              </h3>
-              <div class="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mb-2.5">
-                <span>🗓️</span>
-                <span class="font-bold text-slate-800">${formatDateRange(plan.startDate, plan.endDate)}</span>
-                
-              </div>
+    document.addEventListener("lw:workweek", (e) => {
+      state.workWeek = (e as CustomEvent<{ workWeek: number }>).detail.workWeek;
+      results?.refresh();
+    });
 
-              <div class="flex w-full gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
-                ${pillsHtml}
-              </div>
-            </div>
+    renderDetectedDates();
+    syncSections();
+  }
 
-            <div>
-              ${bottomBarHtml}
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      document.querySelectorAll(".btn-open-cal").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const idx = parseInt((btn as HTMLElement).dataset.idx || "0", 10);
-          const selectedPlan = state.currentPlans[idx];
-          if (selectedPlan) {
-            openCalendarModal(selectedPlan);
-          }
-        });
-      });
-    }
-
+  if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
-  </script>
-</body>
-</html>
+  } else {
+    init();
+  }
+</script>

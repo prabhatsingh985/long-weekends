@@ -1,0 +1,487 @@
+/**
+ * Rendering for vacation plans: the card, the modal calendar, and the
+ * festival -> banner-theme mapping.
+ *
+ * Both the homepage and the company optimizer showed the same cards, but each
+ * kept its own copy of the markup and the two had already drifted apart (one
+ * had a leave-cost badge the other lacked, and the "efficiency" line was
+ * formatted differently). Everything visual now lives here so a change lands
+ * on both pages at once.
+ */
+import type { VacationPlan, PlanDay, CalendarDay } from "../types";
+
+/* ==========================================================================
+   Banner themes
+   ==========================================================================
+   Instead of stock photography, each card gets a deep gradient keyed to the
+   festival it is built around, plus one oversized motif glyph. The gradients
+   live in global.css as `.bnr-*` and were all contrast-checked against the
+   white text they carry.
+
+   Matching is on `plan.festivalName` — the RAW holiday name — not `plan.title`,
+   because the title has already been through cleanFestivalName() and had
+   suffixes like "Day" and "Jayanti" stripped off.
+*/
+export interface BannerTheme {
+  /** Gradient class, e.g. "bnr-festive". */
+  cls: string;
+  /** Motif glyph shown large and faint behind the banner text. */
+  motif: string;
+  /** Short human label for the eyebrow, e.g. "Festive season". */
+  season: string;
+}
+
+const THEME_RULES: { re: RegExp; theme: BannerTheme }[] = [
+  {
+    // Diwali cluster: the lamps-and-lights run from Dussehra to Chhath.
+    re: /diwali|deepavali|dussehra|dasara|vijay|navami|ayudha|durga|chhath|kanakadasa|bhai|govardhan/i,
+    theme: { cls: "bnr-festive", motif: "🪔", season: "Festival of lights" },
+  },
+  {
+    // Word-bounded: an unanchored /holi/ also matches "Holiday".
+    re: /\bholi\b|dhulandi|rangpanchami/i,
+    theme: { cls: "bnr-spring", motif: "🎨", season: "Colours of spring" },
+  },
+  {
+    // Regional new years, all of them spring.
+    re: /ugadi|gudi\s*padwa|poila|boishakh|puthandu|vishu|bihu|baisakhi|tamil new year|navreh/i,
+    theme: { cls: "bnr-spring", motif: "🌸", season: "New year, new season" },
+  },
+  {
+    re: /raksha|rakhi|janmashtami|ganesh|chaturthi|onam|nag panchami/i,
+    theme: { cls: "bnr-monsoon", motif: "☔", season: "Monsoon break" },
+  },
+  {
+    re: /christmas|new year|boxing/i,
+    theme: { cls: "bnr-winter", motif: "❄️", season: "Year end" },
+  },
+  {
+    re: /pongal|sankranti|makar|lohri|thanksgiving|uzhavar|harvest/i,
+    theme: { cls: "bnr-harvest", motif: "🌾", season: "Harvest season" },
+  },
+  {
+    re: /memorial|labor day|labour day/i,
+    theme: { cls: "bnr-summer", motif: "🌤️", season: "Summer break" },
+  },
+  {
+    re: /republic|gandhi|ambedkar|netaji|shivaji|rajyotsava|maharashtra|karnataka|patel|king|presidents|juneteenth|veterans|columbus|indigenous|may day/i,
+    theme: { cls: "bnr-civic", motif: "🏛️", season: "National holiday" },
+  },
+  {
+    re: /shivratri|shivaratri|id-ul|eid|ramzan|ramadan|muharram|milad|good friday|easter|palm sunday|buddha|purnima|mahavir|guru|nanak|gurpurab|parsi|navroz|jayanti/i,
+    theme: { cls: "bnr-sacred", motif: "🕯️", season: "Day of observance" },
+  },
+];
+
+const FALLBACK_THEME: BannerTheme = {
+  cls: "bnr-brand",
+  motif: "🗓️",
+  season: "Public holiday",
+};
+
+export function getBannerTheme(plan: VacationPlan): BannerTheme {
+  const name = `${plan.festivalName || ""} ${plan.title || ""}`;
+
+  // "Independence Day" appears in both calendars — India in August, the USA in
+  // July. Identical string, different holiday, so the month has to break the
+  // tie before the generic rules get a look at it.
+  if (/independence/i.test(name)) {
+    return plan.startDate.slice(5, 7) === "07"
+      ? { cls: "bnr-summer", motif: "🎆", season: "Fourth of July" }
+      : { cls: "bnr-civic", motif: "🇮🇳", season: "Independence Day" };
+  }
+
+  for (const rule of THEME_RULES) {
+    if (rule.re.test(name)) return rule.theme;
+  }
+  return FALLBACK_THEME;
+}
+
+/* ==========================================================================
+   Formatting
+   ========================================================================== */
+const MONTHS_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+const MONTHS_LONG = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/** Parses "YYYY-MM-DD" as a LOCAL date. `new Date(iso)` would read it as UTC
+ *  and land on the previous day for anyone west of Greenwich. */
+export function parseIso(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+}
+
+/**
+ * "7 – 10 Nov 2026" | "30 Oct – 2 Nov 2026" | "30 Dec 2026 – 2 Jan 2027"
+ * Repeats the month or year only when it actually changes.
+ */
+export function formatDateRange(startIso: string, endIso: string): string {
+  const s = parseIso(startIso);
+  const e = parseIso(endIso);
+  const sameYear = s.getFullYear() === e.getFullYear();
+  const sameMonth = sameYear && s.getMonth() === e.getMonth();
+
+  const left = sameMonth
+    ? `${s.getDate()}`
+    : sameYear
+      ? `${s.getDate()} ${MONTHS_SHORT[s.getMonth()]}`
+      : `${s.getDate()} ${MONTHS_SHORT[s.getMonth()]} ${s.getFullYear()}`;
+
+  return `${left} – ${e.getDate()} ${MONTHS_SHORT[e.getMonth()]} ${e.getFullYear()}`;
+}
+
+export function pluralLeaves(n: number): string {
+  return `${n} ${n === 1 ? "leave" : "leaves"}`;
+}
+
+/** Days-off per leave spent. Null when the break is free. */
+export function efficiency(plan: VacationPlan): string | null {
+  if (!plan.leavesRequired) return null;
+  return `${(plan.totalDaysOff / plan.leavesRequired).toFixed(1)}× per leave`;
+}
+
+const STRATEGY_COPY: Record<VacationPlan["strategy"], string> = {
+  zero: "Costs you nothing",
+  pre: "Take leave before",
+  post: "Take leave after",
+  bridge: "Bridge the gap",
+};
+
+/** Holiday names are interpolated into HTML, so escape defensively even though
+ *  they currently all originate from the bundled JSON. */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/* ==========================================================================
+   Day ribbon
+   ==========================================================================
+   The ribbon is the signature element of the product, so it repays some care.
+   Colour never carries meaning alone: PTO days are the only dashed ones and
+   the only ones with a cost marker, and every cell keeps a written tag.
+*/
+const DAY_META: Record<PlanDay["type"], { cls: string; tag: string; word: string }> = {
+  holiday: { cls: "day-holiday", tag: "Holiday", word: "public holiday" },
+  weekend: { cls: "day-weekend", tag: "Weekend", word: "weekend" },
+  leave: { cls: "day-pto", tag: "Leave", word: "your leave" },
+};
+
+function renderDay(day: PlanDay): string {
+  const meta = DAY_META[day.type];
+  const cost =
+    day.type === "leave"
+      ? `<span class="day-cost" aria-hidden="true">-1</span>`
+      : "";
+  return `<div class="day ${meta.cls}">
+    ${cost}
+    <span class="day-dow">${escapeHtml(day.dayName)}</span>
+    <span class="day-num">${escapeHtml(day.dayNum)}</span>
+    <span class="day-tag">${meta.tag}</span>
+  </div>`;
+}
+
+/**
+ * Plans can run to 21 days, which will never fit as full-width cells. Past
+ * nine days the strip switches to a compact cell and scrolls; the container is
+ * focusable so it can also be scrolled from the keyboard, and it carries a
+ * text summary as its accessible name because 21 tiny cells make for a
+ * miserable screen-reader walk.
+ */
+function renderDayStrip(plan: VacationPlan): string {
+  const compact = plan.days.length > 9 ? " day-strip-compact" : "";
+  const counts = { holiday: 0, weekend: 0, leave: 0 };
+  plan.days.forEach((d) => (counts[d.type] += 1));
+
+  const summary =
+    `${plan.totalDaysOff} days off: ` +
+    [
+      counts.holiday ? `${counts.holiday} public holiday${counts.holiday === 1 ? "" : "s"}` : "",
+      counts.weekend ? `${counts.weekend} weekend day${counts.weekend === 1 ? "" : "s"}` : "",
+      counts.leave ? `${pluralLeaves(counts.leave)} of yours` : "",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+  return `<div class="day-strip${compact}" role="group" tabindex="0" aria-label="${escapeHtml(summary)}">
+    ${plan.days.map(renderDay).join("")}
+  </div>`;
+}
+
+/* ==========================================================================
+   Card
+   ========================================================================== */
+export function renderPlanCard(plan: VacationPlan, index: number): string {
+  const theme = getBannerTheme(plan);
+  const start = parseIso(plan.startDate);
+  const eyebrow = `${MONTHS_SHORT[start.getMonth()].toUpperCase()} · ${theme.season}`;
+  const ratio = efficiency(plan);
+  const range = formatDateRange(plan.startDate, plan.endDate);
+
+  const costTag = plan.leavesRequired
+    ? `<span class="tag tag-pto"><span class="dot dot-pto" aria-hidden="true"></span>${pluralLeaves(plan.leavesRequired)}</span>`
+    : `<span class="tag tag-holiday"><span class="dot dot-holiday" aria-hidden="true"></span>No leave</span>`;
+
+  return `<article class="card card-interactive flex flex-col overflow-hidden">
+    <div class="banner ${theme.cls}">
+      <span class="banner-motif" aria-hidden="true">${theme.motif}</span>
+      <div class="min-w-0">
+        <p class="banner-eyebrow truncate">${escapeHtml(eyebrow)}</p>
+        <p class="mt-1 text-[0.8125rem] font-bold">${STRATEGY_COPY[plan.strategy]}</p>
+      </div>
+      <div class="shrink-0 text-right">
+        <p class="banner-figure">${plan.totalDaysOff}</p>
+        <p class="banner-figure-label">days off</p>
+      </div>
+    </div>
+
+    <div class="flex grow flex-col gap-3 p-4">
+      <div>
+        <h3 class="text-[0.9375rem] font-extrabold leading-snug">${escapeHtml(plan.title)}</h3>
+        <p class="mt-1 font-mono text-xs font-semibold text-muted tabular">${escapeHtml(range)}</p>
+      </div>
+
+      ${renderDayStrip(plan)}
+
+      <div class="mt-auto flex items-center justify-between gap-2 pt-1">
+        <div class="flex min-w-0 items-center gap-2">
+          ${costTag}
+          ${ratio ? `<span class="truncate font-mono text-[0.6875rem] font-semibold text-muted">${ratio}</span>` : ""}
+        </div>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm btn-open-cal shrink-0"
+          data-idx="${index}"
+          aria-label="See ${escapeHtml(plan.title)} on a calendar, ${escapeHtml(range)}"
+        >Calendar</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+export function renderPlanGrid(plans: VacationPlan[]): string {
+  return plans.map((plan, i) => renderPlanCard(plan, i)).join("");
+}
+
+/* ==========================================================================
+   Modal calendar
+   ==========================================================================
+   Weeks start on Monday, which is how a work week is actually read, and how
+   the previous Sunday-first grid made every Sat–Sun break look like it was
+   split across two rows.
+*/
+const DOW_MON_FIRST = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+function monthKey(iso: string): string {
+  return iso.slice(0, 7);
+}
+
+/** Every "YYYY-MM" the plan touches, in order. */
+function monthsSpanned(plan: VacationPlan): string[] {
+  const keys: string[] = [];
+  plan.days.forEach((d) => {
+    const k = monthKey(d.date);
+    if (!keys.includes(k)) keys.push(k);
+  });
+  return keys;
+}
+
+/**
+ * The grid is `aria-hidden` on purpose: 35 numbered cells read aloud one by
+ * one tells a screen-reader user nothing. `renderPlanBreakdown` below is the
+ * accessible equivalent and is shown to everyone, not tucked away.
+ */
+function renderMonth(
+  key: string,
+  planDays: Map<string, PlanDay>,
+  calendar: Map<string, CalendarDay> | null,
+  todayIso: string
+): string {
+  const [year, month] = key.split("-").map(Number);
+  const first = new Date(year, month - 1, 1);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const lead = (first.getDay() + 6) % 7; // Monday-first offset
+
+  const cells: string[] = [];
+  for (let i = 0; i < lead; i++) cells.push(`<div></div>`);
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const inPlan = planDays.get(iso);
+    const ctx = calendar?.get(iso);
+
+    let cls = "cal-cell";
+    if (inPlan) {
+      cls += ` ${DAY_META[inPlan.type].cls.replace("day-", "cal-cell-")}`;
+    } else if (ctx && (ctx.isWeekend || ctx.isHoliday)) {
+      cls += " cal-cell-off";
+    }
+    if (iso === todayIso) cls += " cal-cell-today";
+
+    cells.push(`<div class="${cls}">${d}</div>`);
+  }
+
+  return `<div>
+    <p class="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
+      ${MONTHS_LONG[month - 1]} ${year}
+    </p>
+    <div class="grid grid-cols-7 gap-1" aria-hidden="true">
+      ${DOW_MON_FIRST.map(
+        (d) =>
+          `<div class="pb-1 text-center text-[0.625rem] font-bold uppercase text-muted">${d}</div>`
+      ).join("")}
+      ${cells.join("")}
+    </div>
+  </div>`;
+}
+
+/** The list that replaces the old per-day hover tooltips, which were
+ *  unreachable by keyboard and invisible on touch. */
+function renderPlanBreakdown(plan: VacationPlan): string {
+  const holidays = plan.days.filter((d) => d.type === "holiday");
+  const leaves = plan.days.filter((d) => d.type === "leave");
+
+  const line = (d: PlanDay, label: string, dotCls: string) => {
+    const dt = parseIso(d.date);
+    return `<li class="flex items-center gap-2.5 py-1.5">
+      <span class="dot ${dotCls}" aria-hidden="true"></span>
+      <span class="font-mono text-xs font-semibold text-body tabular shrink-0">
+        ${d.dayName} ${dt.getDate()} ${MONTHS_SHORT[dt.getMonth()]}
+      </span>
+      <span class="min-w-0 truncate text-xs font-semibold text-ink">${escapeHtml(label)}</span>
+    </li>`;
+  };
+
+  const sections: string[] = [];
+
+  if (holidays.length) {
+    sections.push(`<div>
+      <h4 class="mb-1 text-[0.6875rem] font-bold uppercase tracking-widest text-muted">
+        Public holidays you get free
+      </h4>
+      <ul class="divide-y divide-hairline">
+        ${holidays.map((d) => line(d, d.label || "Public holiday", "dot-holiday")).join("")}
+      </ul>
+    </div>`);
+  }
+
+  if (leaves.length) {
+    sections.push(`<div>
+      <h4 class="mb-1 text-[0.6875rem] font-bold uppercase tracking-widest text-muted">
+        Leave to apply for (${pluralLeaves(leaves.length)})
+      </h4>
+      <ul class="divide-y divide-hairline">
+        ${leaves.map((d) => line(d, "Apply for leave", "dot-pto")).join("")}
+      </ul>
+    </div>`);
+  } else {
+    sections.push(`<p class="tag tag-holiday">
+      <span class="dot dot-holiday" aria-hidden="true"></span>
+      This break costs you no leave at all
+    </p>`);
+  }
+
+  return `<div class="flex flex-col gap-4">${sections.join("")}</div>`;
+}
+
+/**
+ * Full modal body. `calendar` is optional; pass the solver's map to also shade
+ * weekends and holidays that fall outside the plan, which is what makes the
+ * grid readable as a month rather than a floating cluster of coloured cells.
+ */
+export function renderPlanCalendar(
+  plan: VacationPlan,
+  calendar: Map<string, CalendarDay> | null,
+  todayIso: string
+): string {
+  const planDays = new Map<string, PlanDay>();
+  plan.days.forEach((d) => planDays.set(d.date, d));
+
+  const keys = monthsSpanned(plan);
+  const months = keys
+    .map((k) => renderMonth(k, planDays, calendar, todayIso))
+    .join("");
+
+  // Written out in full rather than built by interpolation: Tailwind extracts
+  // class names as literal strings from source, so a computed `grid-cols-${n}`
+  // never gets generated.
+  const cols = keys.length > 1 ? "sm:grid-cols-2" : "sm:grid-cols-1";
+
+  return `<div class="flex flex-col gap-6">
+    <div class="grid gap-6 ${cols}">
+      ${months}
+    </div>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-control bg-surface-soft px-3 py-2.5">
+      <span class="flex items-center gap-2 text-[0.6875rem] font-bold text-body">
+        <span class="dot dot-holiday" aria-hidden="true"></span>Public holiday
+      </span>
+      <span class="flex items-center gap-2 text-[0.6875rem] font-bold text-body">
+        <span class="dot dot-weekend" aria-hidden="true"></span>Weekend
+      </span>
+      <span class="flex items-center gap-2 text-[0.6875rem] font-bold text-body">
+        <span class="dot dot-pto" aria-hidden="true"></span>Your leave
+      </span>
+    </div>
+    ${renderPlanBreakdown(plan)}
+  </div>`;
+}
+
+/* ==========================================================================
+   Sorting
+   ==========================================================================
+   Shared so the two pages cannot disagree about what "best value" means.
+*/
+export type SortKey = "efficiency" | "days" | "date" | "cheapest";
+
+export const SORT_LABELS: Record<SortKey, string> = {
+  efficiency: "Best value",
+  days: "Longest break",
+  date: "Soonest first",
+  cheapest: "Fewest leaves",
+};
+
+export function sortPlans(plans: VacationPlan[], key: SortKey): VacationPlan[] {
+  const out = [...plans];
+  const ratio = (p: VacationPlan) =>
+    p.leavesRequired === 0 ? Infinity : p.totalDaysOff / p.leavesRequired;
+
+  switch (key) {
+    case "days":
+      out.sort(
+        (a, b) =>
+          b.totalDaysOff - a.totalDaysOff || a.startDate.localeCompare(b.startDate)
+      );
+      break;
+    case "date":
+      out.sort(
+        (a, b) =>
+          a.startDate.localeCompare(b.startDate) || b.totalDaysOff - a.totalDaysOff
+      );
+      break;
+    case "cheapest":
+      out.sort(
+        (a, b) =>
+          a.leavesRequired - b.leavesRequired ||
+          b.totalDaysOff - a.totalDaysOff ||
+          a.startDate.localeCompare(b.startDate)
+      );
+      break;
+    default:
+      out.sort(
+        (a, b) =>
+          ratio(b) - ratio(a) ||
+          b.totalDaysOff - a.totalDaysOff ||
+          a.startDate.localeCompare(b.startDate)
+      );
+  }
+  return out;
+}
