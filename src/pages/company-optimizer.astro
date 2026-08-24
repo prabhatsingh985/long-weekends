@@ -260,7 +260,9 @@ if (curMonth > 1) {
     aria-label="Filter your office long weekends"
     class="sticky top-[4.25rem] z-40 border-b border-hairline bg-page/90 backdrop-blur-lg"
   >
-    <div class="mx-auto flex max-w-[1280px] flex-col gap-2 px-4 py-3 sm:px-6">
+    <div
+      class="mx-auto flex max-w-[1280px] flex-col gap-1.5 px-4 py-2.5 sm:gap-2 sm:px-6 sm:py-3"
+    >
       <div class="flex items-center gap-3">
         <span
           class="hidden shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted sm:block"
@@ -268,7 +270,7 @@ if (curMonth > 1) {
         >
         <div id="budgetRail" role="group" aria-label="Leave budget" class="rail min-w-0 py-0.5">
           <button type="button" class="pill" data-leaves="0" aria-pressed="true">
-            <span class="pill-glyph" aria-hidden="true">🆓</span>No leaves
+            <span class="pill-glyph" aria-hidden="true">🎁</span>No leaves
           </button>
           <button type="button" class="pill" data-leaves="1" aria-pressed="false">
             <span class="pill-glyph" aria-hidden="true">🌴</span>1 leave
@@ -385,8 +387,11 @@ if (curMonth > 1) {
     </div>
 
     <div id="gridSection" hidden>
-      <div id="results" class="mb-5 flex flex-wrap items-end justify-between gap-4 scroll-mt-[12rem]">
-        <div aria-live="polite">
+      <div
+        id="results"
+        class="mb-5 flex flex-wrap items-end justify-between gap-3 scroll-mt-[12rem] sm:gap-4"
+      >
+        <div aria-live="polite" class="min-w-0">
           <h2 class="text-xl font-extrabold sm:text-2xl">
             <span id="resultsBadge">Counting</span>
           </h2>
@@ -415,7 +420,7 @@ if (curMonth > 1) {
               <path d="M3 6h18M6 12h12M10 18h4"></path>
             </svg>
             <span class="text-muted">Sort</span>
-            <span id="sortLabel">Best value</span>
+            <span id="sortLabel">Soonest first</span>
             <svg
               class="seg-caret h-3 w-3 text-muted"
               viewBox="0 0 24 24"
@@ -433,14 +438,14 @@ if (curMonth > 1) {
             role="menu"
             aria-labelledby="sortTrigger"
             hidden
-            class="popover absolute right-0 top-[calc(100%+0.5rem)] z-40 w-[15rem] p-2"
+            class="popover popover-below absolute right-0 z-40 w-[15rem] p-2"
           >
             {
+              /* Order matters: the first entry is marked checked below, so it
+                 has to be DEFAULT_SORT in plan-view.ts. */
               [
-                { v: "efficiency", label: "Best value", hint: "Most days off per leave" },
-                { v: "days", label: "Longest break", hint: "Biggest total time off" },
                 { v: "date", label: "Soonest first", hint: "Whatever is next" },
-                { v: "cheapest", label: "Fewest leaves", hint: "Guard your balance" },
+                { v: "days", label: "Longest break", hint: "Biggest total time off" },
               ].map((o, i) => (
                 <button
                   type="button"
@@ -600,10 +605,10 @@ if (curMonth > 1) {
         Working a six-day week?
       </h2>
       <p class="prose-body">
-        Switch the workweek control in the header to 6-day and everything
-        recalculates with Sunday as your only weekly day off. Bridges get shorter
-        and rarer, but the ones that survive are usually worth more per leave day
-        spent.
+        Set the workweek control to 6-day — it's in the bar at the top of this
+        page — and everything recalculates with Sunday as your only weekly day
+        off. Bridges get shorter and rarer, but the ones that survive are usually
+        worth more per leave day spent.
       </p>
     </div>
   </section>
@@ -616,6 +621,7 @@ if (curMonth > 1) {
     solveVacationPlans,
     buildCalendarMap,
     getTodayIso,
+    getUpcomingCutoffIso,
     CALENDAR_START,
     CALENDAR_END,
   } from "../data/vacation-solver";
@@ -1294,7 +1300,10 @@ if (curMonth > 1) {
      Mount
      ====================================================================== */
   function init() {
+    // `today` marks the current day in the calendar grid; `cutoff` is what a
+    // plan must start after to be offered. See getUpcomingCutoffIso().
     const today = getTodayIso();
+    const cutoff = getUpcomingCutoffIso();
 
     initTabs();
     initUpload();
@@ -1314,7 +1323,7 @@ if (curMonth > 1) {
               leaves,
               workWeek: state.workWeek,
               month: "ALL",
-              fromDate: today,
+              fromDate: cutoff,
               customHolidays: state.customHolidays,
             }),
       calendar: () =>

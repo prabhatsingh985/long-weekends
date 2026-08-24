@@ -9,6 +9,7 @@
  * on both pages at once.
  */
 import type { VacationPlan, PlanDay, CalendarDay } from "../types";
+import { cleanFestivalName } from "../data/vacation-solver";
 
 /* ==========================================================================
    Banner themes
@@ -85,10 +86,13 @@ export function getBannerTheme(plan: VacationPlan): BannerTheme {
   // "Independence Day" appears in both calendars — India in August, the USA in
   // July. Identical string, different holiday, so the month has to break the
   // tie before the generic rules get a look at it.
+  //
+  // India's motif is a sparkler rather than 🇮🇳 because Windows ships no flag
+  // glyphs and drew the emoji as a bare "IN" on the card banner.
   if (/independence/i.test(name)) {
     return plan.startDate.slice(5, 7) === "07"
       ? { cls: "bnr-summer", motif: "🎆", season: "Fourth of July" }
-      : { cls: "bnr-civic", motif: "🇮🇳", season: "Independence Day" };
+      : { cls: "bnr-civic", motif: "🎇", season: "Independence Day" };
   }
 
   for (const rule of THEME_RULES) {
@@ -438,21 +442,28 @@ export function renderPlanCalendar(
 /* ==========================================================================
    Sorting
    ==========================================================================
-   Shared so the two pages cannot disagree about what "best value" means.
+   Shared so the two pages cannot disagree about what a sort means.
+
+   Two orders, not four. "Best value" (days off per leave) and "Fewest leaves"
+   were dropped because the leave budget above the grid already answers the
+   question they were asking: a visitor who cares about spending fewer days
+   picks a smaller budget, and every plan shown is then the best value at that
+   budget. Four options that mostly reshuffled the same short list read as more
+   choice than the page actually had. What is left is the genuine axis — soonest
+   versus longest.
 */
-export type SortKey = "efficiency" | "days" | "date" | "cheapest";
+export type SortKey = "days" | "date";
 
 export const SORT_LABELS: Record<SortKey, string> = {
-  efficiency: "Best value",
   days: "Longest break",
   date: "Soonest first",
-  cheapest: "Fewest leaves",
 };
+
+/** The order the grid opens in. Named so the pages cannot drift from it. */
+export const DEFAULT_SORT: SortKey = "date";
 
 export function sortPlans(plans: VacationPlan[], key: SortKey): VacationPlan[] {
   const out = [...plans];
-  const ratio = (p: VacationPlan) =>
-    p.leavesRequired === 0 ? Infinity : p.totalDaysOff / p.leavesRequired;
 
   switch (key) {
     case "days":
@@ -461,27 +472,100 @@ export function sortPlans(plans: VacationPlan[], key: SortKey): VacationPlan[] {
           b.totalDaysOff - a.totalDaysOff || a.startDate.localeCompare(b.startDate)
       );
       break;
-    case "date":
+    default:
       out.sort(
         (a, b) =>
           a.startDate.localeCompare(b.startDate) || b.totalDaysOff - a.totalDaysOff
       );
-      break;
-    case "cheapest":
-      out.sort(
-        (a, b) =>
-          a.leavesRequired - b.leavesRequired ||
-          b.totalDaysOff - a.totalDaysOff ||
-          a.startDate.localeCompare(b.startDate)
-      );
-      break;
-    default:
-      out.sort(
-        (a, b) =>
-          ratio(b) - ratio(a) ||
-          b.totalDaysOff - a.totalDaysOff ||
-          a.startDate.localeCompare(b.startDate)
-      );
   }
   return out;
+}
+
+/* ==========================================================================
+   Highlight selection
+   ==========================================================================
+   The "Long weekends still ahead" list is a chronological summary, not the
+   results grid, so it needs one row per festival rather than every variant the
+   solver can build around it.
+
+   This used to be inline in index.astro and deduplicated on `plan.title`,
+   which does not do that: the solver emits "Raksha Bandhan" for the free
+   3-day version and "Raksha Bandhan (Pre-Break)" for the same weekend with a
+   leave day in front, so both survived and the list showed one festival two or
+   three times. It also made the page contradict itself — the list opened with
+   the 27 Aug pre-break while the badge above it named the 28 Aug free break,
+   because the badge asks for the cheapest option and the list was sorted purely
+   by date.
+
+   Grouping on the festival and keeping the cheapest variant fixes both: one row
+   per festival, and the first row is by construction the same plan the badge
+   names.
+*/
+
+/**
+ * "Raksha Bandhan (Pre-Break)" and "Raksha Bandhan" are the same festival.
+ *
+ * Uses the solver's own naming rule rather than a second regex here, so the two
+ * cannot drift into disagreeing about what counts as one festival.
+ */
+function festivalKey(plan: VacationPlan): string {
+  return cleanFestivalName(plan.festivalName || plan.title).toLowerCase();
+}
+
+export function selectHighlights(plans: VacationPlan[], limit = 6): VacationPlan[] {
+  const best = new Map<string, VacationPlan>();
+
+  for (const plan of plans) {
+    const key = festivalKey(plan);
+    const held = best.get(key);
+    // Cheapest wins; on a tie the longer break is the better row, and on a
+    // second tie the earlier one, so the result does not depend on input order.
+    const better =
+      !held ||
+      plan.leavesRequired < held.leavesRequired ||
+      (plan.leavesRequired === held.leavesRequired &&
+        (plan.totalDaysOff > held.totalDaysOff ||
+          (plan.totalDaysOff === held.totalDaysOff && plan.startDate < held.startDate)));
+    if (better) best.set(key, plan);
+  }
+
+  return [...best.values()]
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+    .slice(0, limit);
+}
+
+/**
+ * The next breaks, soonest first — the single answer to "what is coming up".
+ *
+ * The hero badge and the highlight list are both answering that question, and
+ * they used to answer it with two different heuristics that happened to agree
+ * on most dates. The badge asked for the cheapest leave budget that had
+ * anything and then took the earliest plan *within* it, which means it skipped
+ * nearer breaks that cost a day: standing on 14 Feb 2026 it announced Good
+ * Friday on 3 April while Id-ul-Fitr sat unmentioned on 20 March, seven weeks
+ * closer. That is the opposite of "next".
+ *
+ * So the order is reversed here — earliest first, cheapest only as the
+ * tie-break within one festival, which is what selectHighlights already does.
+ * The budget widens beyond the floor only when the narrower band is empty, so
+ * the search never reaches past a nearer break to find a pricier one.
+ *
+ * `solve` is a callback rather than options because the caller owns region,
+ * work week and (on the optimizer) a custom holiday list.
+ */
+export function nextBreaks(
+  solve: (leaves: number) => VacationPlan[],
+  options: { budgetFloor?: number; budgetCeiling?: number; limit?: number } = {}
+): VacationPlan[] {
+  const floor = options.budgetFloor ?? 1;
+  const ceiling = options.budgetCeiling ?? 4;
+  const pool: VacationPlan[] = [];
+
+  for (let cap = 0; cap <= ceiling; cap++) {
+    pool.push(...solve(cap));
+    if (cap < floor) continue;
+    const rows = selectHighlights(pool, options.limit);
+    if (rows.length) return rows;
+  }
+  return [];
 }

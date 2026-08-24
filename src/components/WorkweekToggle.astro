@@ -1,0 +1,38 @@
+---
+/**
+ * The 5-day / 6-day work-week switch.
+ *
+ * Extracted because it is rendered twice — once in the desktop control bar and
+ * once in the strip below the header that phones and tablets get. It used to
+ * exist only inside `hidden lg:flex`, so below 1024px there was no way to
+ * switch at all, and company-optimizer.astro tells the reader in plain English
+ * to "switch the workweek control in the header to 6-day" — an instruction that
+ * could not be followed on a phone.
+ *
+ * No ids: with two instances on the page they would collide. The group is named
+ * with aria-label and the script finds the buttons by `.workweek-btn`, then
+ * syncs every instance by `data-workweek` VALUE rather than by element
+ * identity, so the two copies cannot end up disagreeing.
+ */
+---
+
+<div
+  role="group"
+  aria-label="Work week length"
+  class="flex items-center gap-0.5 bg-surface-sunken p-0.5 rounded-full border border-hairline shrink-0"
+>
+  <button
+    type="button"
+    data-workweek="5"
+    aria-pressed="true"
+    class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
+    >5-day</button
+  >
+  <button
+    type="button"
+    data-workweek="6"
+    aria-pressed="false"
+    class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
+    >6-day</button
+  >
+</div>

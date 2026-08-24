@@ -2,15 +2,31 @@
 /**
  * Site header.
  *
- * Two things changed structurally:
+ * Three things changed structurally:
  *
  * 1. The theme toggle lives here and ONLY here. index.astro used to bind a
  *    second listener to the same button, so a click toggled twice and
  *    cancelled itself out.
  * 2. Region and work-week changes are broadcast as `lw:region` / `lw:workweek`
  *    events on `document` instead of pages reaching in by element id. That is
- *    what fixes the mobile region <select>, which was never wired to anything.
+ *    what fixes the mobile region control, which was never wired to anything.
+ * 3. Region is a RegionMenu popover rather than a native <select>. A <select>'s
+ *    open list is drawn by the OS: it ignores every design token, stays white
+ *    in dark mode, and cannot hold the flag SVG. See RegionMenu.astro.
+ * 4. Below `lg` the controls move OUT of the bar and into a second row under
+ *    the header. Squeezing region + workweek into a 360px-wide bar next to the
+ *    wordmark is what made the header feel cramped, and the workweek control
+ *    was simply absent below `lg` even though company-optimizer.astro tells the
+ *    reader to go use it.
+ *
+ * The bar's height is a flat 4.25rem at every width on purpose: both pages pin
+ * their filter bar with `sticky top-[4.25rem]`, so a responsive height here
+ * would open a gap that page content scrolls through. The extra row below is
+ * NOT sticky, so it scrolls away and that offset stays true.
  */
+import RegionMenu from "./RegionMenu.astro";
+import WorkweekToggle from "./WorkweekToggle.astro";
+
 const pathname = Astro.url.pathname;
 const onOptimizer = pathname.includes("company-optimizer");
 
@@ -24,7 +40,7 @@ const showRegion = !onOptimizer;
   class="sticky top-0 z-50 bg-surface/85 backdrop-blur-lg border-b border-hairline"
 >
   <div
-    class="max-w-[1280px] mx-auto px-4 sm:px-6 h-[4.25rem] flex items-center justify-between gap-3"
+    class="max-w-[1280px] mx-auto px-3 sm:px-6 h-[4.25rem] flex items-center justify-between gap-2 sm:gap-3"
   >
     <!-- Brand -->
     <a
@@ -33,7 +49,7 @@ const showRegion = !onOptimizer;
       aria-label="The Long Weekends — home"
     >
       <span
-        class="w-9 h-9 rounded-[0.625rem] bg-brand text-white flex items-center justify-center font-mono font-extrabold text-[0.8125rem] shadow-card group-hover:scale-105 transition-transform"
+        class="w-9 h-9 rounded-[0.625rem] bg-brand text-white flex items-center justify-center font-mono font-extrabold text-[0.8125rem] shadow-card group-hover:scale-105 transition-transform shrink-0"
         aria-hidden="true">LW</span
       >
       <span class="flex items-baseline gap-1.5 min-w-0">
@@ -41,10 +57,17 @@ const showRegion = !onOptimizer;
           class="font-extrabold text-[0.9375rem] sm:text-[1.0625rem] tracking-tight text-ink whitespace-nowrap"
           >The Long Weekends</span
         >
+        {/* On phones the region pill sits a few centimetres to the right saying
+            the same thing, so this chip was the word "IN" floating beside the
+            wordmark with nothing to explain it. Shown from `sm` up, where the
+            pill is the only other place region appears. On the optimizer it
+            reads "OFFICE", which nothing else says, so it stays at every size. */}
         <span
           id="brandRegionText"
-          class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text"
-          >{onOptimizer ? "OFFICE" : "IN"}</span
+          class:list={[
+            "font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text",
+            onOptimizer ? "" : "hidden sm:inline",
+          ]}>{onOptimizer ? "OFFICE" : "IN"}</span
         >
       </span>
     </a>
@@ -57,22 +80,13 @@ const showRegion = !onOptimizer;
         showRegion && (
           <Fragment>
             <div class="flex items-center gap-2">
-              <label
-                for="navRegionSelector"
+              <span
+                id="navRegionLabel"
                 class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
               >
                 Region
-              </label>
-              <select
-                id="navRegionSelector"
-                data-region-select
-                class="bg-transparent border-0 text-ink text-[0.8125rem] font-bold outline-none cursor-pointer pr-1 hover:text-brand-text transition-colors"
-              >
-                <option value="ALL" selected>
-                  Pan-India IT
-                </option>
-                <option value="USA">United States</option>
-              </select>
+              </span>
+              <RegionMenu id="navRegionDesktop" variant="bar" align="left" />
             </div>
 
             <span class="w-px h-4 bg-hairline-strong" aria-hidden="true" />
@@ -81,73 +95,29 @@ const showRegion = !onOptimizer;
       }
       <div class="flex items-center gap-2">
         <span
-          id="workweekLabel"
           class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
           >Workweek</span
         >
-        <div
-          role="group"
-          aria-labelledby="workweekLabel"
-          class="flex items-center gap-0.5 bg-surface-sunken p-0.5 rounded-full border border-hairline"
-        >
-          <button
-            type="button"
-            id="btnWorkweek5"
-            data-workweek="5"
-            aria-pressed="true"
-            class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
-            >5-day</button
-          >
-          <button
-            type="button"
-            id="btnWorkweek6"
-            data-workweek="6"
-            aria-pressed="false"
-            class="workweek-btn px-2.5 py-1 text-[0.6875rem] font-bold rounded-full cursor-pointer transition-colors"
-            >6-day</button
-          >
-        </div>
+        <WorkweekToggle />
       </div>
     </div>
 
     <!-- Right controls -->
     <div class="flex items-center gap-2">
+      {/* Only from `lg`, where the control bar exists. Below that the same link
+          is in the row underneath, which has room for its label. */}
       {
         onOptimizer ? (
-          <a
-            href="/"
-            class="hidden sm:inline-flex btn btn-ghost btn-sm no-underline"
-          >
+          <a href="/" class="hidden lg:inline-flex btn btn-ghost btn-sm no-underline">
             <span aria-hidden="true">←</span> National calendar
           </a>
         ) : (
           <a
             href="/company-optimizer"
-            class="hidden sm:inline-flex btn btn-ghost btn-sm no-underline"
+            class="hidden lg:inline-flex btn btn-ghost btn-sm no-underline"
           >
             <span aria-hidden="true">🏢</span> Office holidays
           </a>
-        )
-      }
-
-      <!-- Mobile region selector — now actually functional -->
-      {
-        showRegion && (
-          <div class="lg:hidden">
-            <label for="navRegionSelectorMobile" class="sr-only">
-              Region
-            </label>
-            <select
-              id="navRegionSelectorMobile"
-              data-region-select
-              class="bg-surface-soft border border-hairline text-ink text-[0.75rem] font-bold rounded-full pl-3 pr-2 py-1.5 outline-none cursor-pointer"
-            >
-              <option value="ALL" selected>
-                🇮🇳 India
-              </option>
-              <option value="USA">🇺🇸 USA</option>
-            </select>
-          </div>
         )
       }
 
@@ -183,6 +153,43 @@ const showRegion = !onOptimizer;
   </div>
 </header>
 
+{/* Second row of controls, phones and tablets only.
+    OUTSIDE <header> on purpose. The header is `sticky top-0` and both pages pin
+    their filter bar with `sticky top-[4.25rem]` — the header bar's exact height.
+    Putting this row inside would make the sticky block ~7rem tall and the
+    filter bar would land on top of it. Out here the row scrolls away instead,
+    which is right for set-once preferences.
+
+    No `overflow-x-auto`: overflow clipping applies to descendants, and it would
+    cut off the region popover the same way the hero section once did. The row
+    wraps instead, so a 320px screen gets two lines rather than a clipped menu. */}
+<div class="lg:hidden border-b border-hairline bg-surface-soft">
+  <div
+    class="max-w-[1280px] mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-2"
+  >
+    {showRegion && <RegionMenu id="navRegionMobile" variant="pill" align="left" />}
+    <WorkweekToggle />
+
+    {/* Pushed to the far end so the two controls stay together on the left. The
+        label is shortened — the bar above says the same thing in full from `lg`,
+        where there is room for it. */}
+    {
+      onOptimizer ? (
+        <a href="/" class="btn btn-ghost btn-sm no-underline ml-auto shrink-0">
+          <span aria-hidden="true">←</span> National
+        </a>
+      ) : (
+        <a
+          href="/company-optimizer"
+          class="btn btn-ghost btn-sm no-underline ml-auto shrink-0"
+        >
+          <span aria-hidden="true">🏢</span> Office
+        </a>
+      )
+    }
+  </div>
+</div>
+
 <style>
   /* Selected segment of the work-week control. Driven by aria-pressed so the
      accessible state and the visual state can never disagree. */
@@ -200,6 +207,8 @@ const showRegion = !onOptimizer;
 </style>
 
 <script>
+  import { createMenu, type MenuHandle } from "../scripts/menu";
+
   // ---------------------------------------------------------------- theme ----
   function applyThemeIcons() {
     const dark = document.documentElement.classList.contains("dark");
@@ -228,51 +237,100 @@ const showRegion = !onOptimizer;
   }
 
   // --------------------------------------------------------------- region ----
-  function initRegion() {
-    const selects = Array.from(
-      document.querySelectorAll<HTMLSelectElement>("[data-region-select]")
-    );
+  /**
+   * Handles are kept per-trigger in a WeakMap rather than in a plain array.
+   * `init` re-runs on every `astro:page-load`, and an array would keep growing
+   * with handles pointing at elements that are no longer in the document.
+   */
+  const regionHandles = new WeakMap<HTMLElement, MenuHandle>();
 
-    selects.forEach((sel) => {
-      if (sel.dataset.bound === "1") return;
-      sel.dataset.bound = "1";
-      sel.addEventListener("change", () => {
-        const region = sel.value;
-        // Keep the desktop and mobile selects in agreement.
-        selects.forEach((other) => {
-          if (other !== sel) other.value = region;
-        });
-        const chip = document.getElementById("brandRegionText");
-        if (chip) chip.textContent = region === "USA" ? "US" : "IN";
-        document.dispatchEvent(new CustomEvent("lw:region", { detail: { region } }));
+  const regionTriggers = () =>
+    Array.from(document.querySelectorAll<HTMLElement>("[data-region-trigger]"));
+
+  /**
+   * Puts every region control into agreement and, for a real user choice, tells
+   * the page about it.
+   *
+   * `broadcast` is the whole reason this takes an argument. A user picking from
+   * a menu has to re-solve the grid (`lw:region`) and let other controls catch
+   * up (`lw:setregion`); a page telling us the region came from `?region=USA`
+   * must NOT re-emit, or the two events chase each other in a loop.
+   */
+  function applyRegion(region: string, broadcast: boolean) {
+    // Each trigger renders both flags and hides one. Swapping the `hidden`
+    // attribute keeps the drawn SVG — an <option> could only have held text.
+    document.querySelectorAll<HTMLElement>("[data-region-flag]").forEach((el) => {
+      el.toggleAttribute("hidden", el.dataset.regionFlag !== region);
+    });
+
+    // setValue marks the item and repaints the trigger text without firing
+    // onSelect, so syncing the other menus cannot re-enter this function.
+    regionTriggers().forEach((t) => regionHandles.get(t)?.setValue(region));
+
+    // Only touch the brand chip on pages that actually have a region control.
+    // The optimizer's chip reads "OFFICE", which is not a region at all.
+    const chip = document.getElementById("brandRegionText");
+    if (chip && regionTriggers().length) {
+      chip.textContent = region === "USA" ? "US" : "IN";
+    }
+
+    if (broadcast) {
+      document.dispatchEvent(new CustomEvent("lw:region", { detail: { region } }));
+      document.dispatchEvent(new CustomEvent("lw:setregion", { detail: { region } }));
+    }
+  }
+
+  function initRegion() {
+    regionTriggers().forEach((trigger) => {
+      // createMenu adds listeners to `document` and `window`, so binding the
+      // same trigger twice would leave a duplicate set behind for good.
+      if (trigger.dataset.bound === "1") return;
+
+      const menuId = trigger.getAttribute("aria-controls");
+      const menu = menuId ? document.getElementById(menuId) : null;
+      if (!menu) return;
+      trigger.dataset.bound = "1";
+
+      const handle = createMenu({
+        trigger,
+        menu,
+        valueAttr: "data-region",
+        // Text only. The flags are handled above, and each instance carries its
+        // own data-label so the bar can say "United States" while the pill,
+        // which has no room for it, says "USA".
+        display: trigger.querySelector<HTMLElement>("[data-region-display]"),
+        onSelect: (region) => applyRegion(region, true),
       });
+      if (handle) regionHandles.set(trigger, handle);
     });
   }
 
   /** Lets a page set the region programmatically (e.g. from ?region=USA). */
   function initRegionSync() {
+    const root = document.documentElement;
+    if (root.dataset.lwRegionSync === "1") return;
+    root.dataset.lwRegionSync = "1"; // survives page swaps, unlike the handles
     document.addEventListener("lw:setregion", (e) => {
-      const region = (e as CustomEvent<{ region: string }>).detail.region;
-      document
-        .querySelectorAll<HTMLSelectElement>("[data-region-select]")
-        .forEach((sel) => {
-          sel.value = region;
-        });
-      const chip = document.getElementById("brandRegionText");
-      if (chip) chip.textContent = region === "USA" ? "US" : "IN";
+      applyRegion((e as CustomEvent<{ region: string }>).detail.region, false);
     });
   }
 
   // ------------------------------------------------------------- workweek ----
   function initWorkweek() {
-    const btns = Array.from(document.querySelectorAll<HTMLButtonElement>(".workweek-btn"));
-    btns.forEach((btn) => {
+    document.querySelectorAll<HTMLButtonElement>(".workweek-btn").forEach((btn) => {
       if (btn.dataset.bound === "1") return;
       btn.dataset.bound = "1";
       btn.addEventListener("click", () => {
-        btns.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
-        const workWeek = Number(btn.dataset.workweek) || 5;
-        document.dispatchEvent(new CustomEvent("lw:workweek", { detail: { workWeek } }));
+        const value = btn.dataset.workweek === "6" ? "6" : "5";
+        // Matched by VALUE, not by element identity. The control is rendered
+        // twice — desktop bar and mobile row — and identity would light up only
+        // the copy that was clicked, leaving the other showing the old answer.
+        document.querySelectorAll<HTMLButtonElement>(".workweek-btn").forEach((b) => {
+          b.setAttribute("aria-pressed", String(b.dataset.workweek === value));
+        });
+        document.dispatchEvent(
+          new CustomEvent("lw:workweek", { detail: { workWeek: Number(value) } })
+        );
       });
     });
   }

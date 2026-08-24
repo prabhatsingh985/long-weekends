@@ -43,13 +43,48 @@ export function isCalendarExhausted(): boolean {
   return formatLocalIso(new Date()) > CALENDAR_END;
 }
 
-export const CURRENT_DATE_REF = getTodayIso();
+/**
+ * The date a plan must start STRICTLY AFTER to count as upcoming.
+ *
+ * This is deliberately not `getTodayIso()`. A break that starts today, or that
+ * started yesterday and is still running, cannot be planned for — you would
+ * have had to file the leave already — so showing it as "next up" is wrong.
+ * The solver therefore filters on `startDate > cutoff`, and this is the cutoff.
+ *
+ * The one case that needs care is a visitor whose clock is before the data
+ * window (or a build run early). Clamping to CALENDAR_START the way
+ * getTodayIso() does would combine with the strict `>` to silently drop every
+ * plan starting on 1 January. The cutoff sits one day earlier instead, so the
+ * whole calendar survives the filter.
+ */
+export function getUpcomingCutoffIso(): string {
+  const today = formatLocalIso(new Date());
+  if (today < CALENDAR_START) return "2025-12-31";
+  if (today > CALENDAR_END) return CALENDAR_END;
+  return today;
+}
+
+/**
+ * Evaluated once when this module is first imported.
+ *
+ * In the browser that happens on page load, so it is the visitor's real current
+ * date — which is what makes "next up" correct for someone returning days after
+ * the site was built. Anything computed from this in page frontmatter, by
+ * contrast, is frozen at build time; see the highlight list on the homepage,
+ * which is re-filtered on the client for exactly that reason.
+ */
+export const CURRENT_DATE_REF = getUpcomingCutoffIso();
 
 export interface SolverOptions {
   leaves: number;
   workWeek?: number;
   region?: RegionCode;
   month?: string;
+  /**
+   * Plans must start STRICTLY AFTER this date. Pass `getUpcomingCutoffIso()`,
+   * not `getTodayIso()` — the latter clamps up to CALENDAR_START, which would
+   * make the strict comparison drop every plan starting on 1 January.
+   */
   fromDate?: string;
   customHolidays?: string[];
 }
@@ -143,7 +178,15 @@ function getDayNumber(isoDate: string): string {
   return String(d.getDate()).padStart(2, "0");
 }
 
-function cleanFestivalName(name: string): string {
+/**
+ * Collapses a raw holiday name to the festival it belongs to.
+ *
+ * Exported because the highlight list has to group on the same notion of "same
+ * festival" that titles are built from — otherwise "Raksha Bandhan" and
+ * "Raksha Bandhan (Pre-Break)" read as two different festivals and the list
+ * shows one weekend twice.
+ */
+export function cleanFestivalName(name: string): string {
   let cleaned = name.split("/")[0].split("(")[0].trim();
   cleaned = cleaned.replace(/\s+Day$/, "").replace(/\s+Jayanti$/, "").replace(/'s Birthday$/, "").trim();
   return cleaned;
@@ -298,9 +341,12 @@ export function solveVacationPlans(options: SolverOptions): VacationPlan[] {
 
   let deduplicatedPlans = Array.from(canonicalDeals.values());
 
-  // STRICT UPCOMING FILTER: Vacation must start on or after fromDate (No past vacations)
+  // STRICT UPCOMING FILTER. `>` and not `>=`: a break that starts today has
+  // already begun, and nobody can file leave for it retroactively, so it is not
+  // something this tool can offer. Every surface — the results grid, the hero
+  // badge, the month rail, the company optimizer — inherits the rule from here.
   if (fromDate) {
-    deduplicatedPlans = deduplicatedPlans.filter((p) => p.startDate >= fromDate);
+    deduplicatedPlans = deduplicatedPlans.filter((p) => p.startDate > fromDate);
   }
 
   if (month && month !== "ALL") {

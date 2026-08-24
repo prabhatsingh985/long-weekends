@@ -1,0 +1,133 @@
+---
+/**
+ * The region switcher, as a real menu instead of a native <select>.
+ *
+ * It used to be a bare <select>. The trigger could be themed, but the *open*
+ * option list is drawn by the operating system: it ignores every design token,
+ * stays white in dark mode, and cannot hold the Flag.astro SVG (an <option> is
+ * text only). On Windows that made the drop-down look like a stray browser
+ * widget sitting inside our own header. This is the same createMenu popover the
+ * hero capsule uses, so the list now themes with the rest of the site and can
+ * carry a drawn flag beside each choice.
+ *
+ * Two presentations from one component:
+ *   - "bar"  sits inside the desktop control bar and reads as plain text.
+ *   - "pill" is the standalone rounded button used on phones.
+ *
+ * The word on the trigger differs by variant on purpose — the desktop bar has
+ * room for "Pan-India IT", the phone pill does not, so it says "India". Both
+ * drive the SAME value ("ALL" / "USA"); only the wording differs, which is why
+ * each item carries its own data-label.
+ */
+import Flag from "./Flag.astro";
+
+interface Props {
+  /** Unique id root, e.g. "navRegionDesktop". The menu becomes `${id}Menu`. */
+  id: string;
+  variant: "bar" | "pill";
+  /**
+   * Which edge the menu hangs from. Set it from where the trigger sits in its
+   * row, not from the variant: the menu is up to 20rem wide, so anchoring a
+   * left-hand trigger to its right edge pushes the panel off the screen.
+   */
+  align: "left" | "right";
+}
+
+const { id, variant, align } = Astro.props;
+const menuId = `${id}Menu`;
+
+const REGIONS = [
+  {
+    value: "ALL",
+    code: "IN" as const,
+    label: "Pan-India IT",
+    short: "India",
+    hint: "Gazetted public + IT sector holidays",
+  },
+  {
+    value: "USA",
+    code: "US" as const,
+    label: "United States",
+    short: "USA",
+    hint: "US federal public holidays",
+  },
+];
+
+const isPill = variant === "pill";
+
+/* The trigger word: full on the desktop bar, abbreviated on the phone pill. */
+const triggerText = isPill ? REGIONS[0].short : REGIONS[0].label;
+
+/* The bar variant draws no edge of its own — it lives inside the control bar's
+   border and would otherwise read as a box inside a box. */
+const triggerClass = isPill
+  ? "flex items-center gap-1.5 rounded-full border border-hairline bg-surface-soft py-1.5 pl-2 pr-2 text-[0.8125rem] font-bold text-ink cursor-pointer hover:border-hairline-strong transition-colors"
+  : "flex items-center gap-1.5 bg-transparent text-[0.8125rem] font-bold text-ink cursor-pointer hover:text-brand-text transition-colors";
+
+const menuSide = align === "right" ? "right-0" : "left-0";
+---
+
+<div class="relative">
+  <button
+    type="button"
+    id={id}
+    data-region-trigger
+    class={triggerClass}
+    aria-haspopup="menu"
+    aria-expanded="false"
+    aria-controls={menuId}
+  >
+    {/* Both flags are rendered and one is hidden, rather than swapping an
+        emoji: Flag.astro takes a fixed `code`, and toggling `hidden` avoids
+        rebuilding the SVG on every region change. */}
+    <span data-region-flag="ALL" class="shrink-0"><Flag code="IN" /></span>
+    <span data-region-flag="USA" class="shrink-0" hidden><Flag code="US" /></span>
+    {/* The visible word is "India", not "Region: India" — the prefix is here
+        so the button does not announce as a bare country name out of context. */}
+    <span class="sr-only">Region:</span>
+    <span data-region-display>{triggerText}</span>
+    <svg
+      class="seg-caret h-3 w-3 shrink-0 text-muted"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="3"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6"></path>
+    </svg>
+  </button>
+
+  <div
+    id={menuId}
+    role="menu"
+    aria-labelledby={id}
+    hidden
+    class:list={[
+      "popover popover-below absolute z-50 w-[min(20rem,calc(100vw-2rem))] p-2 text-left",
+      menuSide,
+    ]}
+  >
+    {
+      REGIONS.map((r, i) => (
+        <button
+          type="button"
+          role="menuitemradio"
+          aria-checked={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          class="menu-item"
+          data-region={r.value}
+          data-label={isPill ? r.short : r.label}
+        >
+          <Flag code={r.code} class="shrink-0" />
+          <span class="min-w-0">
+            <span class="block text-[0.8125rem] font-bold text-ink">{r.label}</span>
+            <span class="block text-xs text-muted">{r.hint}</span>
+          </span>
+        </button>
+      ))
+    }
+  </div>
+</div>

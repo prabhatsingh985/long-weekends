@@ -45,6 +45,60 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
 
   const isOpen = () => !menu.hidden;
 
+  /** Matches --popover-gap in global.css. */
+  const GAP = 10;
+  /** Below this there is no point opening downward at all. */
+  const MIN_USABLE = 140;
+  /**
+   * How much extra room a flip has to buy before it is worth taking.
+   *
+   * Without it, a trigger sitting near the middle of a short viewport flips on
+   * a few pixels' difference, and then flips back on the next scroll frame —
+   * the menu appears to jump from one side of the trigger to the other while
+   * the user is reading it. Roughly one item's height, so a flip always gains
+   * at least one more visible option.
+   */
+  const FLIP_MARGIN = 48;
+
+  /**
+   * Decides whether the menu hangs below the trigger or above it.
+   *
+   * The hero menus used to be pinned above with a hardcoded Tailwind class, so
+   * they covered the headline and overlapped the sticky header even when there
+   * was plenty of room underneath. Placement is a function of where the trigger
+   * happens to be in the viewport, which only the browser knows, so it belongs
+   * here rather than in the markup.
+   *
+   * Must run while the menu is visible — a hidden element measures as zero.
+   */
+  function place() {
+    const rect = trigger.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom - GAP;
+    const spaceAbove = rect.top - GAP;
+
+    // Clear any previous cap before measuring, or the menu's natural height is
+    // read as whatever it was constrained to last time.
+    menu.style.maxHeight = "";
+    const needed = menu.offsetHeight;
+
+    // Prefer below, and only flip when below genuinely cannot serve: the menu
+    // does not fit, and above has meaningfully more room to offer. Note that
+    // "fits above" is covered by the same test, since a menu that fits above
+    // needs more room than below was able to give.
+    const useAbove =
+      needed > spaceBelow &&
+      spaceAbove > spaceBelow + FLIP_MARGIN &&
+      spaceAbove >= MIN_USABLE;
+
+    menu.classList.toggle("popover-above", useAbove);
+    menu.classList.toggle("popover-below", !useAbove);
+
+    // Cap only when the menu really is taller than its side allows, so short
+    // menus never get a scrollbar they have no use for.
+    const available = Math.max(MIN_USABLE, useAbove ? spaceAbove : spaceBelow);
+    menu.style.maxHeight = needed > available ? `${available}px` : "";
+  }
+
   function focusAt(i: number) {
     const idx = (i + items.length) % items.length;
     items.forEach((it, n) => {
@@ -55,6 +109,7 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
 
   function open(where: "selected" | "first" | "last" = "selected") {
     menu.hidden = false;
+    place();
     menu.classList.add("pop-in");
     trigger.setAttribute("aria-expanded", "true");
 
@@ -143,6 +198,21 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     const t = e.target as Node;
     if (!menu.contains(t) && !trigger.contains(t)) close(false);
   });
+
+  // Scrolling and rotating both change how much room the trigger has, so an
+  // open menu has to re-measure or it ends up hanging off screen. Coalesced
+  // into one frame because scroll fires far more often than layout changes.
+  let queued = false;
+  function replace() {
+    if (!isOpen() || queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      if (isOpen()) place();
+    });
+  }
+  window.addEventListener("scroll", replace, { passive: true });
+  window.addEventListener("resize", replace);
 
   return {
     open,

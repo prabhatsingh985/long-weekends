@@ -18,6 +18,7 @@ import {
   formatDateRange,
   pluralLeaves,
   sortPlans,
+  DEFAULT_SORT,
   type SortKey,
 } from "./plan-view";
 import { createMenu } from "./menu";
@@ -89,7 +90,7 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
   let leaves = options.initialLeaves ?? 0;
   let customValue = 3;
   let month = "ALL";
-  let sort: SortKey = "efficiency";
+  let sort: SortKey = DEFAULT_SORT;
   let all: VacationPlan[] = [];
   let visible: VacationPlan[] = [];
 

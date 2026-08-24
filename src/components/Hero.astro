@@ -9,25 +9,32 @@
  *
  * Emits `lw:search` with { region, leaves } when the user presses Search.
  */
+import Flag from "./Flag.astro";
+
 const REGIONS = [
   {
     value: "ALL",
-    flag: "🇮🇳",
+    code: "IN" as const,
     label: "Pan-India IT",
     hint: "Gazetted public + IT sector holidays",
   },
   {
     value: "USA",
-    flag: "🇺🇸",
+    code: "US" as const,
     label: "United States",
     hint: "US federal public holidays",
   },
 ];
 
+/* Glyphs are picked for what Windows can actually draw. 🆓 was the obvious
+   choice for the free tier and the wrong one: Segoe UI Emoji renders it as a
+   system-blue "FREE" chip that reads as a browser badge sitting inside our own
+   menu, not as an icon in it. 🎁 carries the same "costs you nothing" meaning
+   and matches the weight of the three beside it. */
 const BUDGETS = [
   {
     value: "0",
-    glyph: "🆓",
+    glyph: "🎁",
     label: "No leaves",
     hint: "Breaks that cost you nothing",
   },
@@ -37,31 +44,46 @@ const BUDGETS = [
 ];
 ---
 
-<section class="relative overflow-hidden px-4 sm:px-6 pt-12 pb-14 sm:pt-16 sm:pb-16">
+<!-- No `overflow-hidden` on the section itself, deliberately.
+     It used to live here to stop the decorative blurs below from widening the
+     page, but an ancestor's overflow clips *every* descendant — so the search
+     capsule's dropdowns were cut off at the section's bottom edge and the
+     budget menu appeared to only have two options. The blurs are clipped by
+     their own wrapper instead, which leaves the menus free to overhang. -->
+<section class="relative px-4 sm:px-6 pt-12 pb-14 sm:pt-16 sm:pb-16">
   <!-- Ambient warmth. Decorative only, so kept out of the a11y tree and
        deliberately faint enough not to shift text contrast. -->
   <div
-    class="absolute -top-40 -left-32 w-[26rem] h-[26rem] rounded-full bg-brand/8 blur-3xl pointer-events-none"
+    class="absolute inset-0 overflow-hidden pointer-events-none"
     aria-hidden="true"
   >
-  </div>
-  <div
-    class="absolute -top-24 -right-24 w-[22rem] h-[22rem] rounded-full bg-brand-400/8 blur-3xl pointer-events-none"
-    aria-hidden="true"
-  >
+    <div
+      class="absolute -top-40 -left-32 w-[26rem] h-[26rem] rounded-full bg-brand/8 blur-3xl"
+    >
+    </div>
+    <div
+      class="absolute -top-24 -right-24 w-[22rem] h-[22rem] rounded-full bg-brand-400/8 blur-3xl"
+    >
+    </div>
   </div>
 
   <div
     class="relative max-w-[1280px] mx-auto flex flex-col items-center text-center"
   >
+    {/* "Next up: Raksha Bandhan — 3 days off for no leaves" is ~45 characters,
+        so on a 320px screen it has to wrap. `rounded-full` on a two-line pill
+        bulges into a stadium, hence the softer corner below `sm`. The dot and
+        arrow are shrink-0 so the text is the only thing that gives way. */}
     <a
       href="#results"
-      class="group inline-flex items-center gap-2 mb-7 pl-3 pr-2.5 py-1.5 rounded-full bg-surface border border-hairline shadow-soft text-[0.8125rem] font-semibold text-body hover:border-hairline-strong hover:text-ink transition-colors no-underline"
+      class="group inline-flex max-w-full items-center gap-2 mb-7 pl-3 pr-2.5 py-1.5 rounded-2xl sm:rounded-full bg-surface border border-hairline shadow-soft text-[0.8125rem] font-semibold text-body hover:border-hairline-strong hover:text-ink transition-colors no-underline"
     >
-      <span class="dot dot-holiday" aria-hidden="true"></span>
-      <span id="heroCountdownBadge">Every long weekend left in 2026</span>
+      <span class="dot dot-holiday shrink-0" aria-hidden="true"></span>
+      <span id="heroCountdownBadge" class="text-left"
+        >Every long weekend left in 2026</span
+      >
       <span
-        class="text-muted group-hover:translate-x-0.5 transition-transform"
+        class="shrink-0 text-muted group-hover:translate-x-0.5 transition-transform"
         aria-hidden="true">→</span
       >
     </a>
@@ -78,71 +100,155 @@ const BUDGETS = [
     </p>
 
     <!-- Search capsule ------------------------------------------------------ -->
-    <div class="w-full max-w-[42rem] relative">
+    {/* Stacks to a column below `sm`. In a row at 360px each `.seg` gets
+        `flex:1 1 0` of ~110px, so "Pan-India IT" truncated to "Pan-India…" and
+        the "Days you can spare" label wrapped to two lines. Stacking gives each
+        control the full width instead of shrinking the type. */}
+    <div class="w-full max-w-[42rem]">
       <div
-        class="flex items-center gap-1 p-2 rounded-full bg-surface border border-hairline shadow-lift"
+        class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-1 p-2 rounded-3xl sm:rounded-full bg-surface border border-hairline shadow-lift"
       >
+        {/* Each seg owns a `relative` wrapper so its menu anchors to the seg,
+            not to the capsule. Without it `top:100%` measures the whole capsule,
+            so once stacked both menus dropped below the entire stack. */}
         <!-- Region -->
-        <button
-          type="button"
-          id="heroRegionTrigger"
-          class="seg"
-          aria-haspopup="menu"
-          aria-expanded="false"
-          aria-controls="heroRegionMenu"
-        >
-          <span class="seg-label">Where you work</span>
-          <span class="flex items-center justify-between gap-1">
-            <span class="seg-value" id="heroRegionDisplay">Pan-India IT</span>
-            <svg
-              class="seg-caret w-3 h-3 text-muted shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m6 9 6 6 6-6"></path>
-            </svg>
-          </span>
-        </button>
+        <div class="relative flex-1 min-w-0">
+          <button
+            type="button"
+            id="heroRegionTrigger"
+            class="seg w-full"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="heroRegionMenu"
+          >
+            <span class="seg-label">Where you work</span>
+            <span class="flex items-center justify-between gap-1">
+              <span class="seg-value" id="heroRegionDisplay">Pan-India IT</span>
+              <svg
+                class="seg-caret w-3 h-3 text-muted shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </span>
+          </button>
 
-        <span class="w-px h-9 bg-hairline shrink-0" aria-hidden="true"></span>
+          <!-- Placement (below by default, flipped only when the viewport
+               demands it) is set by createMenu on every open. `popover-below` is
+               here as the sensible starting point if the script has not run. -->
+          <div
+            id="heroRegionMenu"
+            role="menu"
+            aria-labelledby="heroRegionTrigger"
+            hidden
+            class="popover popover-below absolute left-0 w-[min(22rem,calc(100vw-2rem))] p-2 z-50 text-left"
+          >
+            {
+              REGIONS.map((r, i) => (
+                <button
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={i === 0 ? "true" : "false"}
+                  tabindex={i === 0 ? 0 : -1}
+                  class="menu-item"
+                  data-region={r.value}
+                  data-label={r.label}
+                >
+                  <Flag code={r.code} class="shrink-0" />
+                  <span class="min-w-0">
+                    <span class="block text-[0.8125rem] font-bold text-ink">
+                      {r.label}
+                    </span>
+                    <span class="block text-xs text-muted">{r.hint}</span>
+                  </span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <!-- Divider: only meaningful when the two segments sit side by side. -->
+        <span
+          class="hidden sm:block w-px h-9 bg-hairline shrink-0"
+          aria-hidden="true"></span>
 
         <!-- Leave budget -->
-        <button
-          type="button"
-          id="heroBudgetTrigger"
-          class="seg"
-          aria-haspopup="menu"
-          aria-expanded="false"
-          aria-controls="heroBudgetMenu"
-        >
-          <span class="seg-label">Days you can spare</span>
-          <span class="flex items-center justify-between gap-1">
-            <span class="seg-value" id="heroBudgetDisplay">No leaves</span>
-            <svg
-              class="seg-caret w-3 h-3 text-muted shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m6 9 6 6 6-6"></path>
-            </svg>
-          </span>
-        </button>
+        <div class="relative flex-1 min-w-0">
+          <button
+            type="button"
+            id="heroBudgetTrigger"
+            class="seg w-full"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="heroBudgetMenu"
+          >
+            <span class="seg-label">Days you can spare</span>
+            <span class="flex items-center justify-between gap-1">
+              <span class="seg-value" id="heroBudgetDisplay">No leaves</span>
+              <svg
+                class="seg-caret w-3 h-3 text-muted shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </span>
+          </button>
 
+          {/* `right-0` so the wide menu extends leftward from the seg's right
+              edge on desktop and cannot spill off-screen. When stacked the
+              wrapper is full width, so left and right edges coincide anyway. */}
+          <div
+            id="heroBudgetMenu"
+            role="menu"
+            aria-labelledby="heroBudgetTrigger"
+            hidden
+            class="popover popover-below absolute right-0 w-[min(23rem,calc(100vw-2rem))] p-2 z-50 text-left"
+          >
+            {
+              BUDGETS.map((b, i) => (
+                <button
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={i === 0 ? "true" : "false"}
+                  tabindex={i === 0 ? 0 : -1}
+                  class="menu-item"
+                  data-leaves={b.value}
+                  data-label={b.label}
+                >
+                  <span class="text-xl shrink-0" aria-hidden="true">
+                    {b.glyph}
+                  </span>
+                  <span class="min-w-0">
+                    <span class="block text-[0.8125rem] font-bold text-ink">
+                      {b.label}
+                    </span>
+                    <span class="block text-xs text-muted">{b.hint}</span>
+                  </span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        {/* Full width with a visible label when stacked — an icon-only button
+            below the two controls read as a mystery circle. Auto width and
+            icon+label on the row layout. */}
         <button
           type="button"
           id="heroSearchActionBtn"
-          class="btn btn-brand shrink-0"
-          aria-label="Show plans"
+          class="btn btn-brand w-full sm:w-auto shrink-0"
         >
           <svg
             class="w-4 h-4"
@@ -157,84 +263,21 @@ const BUDGETS = [
             <circle cx="11" cy="11" r="7"></circle>
             <path d="m21 21-4.3-4.3"></path>
           </svg>
-          <span class="hidden sm:inline">Show plans</span>
+          <span>Show plans</span>
         </button>
-      </div>
-
-      <!-- Menus open upward so they never fight the sticky filter bar. -->
-      <div
-        id="heroRegionMenu"
-        role="menu"
-        aria-labelledby="heroRegionTrigger"
-        hidden
-        class="popover absolute bottom-[calc(100%+0.625rem)] left-0 w-[min(22rem,calc(100vw-2rem))] p-2 z-50 text-left"
-      >
-        {
-          REGIONS.map((r, i) => (
-            <button
-              type="button"
-              role="menuitemradio"
-              aria-checked={i === 0 ? "true" : "false"}
-              tabindex={i === 0 ? 0 : -1}
-              class="menu-item"
-              data-region={r.value}
-              data-label={r.label}
-            >
-              <span class="text-xl shrink-0" aria-hidden="true">
-                {r.flag}
-              </span>
-              <span class="min-w-0">
-                <span class="block text-[0.8125rem] font-bold text-ink">
-                  {r.label}
-                </span>
-                <span class="block text-xs text-muted">{r.hint}</span>
-              </span>
-            </button>
-          ))
-        }
-      </div>
-
-      <div
-        id="heroBudgetMenu"
-        role="menu"
-        aria-labelledby="heroBudgetTrigger"
-        hidden
-        class="popover absolute bottom-[calc(100%+0.625rem)] right-0 w-[min(23rem,calc(100vw-2rem))] p-2 z-50 text-left"
-      >
-        {
-          BUDGETS.map((b, i) => (
-            <button
-              type="button"
-              role="menuitemradio"
-              aria-checked={i === 0 ? "true" : "false"}
-              tabindex={i === 0 ? 0 : -1}
-              class="menu-item"
-              data-leaves={b.value}
-              data-label={b.label}
-            >
-              <span class="text-xl shrink-0" aria-hidden="true">
-                {b.glyph}
-              </span>
-              <span class="min-w-0">
-                <span class="block text-[0.8125rem] font-bold text-ink">
-                  {b.label}
-                </span>
-                <span class="block text-xs text-muted">{b.hint}</span>
-              </span>
-            </button>
-          ))
-        }
       </div>
     </div>
 
+    {/* Same wrap-safety as the countdown badge above: this label is ~35
+        characters, which does not fit one line at 320px. */}
     <a
       href="/company-optimizer"
-      class="group inline-flex items-center gap-2.5 mt-7 px-4 py-2.5 rounded-full border border-brand-200 bg-brand-50 text-[0.8125rem] font-bold text-brand-text hover:border-brand-300 transition-colors no-underline"
+      class="group inline-flex max-w-full items-center gap-2.5 mt-7 px-4 py-2.5 rounded-2xl sm:rounded-full border border-brand-200 bg-brand-50 text-[0.8125rem] font-bold text-brand-text hover:border-brand-300 transition-colors no-underline"
     >
-      <span aria-hidden="true">🏢</span>
-      <span>Your office list differs? Upload it</span>
+      <span class="shrink-0" aria-hidden="true">🏢</span>
+      <span class="text-left">Your office list differs? Upload it</span>
       <span
-        class="group-hover:translate-x-0.5 transition-transform"
+        class="shrink-0 group-hover:translate-x-0.5 transition-transform"
         aria-hidden="true">→</span
       >
     </a>
@@ -242,8 +285,22 @@ const BUDGETS = [
 </section>
 
 <script>
-  import { solveVacationPlans, getTodayIso } from "../data/vacation-solver";
-  import { createMenu } from "../scripts/menu";
+  import {
+    solveVacationPlans,
+    getUpcomingCutoffIso,
+    isCalendarExhausted,
+    type RegionCode,
+  } from "../data/vacation-solver";
+  import { createMenu, type MenuHandle } from "../scripts/menu";
+  import { nextBreaks } from "../scripts/plan-view";
+
+  /* The live region and work week. The badge used to hardcode region "ALL", so
+     a visitor who picked United States was still told the next break was Raksha
+     Bandhan — an Indian festival that is not in the US holiday list at all. */
+  let region: RegionCode = "ALL";
+  let workWeek = 5;
+  let leaves = 0;
+  let regionMenuHandle: MenuHandle | null = null;
 
   function setupCapsule() {
     const el = (id: string) => document.getElementById(id);
@@ -255,17 +312,22 @@ const BUDGETS = [
     const budgetDisplay = el("heroBudgetDisplay");
     const searchBtn = el("heroSearchActionBtn");
 
-    let region = "ALL";
-    let leaves = 0;
-
     if (regionTrigger && regionMenu && regionDisplay) {
-      createMenu({
+      regionMenuHandle = createMenu({
         trigger: regionTrigger,
         menu: regionMenu,
         display: regionDisplay,
         valueAttr: "data-region",
         onSelect: (v) => {
-          region = v;
+          region = (v as RegionCode) || "ALL";
+          // Announce it instead of holding it until "Show plans" is pressed.
+          // Previously this only set a local variable, so the hero and the
+          // navbar could sit there showing two different regions, and the
+          // results grid agreed with neither until the button was clicked.
+          // `lw:region` updates the grid; `lw:setregion` updates the navbar.
+          document.dispatchEvent(new CustomEvent("lw:region", { detail: { region } }));
+          document.dispatchEvent(new CustomEvent("lw:setregion", { detail: { region } }));
+          renderCountdownBadge();
         },
       });
     }
@@ -289,52 +351,87 @@ const BUDGETS = [
     });
   }
 
-  /** Names the soonest break so the promise at the top of the page is concrete. */
-  function initCountdownBadge() {
+  /**
+   * Names the soonest break so the promise at the top of the page is concrete.
+   *
+   * Recomputed rather than rendered once: region and work week both change what
+   * "next" means, and the cutoff is read from the visitor's clock on every call,
+   * so returning to an already-open tab days later still gives a truthful
+   * answer rather than whatever was true when the page loaded.
+   */
+  function renderCountdownBadge() {
     const badge = document.getElementById("heroCountdownBadge");
     if (!badge) return;
 
-    const today = getTodayIso();
-
-    for (let l = 0; l <= 4; l++) {
-      const plans = solveVacationPlans({
-        leaves: l,
-        workWeek: 5,
-        region: "ALL",
-        month: "ALL",
-        fromDate: today,
-      });
-
-      let upcoming = plans.filter((p) => p.startDate > today);
-      if (!upcoming.length) upcoming = plans.filter((p) => p.startDate >= today);
-      if (!upcoming.length) continue;
-
-      upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate));
-      const next = upcoming[0];
-
-      let name = next.title.split(":")[0].replace(/\(.*?\)/g, "").trim();
-      if (!name) {
-        name = next.days.find((d) => d.type === "holiday")?.label || "";
-      }
-
-      const days = next.totalDaysOff || 3;
-      const cost =
-        next.leavesRequired === 0
-          ? "no leaves"
-          : `${next.leavesRequired} ${next.leavesRequired === 1 ? "leave" : "leaves"}`;
-
-      badge.textContent = name
-        ? `Next up: ${name} — ${days} days off for ${cost}`
-        : `Next up: ${days} days off for ${cost}`;
+    if (isCalendarExhausted()) {
+      badge.textContent = "The 2026 calendar has run out — new dates coming";
       return;
     }
 
-    badge.textContent = "Every long weekend left in 2026";
+    const cutoff = getUpcomingCutoffIso();
+
+    // Deliberately the same call the highlight list below makes, so the badge
+    // cannot name one break while the list opens with another.
+    //
+    // It used to walk leave budgets from cheapest and take the earliest plan
+    // within the first budget that had anything. That reads as "next" but is
+    // not: standing on 14 Feb 2026 the cheapest budget's first free break was
+    // Good Friday on 3 April, so the badge announced it while Id-ul-Fitr sat
+    // seven weeks nearer on 20 March, unmentioned. nextBreaks() orders by date
+    // first and treats cost as the tie-break within one festival.
+    const next = nextBreaks((l) =>
+      solveVacationPlans({ leaves: l, workWeek, region, month: "ALL", fromDate: cutoff })
+    )[0];
+
+    if (!next) {
+      badge.textContent = "No long weekends left on this calendar";
+      return;
+    }
+
+    let name = next.title.split(":")[0].replace(/\(.*?\)/g, "").trim();
+    if (!name) {
+      name = next.days.find((d) => d.type === "holiday")?.label || "";
+    }
+
+    const days = next.totalDaysOff || 3;
+    const cost =
+      next.leavesRequired === 0
+        ? "no leaves"
+        : `${next.leavesRequired} ${next.leavesRequired === 1 ? "leave" : "leaves"}`;
+
+    badge.textContent = name
+      ? `Next up: ${name} — ${days} days off for ${cost}`
+      : `Next up: ${days} days off for ${cost}`;
   }
 
   function init() {
     setupCapsule();
-    initCountdownBadge();
+    renderCountdownBadge();
+
+    // The navbar owns these controls on the rest of the page; the hero mirrors
+    // them so the two can never contradict each other.
+    //
+    // Both channels are listened to on purpose. `lw:region` is a user change
+    // coming from the navbar; `lw:setregion` is a programmatic one, which is
+    // how a deep link such as /?region=USA arrives. Missing the second left the
+    // badge naming an Indian festival on a page already switched to the US.
+    function syncRegion(e: Event) {
+      const next = (e as CustomEvent<{ region: string }>).detail?.region;
+      if (!next || next === region) return; // our own echo, or a no-op change
+      region = (next as RegionCode) || "ALL";
+      // setValue marks the item without firing onSelect, so this cannot loop
+      // back into another dispatch.
+      regionMenuHandle?.setValue(region);
+      renderCountdownBadge();
+    }
+
+    document.addEventListener("lw:region", syncRegion);
+    document.addEventListener("lw:setregion", syncRegion);
+
+    document.addEventListener("lw:workweek", (e) => {
+      workWeek = (e as CustomEvent<{ workWeek: number }>).detail.workWeek || 5;
+      renderCountdownBadge();
+    });
   }
 
   if (document.readyState === "loading") {

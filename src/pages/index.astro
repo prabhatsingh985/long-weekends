@@ -11,8 +11,8 @@ import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import Hero from "../components/Hero.astro";
 import Footer from "../components/Footer.astro";
-import { getTodayIso, solveVacationPlans } from "../data/vacation-solver";
-import { formatDateRange, getBannerTheme, pluralLeaves } from "../scripts/plan-view";
+import { getTodayIso, getUpcomingCutoffIso, solveVacationPlans } from "../data/vacation-solver";
+import { formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
 
 const TITLE =
   "Next Long Weekend 2026 – Leave Calculator India | The Long Weekends";
@@ -60,20 +60,17 @@ if (curMonth > 1) {
  * crawler read as the page's only real content, since the results grid is
  * rendered on the client. Deriving it from the solver makes it both accurate
  * and crawlable.
+ *
+ * What is rendered here is the India list as of build time, which is what a
+ * crawler should see. It is not what a visitor should see: `buildCutoff` is
+ * frozen at build, and the region is a guess. renderHighlights() in the client
+ * script re-solves both from the visitor's own clock and region and replaces
+ * these rows — see the note there.
  */
-const highlightPool = [
-  ...solveVacationPlans({ leaves: 0, workWeek: 5, region: "ALL", fromDate: today }),
-  ...solveVacationPlans({ leaves: 1, workWeek: 5, region: "ALL", fromDate: today }),
-];
-const seenFestival = new Set<string>();
-const highlights = highlightPool
-  .sort((a, b) => a.startDate.localeCompare(b.startDate))
-  .filter((p) => {
-    if (seenFestival.has(p.title)) return false;
-    seenFestival.add(p.title);
-    return true;
-  })
-  .slice(0, 6);
+const buildCutoff = getUpcomingCutoffIso();
+const highlights = nextBreaks((leaves) =>
+  solveVacationPlans({ leaves, workWeek: 5, region: "ALL", fromDate: buildCutoff })
+);
 
 /**
  * One FAQ source feeding both the visible accordion and the JSON-LD. They had
@@ -136,7 +133,12 @@ const faqSchema = {
     aria-label="Filter long weekends"
     class="sticky top-[4.25rem] z-40 border-b border-hairline bg-page/90 backdrop-blur-lg"
   >
-    <div class="mx-auto flex max-w-[1280px] flex-col gap-2 px-4 py-3 sm:px-6">
+    {/* Tighter vertically on phones. This bar and the navbar are both pinned,
+         and at py-3 they took ~160px of a 667px screen before a single result
+         showed. The eyebrow labels below are `sm:block` for the same reason. */}
+    <div
+      class="mx-auto flex max-w-[1280px] flex-col gap-1.5 px-4 py-2.5 sm:gap-2 sm:px-6 sm:py-3"
+    >
       <div class="flex items-center gap-3">
         <span
           class="hidden shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted sm:block"
@@ -149,7 +151,7 @@ const faqSchema = {
           class="rail min-w-0 py-0.5"
         >
           <button type="button" class="pill" data-leaves="0" aria-pressed="true">
-            <span class="pill-glyph" aria-hidden="true">🆓</span>No leaves
+            <span class="pill-glyph" aria-hidden="true">🎁</span>No leaves
           </button>
           <button type="button" class="pill" data-leaves="1" aria-pressed="false">
             <span class="pill-glyph" aria-hidden="true">🌴</span>1 leave
@@ -268,11 +270,16 @@ const faqSchema = {
     id="main"
     class="mx-auto w-full max-w-[1280px] grow px-4 py-8 sm:px-6 sm:py-10"
   >
+    {/* scroll-mt clears whatever is pinned above this anchor when the hero's
+        "Next up" link jumps here. Two sticky bars stack on the way down —
+        navbar (4.25rem) + filter bar — and the filter bar is one row taller on
+        phones than it looks, because the eyebrow labels drop out and the rails
+        keep their padding. 12rem covers it at every width. */}
     <div
       id="results"
-      class="mb-5 flex flex-wrap items-end justify-between gap-4 scroll-mt-[12rem]"
+      class="mb-5 flex flex-wrap items-end justify-between gap-3 scroll-mt-[12rem] sm:gap-4"
     >
-      <div aria-live="polite">
+      <div aria-live="polite" class="min-w-0">
         <h2 class="text-xl font-extrabold sm:text-2xl">
           <span id="resultsBadge">Counting</span>
         </h2>
@@ -301,7 +308,7 @@ const faqSchema = {
             <path d="M3 6h18M6 12h12M10 18h4"></path>
           </svg>
           <span class="text-muted">Sort</span>
-          <span id="sortLabel">Best value</span>
+          <span id="sortLabel">Soonest first</span>
           <svg
             class="seg-caret h-3 w-3 text-muted"
             viewBox="0 0 24 24"
@@ -319,14 +326,14 @@ const faqSchema = {
           role="menu"
           aria-labelledby="sortTrigger"
           hidden
-          class="popover absolute right-0 top-[calc(100%+0.5rem)] z-40 w-[15rem] p-2"
+          class="popover popover-below absolute right-0 z-40 w-[15rem] p-2"
         >
           {
+            /* Order matters: the first entry is marked checked below, so it
+               has to be DEFAULT_SORT in plan-view.ts. */
             [
-              { v: "efficiency", label: "Best value", hint: "Most days off per leave" },
-              { v: "days", label: "Longest break", hint: "Biggest total time off" },
               { v: "date", label: "Soonest first", hint: "Whatever is next" },
-              { v: "cheapest", label: "Fewest leaves", hint: "Guard your balance" },
+              { v: "days", label: "Longest break", hint: "Biggest total time off" },
             ].map((o, i) => (
               <button
                 type="button"
@@ -476,52 +483,61 @@ const faqSchema = {
         </p>
       </div>
 
-      <hr class="my-10 border-hairline" />
+      <!-- The leading rule lives inside this block so that hiding a fully
+           stale list does not leave two rules stacked on top of each other. -->
+      <div id="highlightBlock">
+        <hr class="my-10 border-hairline" />
 
-      <h2 class="mb-4 text-2xl font-extrabold sm:text-3xl">
-        Long weekends still ahead
-      </h2>
-      <p class="prose-body mb-6">
-        Generated from the gazetted list when this page was built, for a
-        five-day work week with at most one leave day spent. Change the budget
-        above to see the rest.
-      </p>
+        <h2 class="mb-4 text-2xl font-extrabold sm:text-3xl">
+          Long weekends still ahead
+        </h2>
+        <!-- Rewritten by the client script once it knows the visitor's region
+             and clock; this wording is what a crawler sees. -->
+        <p id="highlightNote" class="prose-body mb-6">
+          Generated from the gazetted list when this page was built, for a
+          five-day work week, cheapest option first. Change the budget above to
+          see the rest.
+        </p>
 
-      <ul class="flex flex-col divide-y divide-hairline border-y border-hairline">
-        {
-          highlights.map((plan) => {
-            const theme = getBannerTheme(plan);
-            return (
-              <li class="flex items-center gap-4 py-3.5">
-                <span class="text-xl shrink-0" aria-hidden="true">{theme.motif}</span>
-                <span class="min-w-0 grow">
-                  <span class="block truncate text-sm font-bold text-ink">
-                    {plan.title}
+        <ul
+          id="highlightList"
+          class="flex flex-col divide-y divide-hairline border-y border-hairline"
+        >
+          {
+            highlights.map((plan) => {
+              const theme = getBannerTheme(plan);
+              return (
+                <li class="flex items-center gap-4 py-3.5">
+                  <span class="text-xl shrink-0" aria-hidden="true">{theme.motif}</span>
+                  <span class="min-w-0 grow">
+                    <span class="block truncate text-sm font-bold text-ink">
+                      {plan.title}
+                    </span>
+                    <span class="block font-mono text-xs font-semibold text-muted tabular">
+                      {formatDateRange(plan.startDate, plan.endDate)}
+                    </span>
                   </span>
-                  <span class="block font-mono text-xs font-semibold text-muted tabular">
-                    {formatDateRange(plan.startDate, plan.endDate)}
+                  <span class="shrink-0 text-right">
+                    <span class="block font-mono text-base font-bold text-ink tabular">
+                      {plan.totalDaysOff}
+                    </span>
+                    <span class="block text-[0.625rem] font-bold uppercase tracking-wider text-muted">
+                      days off
+                    </span>
                   </span>
-                </span>
-                <span class="shrink-0 text-right">
-                  <span class="block font-mono text-base font-bold text-ink tabular">
-                    {plan.totalDaysOff}
+                  <span class="hidden shrink-0 sm:block">
+                    {plan.leavesRequired === 0 ? (
+                      <span class="tag tag-holiday">Free</span>
+                    ) : (
+                      <span class="tag tag-pto">{pluralLeaves(plan.leavesRequired)}</span>
+                    )}
                   </span>
-                  <span class="block text-[0.625rem] font-bold uppercase tracking-wider text-muted">
-                    days off
-                  </span>
-                </span>
-                <span class="hidden shrink-0 sm:block">
-                  {plan.leavesRequired === 0 ? (
-                    <span class="tag tag-holiday">Free</span>
-                  ) : (
-                    <span class="tag tag-pto">{pluralLeaves(plan.leavesRequired)}</span>
-                  )}
-                </span>
-              </li>
-            );
-          })
-        }
-      </ul>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
 
       <hr class="my-10 border-hairline" />
 
@@ -627,25 +643,120 @@ const faqSchema = {
 <script>
   import {
     getTodayIso,
+    getUpcomingCutoffIso,
     buildCalendarMap,
     solveVacationPlans,
     type RegionCode,
   } from "../data/vacation-solver";
   import { mountResults } from "../scripts/results";
+  import { formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
 
   // Region and work week live in the navbar; the results grid listens rather
   // than reaching into the navbar's DOM the way the old code did.
   let region: RegionCode = "ALL";
   let workWeek = 5;
+  // Two different dates, deliberately. `today` marks the current day in the
+  // calendar modal; `cutoff` is what a plan has to start after to be offered.
+  // Both are read when this module loads in the browser, so a visitor arriving
+  // days after the site was built gets their own current date, not the build's.
   const today = getTodayIso();
+  const cutoff = getUpcomingCutoffIso();
 
   const results = mountResults({
     solve: (leaves) =>
-      solveVacationPlans({ leaves, workWeek, region, month: "ALL", fromDate: today }),
+      solveVacationPlans({ leaves, workWeek, region, month: "ALL", fromDate: cutoff }),
     // Shades weekends and holidays outside the plan in the modal grid.
     calendar: () => buildCalendarMap(region, workWeek),
     todayIso: today,
   });
+
+  /**
+   * The highlight list is baked into the HTML at build time, which makes it
+   * crawlable but leaves it wrong in two ways for a real visitor: it rots (a
+   * break it calls "still ahead" may already be over), and it is always the
+   * Indian list, so someone who switched to the US read about Raksha Bandhan
+   * under a heading that claimed to be about their year.
+   *
+   * Re-solving on the client fixes both at once, because the solver is given
+   * the visitor's own region, work week and clock. The block is hidden rather
+   * than removed so switching region can bring it back.
+   */
+  function renderHighlights() {
+    const block = document.getElementById("highlightBlock");
+    const list = document.getElementById("highlightList");
+    if (!block || !list) return;
+
+    const rows = nextBreaks((leaves) =>
+      solveVacationPlans({ leaves, workWeek, region, month: "ALL", fromDate: cutoff })
+    );
+
+    if (!rows.length) {
+      // Better to say nothing than to promise a break that is already over.
+      block.hidden = true;
+      return;
+    }
+    block.hidden = false;
+
+    const note = document.getElementById("highlightNote");
+    if (note) {
+      // The leave budget is described from what the rows actually cost rather
+      // than asserted, because nextBreaks() widens the budget when the cheap
+      // band is empty — late in the year "at most one leave day" would be a
+      // claim about the rows above that they no longer satisfy.
+      const dearest = Math.max(...rows.map((p) => p.leavesRequired));
+      note.textContent =
+        `The next ${rows.length === 1 ? "break" : `${rows.length} breaks`} starting after today` +
+        `${region === "USA" ? " on the US federal calendar" : ""}, for a ` +
+        `${workWeek}-day work week, ` +
+        `${dearest === 0 ? "none of which cost a leave day" : `spending at most ${pluralLeaves(dearest)}`}. ` +
+        `Change the budget above to see the rest.`;
+    }
+
+    // Built node by node rather than with innerHTML: plan titles are assembled
+    // from holiday names in the data file, and this list is not worth an
+    // escaping bug.
+    const span = (cls: string, text?: string) => {
+      const s = document.createElement("span");
+      s.className = cls;
+      if (text !== undefined) s.textContent = text;
+      return s;
+    };
+
+    list.replaceChildren(
+      ...rows.map((plan) => {
+        const li = document.createElement("li");
+        li.className = "flex items-center gap-4 py-3.5";
+
+        const motif = span("text-xl shrink-0", getBannerTheme(plan).motif);
+        motif.setAttribute("aria-hidden", "true");
+
+        const name = span("min-w-0 grow");
+        name.append(
+          span("block truncate text-sm font-bold text-ink", plan.title),
+          span(
+            "block font-mono text-xs font-semibold text-muted tabular",
+            formatDateRange(plan.startDate, plan.endDate)
+          )
+        );
+
+        const count = span("shrink-0 text-right");
+        count.append(
+          span("block font-mono text-base font-bold text-ink tabular", String(plan.totalDaysOff)),
+          span("block text-[0.625rem] font-bold uppercase tracking-wider text-muted", "days off")
+        );
+
+        const cost = span("hidden shrink-0 sm:block");
+        cost.append(
+          plan.leavesRequired === 0
+            ? span("tag tag-holiday", "Free")
+            : span("tag tag-pto", pluralLeaves(plan.leavesRequired))
+        );
+
+        li.append(motif, name, count, cost);
+        return li;
+      })
+    );
+  }
 
   function scrollToResults() {
     document.getElementById("results")?.scrollIntoView({
@@ -657,11 +768,13 @@ const faqSchema = {
   document.addEventListener("lw:region", (e) => {
     region = (e as CustomEvent).detail.region as RegionCode;
     results?.refresh();
+    renderHighlights();
   });
 
   document.addEventListener("lw:workweek", (e) => {
     workWeek = (e as CustomEvent).detail.workWeek as number;
     results?.refresh();
+    renderHighlights();
   });
 
   // The hero capsule carries its own region and budget; pressing its button
@@ -673,6 +786,7 @@ const faqSchema = {
       new CustomEvent("lw:setregion", { detail: { region } })
     );
     results?.setLeaves(detail.leaves);
+    renderHighlights();
     scrollToResults();
   });
 
@@ -683,6 +797,7 @@ const faqSchema = {
       region = r;
       document.dispatchEvent(new CustomEvent("lw:setregion", { detail: { region } }));
       results?.refresh();
+      renderHighlights();
     }
 
     const leaves = params.get("leaves");
@@ -698,6 +813,7 @@ const faqSchema = {
     }
   }
 
+  renderHighlights();
   applyParams(new URLSearchParams(window.location.search));
 
   // Footer links point at "/?leaves=2" and friends. On this page that is a
