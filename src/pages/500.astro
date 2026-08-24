@@ -1,0 +1,41 @@
+---
+/**
+ * 500.
+ *
+ * A caveat worth knowing: this is a static site, so there is no server that can
+ * generate a 500. Astro builds this to 500.html like any other page, and whether
+ * it is ever shown depends on the host — Netlify and Vercel can be pointed at it
+ * for origin errors, Cloudflare Pages and GitHub Pages will not use it on their
+ * own. It ships because the cost is one HTML file and the alternative is a raw
+ * host error page in someone else's fonts.
+ *
+ * Deliberately self-contained: no solver call, no holiday data, no client
+ * script. A page whose job is to appear when something has already failed should
+ * not depend on anything that could be the thing that failed.
+ */
+import ErrorPage from "../layouts/ErrorPage.astro";
+---
+
+<ErrorPage
+  code="500"
+  title="Something went wrong | The Long Weekends"
+  description="An unexpected error occurred. Reload the page, or head back to the 2026 long weekend calendar."
+  path="/500"
+  heading="Something broke on our end"
+  message="This one is not your fault. The calculator itself runs entirely in your browser, so reloading is usually enough to get going again."
+>
+  <div class="flex flex-wrap items-center gap-3">
+    <a href="/" class="btn btn-brand no-underline">Back to the calendar</a>
+    <a href="/company-optimizer" class="btn btn-ghost no-underline">
+      Office holiday optimizer
+    </a>
+  </div>
+
+  <p class="mt-6 text-sm leading-relaxed text-body">
+    Still broken after a reload? <a
+      href="mailto:hello@thelongweekends.com?subject=500%20error"
+      class="font-semibold text-brand-text underline underline-offset-2"
+      >Tell us what you were doing</a
+    > — the page you came from is the most useful detail.
+  </p>
+</ErrorPage>

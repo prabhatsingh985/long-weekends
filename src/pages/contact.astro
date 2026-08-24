@@ -1,0 +1,120 @@
+---
+/**
+ * Contact page.
+ *
+ * Email only, on purpose. The site is a static build with no server and no
+ * form anywhere in it, so a contact form would mean posting visitor data to a
+ * third-party form service — which would then have to be disclosed in the
+ * privacy policy and would break the "nothing is uploaded" claim that is
+ * currently true on every page. A mailto has none of that surface.
+ *
+ * The subject lines are prefilled because an inbox full of mail titled "hi" is
+ * how corrections get lost. Only `?subject=` is used, never a second `&`
+ * parameter, so there is no ampersand to escape in the attribute.
+ */
+import DocPage from "../layouts/DocPage.astro";
+
+const TITLE = "Contact – Report a Wrong Holiday Date | The Long Weekends";
+const DESCRIPTION =
+  "Get in touch with The Long Weekends. Report an incorrect holiday date, a bug, or a state calendar you would like added.";
+
+const EMAIL = "hello@thelongweekends.com";
+
+/**
+ * Ordered by how much a message of that kind is actually worth. A wrong date
+ * makes the whole page misleading, so it goes first.
+ */
+const reasons = [
+  {
+    subject: "Wrong holiday date",
+    title: "A date looks wrong",
+    body:
+      "The most valuable thing you can send. Tell us the holiday, the date shown, the date you believe is correct, and the notification you are going by if you have it.",
+  },
+  {
+    subject: "Add a state calendar",
+    title: "Your state is missing",
+    body:
+      "Regional lists currently cover Karnataka, Maharashtra, Delhi, West Bengal and Tamil Nadu. If yours is not there, say which state and link its gazette if you can find it.",
+  },
+  {
+    subject: "Bug report",
+    title: "Something is broken",
+    body:
+      "Include your browser and whether you are on a phone or a computer. If the office optimizer misread a holiday list, the text it got wrong is more useful than a screenshot.",
+  },
+  {
+    subject: "Feedback",
+    title: "Anything else",
+    body:
+      "Feature ideas, wording that reads badly, or a use case the tool does not handle. All read, all welcome.",
+  },
+];
+---
+
+<DocPage
+  title={TITLE}
+  description={DESCRIPTION}
+  path="/contact"
+  eyebrow="Contact"
+  heading="Get in touch"
+  lede="One person reads this inbox, so replies are not instant — but corrections to holiday dates get acted on quickly, because everything on the site depends on them."
+  updated="2026-08-24"
+>
+  <div class="card p-6 sm:p-7">
+    <p class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted">
+      Email
+    </p>
+    {/* break-all rather than break-words: an address has no spaces to break at,
+        and at 320px an unbreakable 26-character string gives the page a
+        horizontal scrollbar. Footer.astro has the same note. */}
+    <a
+      href={`mailto:${EMAIL}`}
+      class="mt-2 block break-all text-lg sm:text-xl font-extrabold tracking-tight text-ink no-underline hover:text-brand-text transition-colors"
+      >{EMAIL}</a
+    >
+    <p class="mt-3 text-sm leading-relaxed text-body">
+      No contact form, no chat widget, no ticket portal. Mail arrives directly and
+      nothing about your visit is recorded on the way.
+    </p>
+  </div>
+
+  <h2>What to write about</h2>
+  <p>
+    Pick the closest subject line below and it will be filled in for you. It genuinely
+    helps — an inbox sorted by subject is how a date correction gets found and fixed
+    the same week instead of a month later.
+  </p>
+
+  <ul>
+    {
+      reasons.map((r) => (
+        <li>
+          <a href={`mailto:${EMAIL}?subject=${encodeURIComponent(r.subject)}`}>
+            {r.title}
+          </a>{" "}
+          — {r.body}
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2>What not to send</h2>
+  <p>
+    Please do not email your company's holiday list asking for it to be added. The
+    <a href="/company-optimizer">office optimizer</a> already does that for you in
+    your own browser, without the list leaving your device — sending it by email
+    only makes a copy that did not need to exist.
+  </p>
+  <p>
+    There is also no advertising, sponsorship or link-placement programme on this
+    site, so mail proposing one will not get a reply.
+  </p>
+
+  <h2>Response times</h2>
+  <p>
+    This is not a staffed support desk. Expect a few days, longer around the
+    festivals the site is about. Wrong dates and broken pages jump the queue; everything
+    else is read in order.
+  </p>
+</DocPage>

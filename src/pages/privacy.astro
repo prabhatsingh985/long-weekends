@@ -1,0 +1,180 @@
+---
+/**
+ * Privacy policy.
+ *
+ * Written from an audit of the code rather than from a template, because a
+ * policy that describes collection which does not happen is as wrong as one
+ * that hides collection which does. What the audit found:
+ *
+ *   - localStorage holds exactly one key, `theme` (Layout.astro reads it before
+ *     first paint, Navbar.astro writes it). The work-week choice is NOT stored;
+ *     it lives in memory for the page view only.
+ *   - No cookies: `document.cookie` appears nowhere in src/.
+ *   - No analytics, tag manager, ad script or pixel of any kind.
+ *   - No fetch/XHR to any first-party endpoint. There is no backend.
+ *   - Third-party origins the browser really does contact: Google Fonts on every
+ *     page, and on /company-optimizer only, cdnjs (pdf.js) and jsDelivr
+ *     (tesseract.js, which pulls its English model at runtime).
+ *
+ * Those last ones are the part a boilerplate policy would have missed, and they
+ * are the only way an IP address of yours reaches a third party. If a script,
+ * font host or storage key is ever added, this page is wrong until it is edited.
+ */
+import DocPage from "../layouts/DocPage.astro";
+
+const TITLE = "Privacy Policy | The Long Weekends";
+const DESCRIPTION =
+  "The Long Weekends runs no analytics, sets no cookies and has no accounts. Exactly what is stored in your browser, and which third parties your browser contacts.";
+---
+
+<DocPage
+  title={TITLE}
+  description={DESCRIPTION}
+  path="/privacy"
+  eyebrow="Legal"
+  heading="Privacy policy"
+  lede="The short version: there are no accounts, no cookies and no analytics. One value is saved in your browser — whether you prefer the dark theme — and it never leaves your device."
+  updated="2026-08-24"
+  numbered
+>
+  <h2>Who this is</h2>
+  <p>
+    The Long Weekends is an independent project operated by an individual based in
+    India ("we", "us"). It is not a registered company. You can reach us at
+    <a href="mailto:hello@thelongweekends.com">hello@thelongweekends.com</a>, which
+    is also the address for any question about this policy.
+  </p>
+
+  <h2>What we do not collect</h2>
+  <p>
+    Stated plainly, because most of this policy is about absences rather than
+    practices. We do not:
+  </p>
+  <ul>
+    <li>ask you to create an account, or collect a name, phone number or address;</li>
+    <li>set any cookie, for any purpose, including analytics or advertising;</li>
+    <li>
+      run analytics of any kind — no Google Analytics, no tag manager, no
+      privacy-friendly alternative either;
+    </li>
+    <li>show advertising, or embed any advertising or social media tracking pixel;</li>
+    <li>have a mailing list, and so cannot add you to one;</li>
+    <li>
+      operate any server that receives your data — the site is a set of static
+      files, with no database and no backend to send anything to.
+    </li>
+  </ul>
+  <p>
+    There is no form anywhere on this site. Nothing you type into the calculator or
+    the office optimizer is transmitted, because there is nowhere for it to be
+    transmitted to.
+  </p>
+
+  <h2>What is stored on your device</h2>
+  <p>
+    Exactly one item, in your browser's <strong>local storage</strong> — not a
+    cookie, so it is never attached to a network request and never sent to us or to
+    anyone else:
+  </p>
+  <ul>
+    <li>
+      <strong><code>theme</code></strong> — the value <code>"light"</code> or
+      <code>"dark"</code>, written when you use the theme toggle. It exists so the
+      site does not flash the wrong colour scheme on your next visit.
+    </li>
+  </ul>
+  <p>
+    That is the whole list. Your region and work-week choices are deliberately
+    <em>not</em> stored: they last for the page view and reset when you leave. To
+    remove the stored theme, clear site data for this domain in your browser
+    settings, or use private browsing, where nothing persists at all.
+  </p>
+
+  <h2>Your office holiday list stays with you</h2>
+  <p>
+    The <a href="/company-optimizer">office holiday optimizer</a> accepts pasted
+    text, PDFs and images of your company's holiday list. All of it —
+    reading the file, extracting dates, running the optimiser — happens
+    <strong>inside your browser</strong>. The file is never uploaded, never
+    transmitted, and no copy of it reaches us or any third party.
+  </p>
+  <p>
+    We therefore have no ability to see your company's holidays, and no copy to
+    hand over, lose, or be compelled to disclose. Closing the tab is all it takes
+    to discard the data.
+  </p>
+
+  <h2>Third parties your browser contacts</h2>
+  <p>
+    We do not embed trackers, but the site does load resources from other people's
+    servers. Any HTTP request necessarily reveals your <strong>IP address</strong>,
+    <strong>browser and operating system</strong>, and the page you were on, to
+    whoever serves it. This is the complete list:
+  </p>
+  <ul>
+    <li>
+      <strong>Google Fonts</strong> (<code>fonts.googleapis.com</code>,
+      <code>fonts.gstatic.com</code>) — the two typefaces the site is set in. Loaded
+      on every page. Google's handling of these requests is governed by its own
+      privacy policy.
+    </li>
+    <li>
+      <strong>cdnjs</strong> (Cloudflare) — the PDF reader used to open a holiday
+      list. Loaded <em>only</em> on the office optimizer page.
+    </li>
+    <li>
+      <strong>jsDelivr</strong> — the text-recognition engine for scanned or
+      image-based holiday lists, which also downloads its English language model the
+      first time you run it. Loaded <em>only</em> on the office optimizer page.
+    </li>
+  </ul>
+  <p>
+    None of these receive the contents of your holiday list. They serve code and
+    fonts; the work is done locally. If you visit only the national calendar, Google
+    Fonts is the sole third party involved.
+  </p>
+
+  <h2>Server logs</h2>
+  <p>
+    The static files are served by a hosting provider, which keeps standard access
+    logs — IP address, timestamp, requested URL, browser string — for security and
+    operational purposes. This is ordinary web-server behaviour, retained by the host
+    under its own terms rather than at our request. We do not analyse those logs to
+    build any profile of you.
+  </p>
+
+  <h2>If you email us</h2>
+  <p>
+    Writing to us means we hold your email address and whatever you chose to put in
+    the message, in a mailbox, for as long as the correspondence is useful — typically
+    until a reported bug or wrong date is fixed. It is not added to any list and not
+    used to contact you about anything other than your message. Please do not include
+    sensitive personal information; a holiday date correction never needs any.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    The site is a holiday calculator and is not directed at children. Because it
+    collects nothing from anyone, it collects nothing from children either.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    Indian data protection law, including the <strong>Digital Personal Data
+    Protection Act, 2023</strong>, gives you rights over personal data held about
+    you — access, correction and erasure among them. In practice the only personal
+    data we can hold is an email you sent us, so a request to delete it is a request
+    to delete that correspondence, and we will do so on request.
+  </p>
+  <p>
+    The <code>theme</code> value is under your control, not ours: it sits in your
+    browser and you can clear it at any time without asking us.
+  </p>
+
+  <h2>Changes to this policy</h2>
+  <p>
+    If a script, font host or stored value is ever added to the site, this page gets
+    updated in the same change, and the date at the top moves. There is no
+    notification mechanism, because there is no mailing list — the date is the record.
+  </p>
+</DocPage>

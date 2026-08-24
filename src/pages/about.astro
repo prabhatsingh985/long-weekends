@@ -1,0 +1,148 @@
+---
+/**
+ * About page.
+ *
+ * Deliberately concrete: what the tool does, which gazette the dates come from,
+ * and what the solver will and will not do. Every figure quoted here is one the
+ * solver produces for 2026 — nine free long weekends, 17 gazetted national
+ * holidays, 22 four-day breaks for a single leave day. The FAQ test on the
+ * homepage pins those same numbers, so if the holiday data changes this page has
+ * to be revisited too. There is a note about that in the verification script.
+ */
+import DocPage from "../layouts/DocPage.astro";
+
+const TITLE = "About – How The Long Weekends Works | The Long Weekends";
+const DESCRIPTION =
+  "How The Long Weekends plans your 2026 leave: where the holiday dates come from, how the solver picks the cheapest long break, and what the tool deliberately does not do.";
+---
+
+<DocPage
+  title={TITLE}
+  description={DESCRIPTION}
+  path="/about"
+  eyebrow="About"
+  heading="Why this site exists"
+  lede="Public holidays are fixed. Your leave balance is not. This tool lines the two up and tells you the cheapest way to buy a long break."
+  updated="2026-08-24"
+>
+  <h2>What it does</h2>
+  <p>
+    Most holiday calendars show you a grid of dates and stop there. The useful
+    question is not <em>when is Diwali</em> — it is <strong>which leave days are
+    worth spending</strong>, and that depends on which weekday each holiday lands
+    on.
+  </p>
+  <p>
+    2026 has <strong>nine long weekends that cost no leave at all</strong>, because
+    the holiday falls on a Friday or a Monday. Spend a single leave day and
+    <strong>22 four-day breaks</strong> open up across 13 different festivals. The
+    calculator finds these for you and sorts them by how soon they arrive, so you
+    can book the next one rather than reading a list of dates that have passed.
+  </p>
+
+  <h2>Where the dates come from</h2>
+  <p>
+    Holiday dates are transcribed from official notifications, not aggregated from
+    other calendar sites:
+  </p>
+  <ul>
+    <li>
+      the <strong>Department of Personnel and Training (DoPT)</strong> gazetted
+      holiday list for central government offices
+    </li>
+    <li>
+      the <strong>Reserve Bank of India</strong> list under section 25 of the
+      Negotiable Instruments Act, which is what banks actually close for
+    </li>
+    <li>
+      state government gazettes for the regional lists — currently Karnataka,
+      Maharashtra, Delhi, West Bengal and Tamil Nadu
+    </li>
+  </ul>
+  <p>
+    Several Indian festivals are set by lunar observation and a few state
+    notifications land only weeks ahead, so a date can move after publication. If
+    you spot one that has, <a href="/contact">tell us</a> — it is the single most
+    useful thing you can report.
+  </p>
+
+  <h2>How the maths works</h2>
+  <p>
+    For a given number of leave days, the solver walks the calendar looking for
+    runs of consecutive days off, treating your weekend, the public holidays for
+    your region, and the leave you are willing to spend as one continuous block.
+    Two rules keep the results honest:
+  </p>
+  <ul>
+    <li>
+      <strong>Every plan must contain a real holiday.</strong> Taking Friday and
+      Monday off around an ordinary weekend is not a long weekend, it is four days
+      of leave.
+    </li>
+    <li>
+      <strong>A plan must return at least 1.3 days off per leave day spent.</strong>
+      Below that you are not bridging a gap, you are just taking leave, and the
+      tool has nothing to add.
+    </li>
+  </ul>
+  <p>
+    Results are then ranked by <strong>how soon they start</strong>, not by how
+    long they are. A spectacular 18-day break next March is no use to someone
+    deciding what to do in three weeks.
+  </p>
+
+  <h2>Six-day work weeks</h2>
+  <p>
+    A large share of Indian workplaces run Monday to Saturday, which changes every
+    answer on the page — a Saturday holiday is a real day off if you normally work
+    it, and Friday holidays stop producing three-day weekends. The work-week switch
+    in the header re-solves the whole calendar for a six-day week rather than
+    adjusting the display.
+  </p>
+
+  <h2>Your office holiday list</h2>
+  <p>
+    Most companies publish their own list, which overlaps the gazette but is never
+    identical. The <a href="/company-optimizer">office holiday optimizer</a> takes
+    that list — pasted as text, or as a PDF or image — reads the dates out of it,
+    and runs the same solver against your actual holidays.
+  </p>
+  <p>
+    The parsing happens <strong>in your browser</strong>. Your company's holiday
+    list is not uploaded anywhere, which is both a privacy property and the reason
+    the feature works without an account. There is more detail in the
+    <a href="/privacy">privacy policy</a>.
+  </p>
+
+  <h2>What it does not do</h2>
+  <p>
+    Worth knowing before you rely on it:
+  </p>
+  <ul>
+    <li>
+      It covers <strong>2026 only</strong>, plus the first days of January 2027 so
+      that a New Year bridge can be calculated.
+    </li>
+    <li>
+      <strong>Restricted or optional holidays</strong> are not modelled. Those vary
+      per employer and are usually the interesting ones, which is what the office
+      optimizer is for.
+    </li>
+    <li>
+      It does not know your leave balance, your team's blackout dates, or whether
+      your manager will approve anything.
+    </li>
+    <li>
+      It is not a booking site and has no commercial relationship with any airline
+      or hotel.
+    </li>
+  </ul>
+
+  <h2>Who runs it</h2>
+  <p>
+    An independent project, built and maintained by one person in India. There is
+    no company behind it, no sign-up, no newsletter and no advertising. If it is
+    useful, the best thanks is to send a correction when a date is wrong — the
+    address is on the <a href="/contact">contact page</a>.
+  </p>
+</DocPage>

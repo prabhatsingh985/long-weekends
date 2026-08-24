@@ -1,0 +1,71 @@
+---
+/**
+ * Shell for the 404 and 500 pages.
+ *
+ * Shared because the two differ only in the number, the wording and which links
+ * help — and because two hand-built error pages would drift, which is the
+ * failure mode this codebase keeps running into.
+ *
+ * Both are `noindex`. A static build writes 404.html as a real file at its own
+ * URL, so it is genuinely crawlable and would otherwise show up in results as a
+ * dead end.
+ *
+ * Note what is NOT here: the next long weekend. It would be a nice touch, but a
+ * static error page can only bake in a build-time date, and a stale "next
+ * break" is a bug this project has already fixed once — see the note in
+ * index.astro about dropping build-time highlights on the client. Every
+ * "what's next" surface is live or absent, so these pages link to the
+ * calculator instead of quoting it.
+ *
+ * The status code is set in mono, which this project reserves for figures you
+ * read exactly rather than language you read fluently.
+ */
+import Layout from "./Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  /** HTTP status, shown large. */
+  code: string;
+  title: string;
+  description: string;
+  path: string;
+  /** Short, plain-language explanation of what happened. */
+  heading: string;
+  /** One or two sentences on what to do about it. */
+  message: string;
+}
+
+const { code, title, description, path, heading, message } = Astro.props;
+---
+
+<Layout title={title} description={description} path={path} noindex>
+  {/* tools={false}: region and work-week filter a calendar, and there is no
+      calendar on an error page. */}
+  <Navbar tools={false} />
+
+  <main
+    id="main"
+    class="mx-auto flex w-full max-w-[1280px] grow flex-col justify-center px-4 py-16 sm:px-6 sm:py-24"
+  >
+    <div class="max-w-[52ch]">
+      <p
+        class="font-mono text-[3.5rem] sm:text-[4.5rem] font-extrabold leading-none tracking-tight text-brand-text"
+      >
+        {code}
+      </p>
+      <h1
+        class="mt-5 text-[1.625rem] sm:text-[2.125rem] font-extrabold leading-[1.15] tracking-tight text-ink"
+      >
+        {heading}
+      </h1>
+      <p class="mt-4 text-base sm:text-lg leading-relaxed text-body">{message}</p>
+
+      <div class="mt-9">
+        <slot />
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

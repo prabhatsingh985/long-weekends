@@ -1,0 +1,93 @@
+---
+/**
+ * Shell for the four text pages: about, contact, privacy, terms.
+ *
+ * They share a header, a measure and a footer, so they share one file. The
+ * alternative — four pages each assembling Layout + Navbar + a heading block —
+ * is exactly how this project ended up with two copies of the card markup that
+ * had already drifted apart by the time anyone noticed.
+ *
+ * The body arrives through the default slot and is wrapped in `.doc-prose`,
+ * which styles descendants. That keeps page files as readable prose with almost
+ * no classes in them, and means a spacing change happens once in global.css
+ * rather than four times in markup.
+ */
+import Layout from "./Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  /** Full <title>, including the site suffix. */
+  title: string;
+  /** Visible <h1>. Usually shorter than the <title>. */
+  heading: string;
+  description: string;
+  path: string;
+  /** Small mono label above the heading. Says what kind of page this is. */
+  eyebrow: string;
+  /** One-sentence summary under the heading, in larger type than the body. */
+  lede: string;
+  /**
+   * ISO date the text last changed — NOT the build date.
+   *
+   * A legal document's "last updated" is a claim about when the terms changed.
+   * Deriving it from `new Date()` at build time would move it every deploy,
+   * telling readers the policy changed when only a CSS file did. So each page
+   * hardcodes its own date and edits it when the words change.
+   */
+  updated: string;
+  /**
+   * Number the top-level sections with a CSS counter. On for privacy and terms,
+   * where clauses get cited by number; off for about and contact, which are
+   * prose and would only look bureaucratic numbered.
+   */
+  numbered?: boolean;
+}
+
+const { title, heading, description, path, eyebrow, lede, updated, numbered = false } =
+  Astro.props;
+
+/* Parsed with an explicit midnight so the date cannot slide a day backwards in
+   timezones behind UTC — the site's audience is UTC+5:30. */
+const updatedLabel = new Date(`${updated}T00:00:00`).toLocaleDateString("en-IN", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+---
+
+<Layout title={title} description={description} path={path}>
+  {/* tools={false}: the region and work-week controls filter a calendar, and
+      there is no calendar on this page. See the note in Navbar.astro. */}
+  <Navbar tools={false} />
+
+  <main
+    id="main"
+    class="mx-auto w-full max-w-[1280px] grow px-4 py-10 sm:px-6 sm:py-14"
+  >
+    <div class="max-w-[68ch]">
+      <p
+        class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text"
+      >
+        {eyebrow}
+      </p>
+      <h1
+        class="mt-3 text-[1.75rem] sm:text-[2.25rem] font-extrabold tracking-tight leading-[1.15] text-ink"
+      >
+        {heading}
+      </h1>
+      <p class="mt-4 text-base sm:text-lg leading-relaxed text-body">{lede}</p>
+      <p class="mt-5 font-mono text-[0.6875rem] uppercase tracking-widest text-muted">
+        Last updated <time datetime={updated}>{updatedLabel}</time>
+      </p>
+    </div>
+
+    <hr class="mt-8 mb-10 border-0 border-t border-hairline max-w-[68ch]" />
+
+    <div class:list={["doc-prose", numbered && "doc-prose-numbered"]}>
+      <slot />
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

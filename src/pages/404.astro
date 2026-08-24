@@ -1,0 +1,64 @@
+---
+/**
+ * 404.
+ *
+ * Astro builds this to 404.html, which static hosts (Netlify, Vercel,
+ * Cloudflare Pages, GitHub Pages, S3 + CloudFront) serve automatically for
+ * unmatched paths. No configuration needed.
+ *
+ * The job of this page is to send the visitor somewhere useful, so it names the
+ * real destinations rather than offering a lone "go home" button. The two tools
+ * come first because a mistyped or stale URL is usually an attempt to reach one
+ * of them.
+ */
+import ErrorPage from "../layouts/ErrorPage.astro";
+
+const destinations = [
+  {
+    href: "/",
+    title: "2026 long weekend calendar",
+    body: "Every long weekend for the rest of the year, sorted by which one arrives next.",
+  },
+  {
+    href: "/company-optimizer",
+    title: "Office holiday optimizer",
+    body: "Paste or upload your company's holiday list and plan leave around your actual holidays.",
+  },
+  {
+    href: "/#faq",
+    title: "Frequently asked questions",
+    body: "How many long weekends 2026 has, which months are worth booking, and how the maths works.",
+  },
+  {
+    href: "/contact",
+    title: "Report a broken link",
+    body: "If something on this site sent you here, that is worth knowing about.",
+  },
+];
+---
+
+<ErrorPage
+  code="404"
+  title="Page not found | The Long Weekends"
+  description="That page does not exist. Jump to the 2026 long weekend calendar or the office holiday optimizer instead."
+  path="/404"
+  heading="That page has taken the weekend off"
+  message="The address does not match anything on this site — most likely a typo, or a link to a page that has since moved. Here is where you were probably heading."
+>
+  <ul class="grid gap-3 sm:grid-cols-2 list-none p-0 m-0">
+    {
+      destinations.map((d) => (
+        <li>
+          {/* No focus utility needed: global.css puts a 2px brand outline on
+              every :focus-visible in @layer base, site-wide. */}
+          <a href={d.href} class="card card-interactive block h-full p-4 no-underline">
+            <span class="block text-sm font-bold text-ink">{d.title}</span>
+            <span class="mt-1 block text-[0.8125rem] leading-relaxed text-body">
+              {d.body}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</ErrorPage>

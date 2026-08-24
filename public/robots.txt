@@ -1,0 +1,26 @@
+# thelongweekends.com
+#
+# Everything here is public and crawlable. There is no admin area, no user
+# content and no paywall, so there is nothing to fence off.
+
+User-agent: *
+Allow: /
+
+# The 404 and 500 pages are deliberately NOT disallowed, which looks like an
+# omission and is not.
+#
+# A static build writes them as real files, so /404 and /500 can be fetched with
+# a 200 and are therefore indexable. They are kept out of search results with
+# <meta name="robots" content="noindex"> instead. Blocking them here would be
+# worse than doing nothing: a crawler that is forbidden from fetching a URL never
+# reads the noindex on it, so the URL can still end up in an index — listed with
+# no description, and with no way for us to remove it. Crawling has to be allowed
+# for a noindex to be seen.
+
+# The homepage accepts filter parameters (?region=, ?leaves=, ?month=) and the
+# footer links to several of them. They are not blocked either: every one of
+# those URLs returns the same page, which declares
+# <link rel="canonical" href="https://thelongweekends.com/">, so they consolidate
+# onto the homepage instead of competing with it.
+
+Sitemap: https://thelongweekends.com/sitemap.xml

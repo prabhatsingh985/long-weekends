@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "The Long Weekends",
+  "short_name": "Long Weekends",
+  "description": "Line up public holidays with your leave balance and spend the fewest days for the longest break.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "theme_color": "#fcfcfd",
+  "background_color": "#fcfcfd",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
