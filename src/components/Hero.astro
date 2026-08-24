@@ -1,40 +1,136 @@
 ---
 ---
-<section class="relative pt-16 pb-14 px-4 sm:px-6 border-b border-slate-200 bg-gradient-to-b from-amber-50/40 via-orange-50/20 to-[#fafafa] overflow-hidden">
-  <!-- Subtle warm glowing backdrop -->
-  <div class="absolute -top-24 -left-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute top-10 right-0 w-80 h-80 bg-rose-100/30 rounded-full blur-3xl pointer-events-none"></div>
+<section class="relative pt-14 pb-16 px-4 sm:px-6 bg-[#0c0c0e] border-b border-zinc-800/80">
+  <!-- Glowing backdrop accents -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-[#ff2b63]/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute top-10 right-0 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
   <div class="max-w-[1200px] mx-auto relative z-10 flex flex-col items-center text-center">
     
-    <!-- 1. Alert Badge (Dynamically calculated based on real today date) -->
-    <div class="inline-flex items-center sm:items-center text-center gap-2 px-4 py-2 rounded-2xl sm:rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] sm:text-xs font-bold mb-5 shadow-xs hover:bg-emerald-100/80 transition-all leading-tight">
+    <!-- 1. Top Capsule Countdown Badge -->
+    <a href="#vacationGrid" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900/90 text-zinc-300 border border-zinc-800 text-xs font-medium mb-6 shadow-md hover:border-zinc-700 hover:text-white transition-all no-underline group">
       <span class="text-sm" aria-hidden="true">🌴</span>
       <span id="heroCountdownBadge">Next: Raksha Bandhan (3 Days Off · 0 Leaves Needed)</span>
+      <span class="text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all">›</span>
+    </a>
+
+    <!-- 2. Main Headline (H1) -->
+    <h1 class="text-3xl sm:text-5xl lg:text-[56px] font-extrabold text-white tracking-tight leading-[1.1] max-w-[850px] mb-3">
+      Find your next <span class="text-[#ff2b63]">long weekend</span>
+    </h1>
+
+    <!-- 3. Subtext Tagline -->
+    <p class="text-sm sm:text-base text-zinc-400 max-w-[620px] mb-8 leading-relaxed font-medium">
+      Turn holidays into vacations. We find the best long weekends so you can take fewer leaves and travel more.
+    </p>
+
+    <!-- 4. Airbnb-Style Pro Search Capsule with Z-100 Popovers -->
+    <div class="w-full max-w-[680px] relative z-30 mb-7">
+      <div class="bg-zinc-900/95 border border-zinc-800 rounded-full p-2 sm:p-2.5 flex items-center justify-between shadow-2xl hover:border-zinc-700 transition-all relative z-20">
+        
+        <!-- Region Selector Block -->
+        <div class="flex-1 px-3 sm:px-4 text-left cursor-pointer group relative" id="heroRegionTrigger">
+          <span class="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-0.5 pointer-events-none">Region</span>
+          <div class="flex items-center justify-between pointer-events-none">
+            <span id="heroRegionDisplay" class="font-extrabold text-white text-xs sm:text-sm group-hover:text-[#ff2b63] transition-colors">Pan-India IT</span>
+            <span class="text-[10px] text-zinc-500 ml-1 transform transition-transform" id="heroRegionArrow">▼</span>
+          </div>
+        </div>
+
+        <span class="border-r border-zinc-800 h-8 mx-1"></span>
+
+        <!-- Leave Budget Block -->
+        <div class="flex-1 px-3 sm:px-4 text-left cursor-pointer group relative" id="heroBudgetTrigger">
+          <span class="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-0.5 pointer-events-none">Leave Budget</span>
+          <div class="flex items-center justify-between pointer-events-none">
+            <span id="heroBudgetDisplay" class="font-extrabold text-white text-xs sm:text-sm group-hover:text-[#ff2b63] transition-colors">0 Leaves (Free)</span>
+            <span class="text-[10px] text-zinc-500 ml-1 transform transition-transform" id="heroBudgetArrow">▼</span>
+          </div>
+        </div>
+
+        <!-- Action Search Button -->
+        <button 
+          type="button" 
+          id="heroSearchActionBtn"
+          class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#ff2b63] hover:bg-[#e11d48] text-white flex items-center justify-center shadow-lg transition-all transform active:scale-95 cursor-pointer shrink-0 ml-2"
+          title="Search Vacations"
+        >
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+
+      </div>
+
+      <!-- PRO FLOATING REGION POPOVER (Z-100) -->
+      <div id="heroRegionPopover" class="hidden absolute top-[calc(100%+10px)] left-0 w-80 bg-[#141417] border border-zinc-700/80 rounded-2xl p-2.5 shadow-2xl shadow-black/90 z-[100] text-left animate-in fade-in zoom-in-95">
+        <div class="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider px-3 py-1.5 border-b border-zinc-800/80 mb-1.5 flex items-center justify-between">
+          <span>Select Region</span>
+          <span class="text-[9px] text-[#ff2b63]">2 Supported</span>
+        </div>
+        <button type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl border border-transparent hover:border-zinc-700 hover:bg-zinc-800/80 transition-all group cursor-pointer hero-popover-option" data-region="ALL">
+          <span class="text-2xl">🇮🇳</span>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="font-bold text-xs text-white group-hover:text-[#ff2b63] transition-colors">Pan-India IT</span>
+            <span class="text-[11px] text-zinc-400">Public & IT Gazetted Holidays</span>
+          </div>
+        </button>
+        <button type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl border border-transparent hover:border-zinc-700 hover:bg-zinc-800/80 transition-all group cursor-pointer hero-popover-option" data-region="USA">
+          <span class="text-2xl">🇺🇸</span>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="font-bold text-xs text-white group-hover:text-[#ff2b63] transition-colors">United States</span>
+            <span class="text-[11px] text-zinc-400">US Federal Public Holidays</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- PRO FLOATING BUDGET POPOVER (Z-100) -->
+      <div id="heroBudgetPopover" class="hidden absolute top-[calc(100%+10px)] right-10 w-84 bg-[#141417] border border-zinc-700/80 rounded-2xl p-2.5 shadow-2xl shadow-black/90 z-[100] text-left animate-in fade-in zoom-in-95">
+        <div class="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider px-3 py-1.5 border-b border-zinc-800/80 mb-1.5 flex items-center justify-between">
+          <span>Select PTO Leave Budget</span>
+          <span class="text-[9px] text-[#ff2b63]">4 Tiers</span>
+        </div>
+        <button type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-transparent hover:border-zinc-700 hover:bg-zinc-800/80 transition-all group cursor-pointer hero-budget-option" data-leaves="0">
+          <span class="text-xl">🆓</span>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="font-bold text-xs text-white group-hover:text-[#ff2b63] transition-colors">0 Leaves (Free)</span>
+            <span class="text-[11px] text-zinc-400">Direct 3-day weekend breaks</span>
+          </div>
+        </button>
+        <button type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-transparent hover:border-zinc-700 hover:bg-zinc-800/80 transition-all group cursor-pointer hero-budget-option" data-leaves="1">
+          <span class="text-xl">🌴</span>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="font-bold text-xs text-white group-hover:text-[#ff2b63] transition-colors">1 Leave</span>
+            <span class="text-[11px] text-zinc-400">Smart 4-day bridge vacations</span>
+          </div>
+        </button>
+        <button type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-transparent hover:border-zinc-700 hover:bg-zinc-800/80 transition-all group cursor-pointer hero-budget-option" data-leaves="2">
+          <span class="text-xl">✈️</span>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="font-bold text-xs text-white group-hover:text-[#ff2b63] transition-colors">2 Leaves</span>
+            <span class="text-[11px] text-zinc-400">Extended 5-6 day getaways</span>
+          </div>
+        </button>
+        <button type="button" class="w-full text-left flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-transparent hover:border-zinc-700 hover:bg-zinc-800/80 transition-all group cursor-pointer hero-budget-option" data-leaves="3">
+          <span class="text-xl">🎉</span>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="font-bold text-xs text-white group-hover:text-[#ff2b63] transition-colors">3+ Leaves</span>
+            <span class="text-[11px] text-zinc-400">Mega week-long festival trips</span>
+          </div>
+        </button>
+      </div>
+
     </div>
 
-    <!-- 2. Main Headline & Tagline -->
-    <h1 class="text-[28px] leading-tight sm:text-5xl lg:text-[52px] font-extrabold text-slate-900 tracking-tight leading-[1.15] max-w-[850px] mb-2.5">
-      Find Your Next Long Weekend in 2026
-    </h1>
-    <p class="text-lg sm:text-xl font-bold text-amber-600 mb-4 tracking-tight">
-      Take more vacations. Burn fewer leaves.
-    </p>
-
-    <!-- 3. Empathetic Description (Subtext) -->
-    <p class="text-base sm:text-lg text-slate-600 max-w-[720px] mb-8 leading-relaxed font-medium">
-      Every long weekend is a chance to recharge — without burning through your leave balance. We scan India's public holidays, match them to your weekends, and show you exactly how many PTO days you need to turn a regular break into a real vacation.
-    </p>
-
-    <!-- Company Optimizer CTA Button -->
-    <a href="/company-optimizer" class="hero-cta-btn group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl bg-[#0f172a] hover:bg-[#1e293b] text-white font-extrabold text-[15px] shadow-[0_8px_20px_-6px_rgba(15,23,42,0.5)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_-6px_rgba(15,23,42,0.6)] border border-slate-700/50 active:scale-95 no-underline">
-      <span class="text-xl" aria-hidden="true">🏢</span>
-      Upload Office Holiday List
-      <span class="text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-all duration-300 ml-1">→</span>
+    <!-- 5. HIGH-END GRADIENT CTA BUTTON FOR OFFICE HOLIDAY LIST -->
+    <a 
+      href="/company-optimizer" 
+      class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-zinc-900 via-[#1c1218] to-zinc-900 border border-rose-500/40 hover:border-rose-500/80 shadow-xl shadow-rose-950/20 text-white font-extrabold text-xs sm:text-sm transition-all duration-300 transform hover:scale-[1.02] active:scale-95 no-underline group"
+    >
+      <span class="text-base" aria-hidden="true">👔</span>
+      <span class="tracking-tight">Upload your office holiday list</span>
+      <span class="text-[#ff2b63] font-bold text-sm group-hover:translate-x-1 transition-transform">→</span>
     </a>
-  
-
-    
 
   </div>
 </section>
@@ -48,7 +144,6 @@
 
     const today = getTodayIso();
 
-    // Check starting with 0 leaves, then 1 leave, 2 leaves, up to 4 leaves
     for (let l = 0; l <= 4; l++) {
       const plans = solveVacationPlans({
         leaves: l,
@@ -58,7 +153,6 @@
         fromDate: today
       });
 
-      // User requirement: check upcoming where startDate > today (or startDate >= today)
       let upcoming = plans.filter(p => p.startDate > today);
       if (upcoming.length === 0) {
         upcoming = plans.filter(p => p.startDate >= today);
@@ -83,7 +177,6 @@
       }
     }
 
-    // Fallback for year end
     badge.textContent = "Year-End Getaways · 2027 Plans Available Soon";
   }
 
@@ -93,3 +186,4 @@
     initDynamicHeroBadge();
   }
 </script>
+

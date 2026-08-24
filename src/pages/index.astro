@@ -93,65 +93,53 @@ import Footer from "../components/Footer.astro";
   </script>
 
 </head>
-<body class="bg-[#fafafa] text-[#171717] font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-[#0c0c0e] text-white font-sans antialiased min-h-screen flex flex-col dark">
 
   <Navbar />
   <Hero />
 
-  <!-- Interactive Filter Bar (Exact Favorite Layout) -->
-  <section class="py-3 px-4 sm:px-6 bg-white border-b border-[#ebebeb] shadow-xs">
-    <div class="max-w-[1200px] mx-auto">
+  <!-- Interactive Single-Line Pill Filter Bar (Pro Single Line) -->
+  <section class="sticky top-[4.25rem] z-40 py-3 px-4 sm:px-6 bg-[#0c0c0e]/95 backdrop-blur-md border-b border-zinc-800/80 shadow-xl">
+    <div class="max-w-[1200px] mx-auto flex items-center justify-center gap-2.5 overflow-x-auto no-scrollbar py-0.5">
       
-            <!-- Filter Header -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-        <div class="flex items-center gap-2">
-          <span class="text-base">🎯</span>
-          <span class="font-bold text-sm text-[#171717]">Select Your Leave Budget</span>
-        </div>
-        
-        <!-- Month Tabs (Moved to Header Row) -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar" id="monthTabsContainer">
-          <button type="button" class="month-tab-btn active" data-month="ALL">All</button>
-          <button type="button" class="month-tab-btn" data-month="08">Aug</button>
-          <button type="button" class="month-tab-btn" data-month="09">Sep</button>
-          <button type="button" class="month-tab-btn" data-month="10">Oct</button>
-          <button type="button" class="month-tab-btn" data-month="11">Nov</button>
-          <button type="button" class="month-tab-btn" data-month="12">Dec</button>
-        </div>
-      </div>
-
-      <!-- 5 Leave Budget Chips -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4" id="budgetChipsContainer">
+      <!-- Left: Leave Budget Pills (Single Line) -->
+      <div class="flex items-center gap-2 shrink-0" id="budgetChipsContainer">
         <button type="button" class="chip-btn active" data-leaves="0">
-          <span class="chip-title">0 Leaves</span>
-          <span class="chip-desc">Free 3-Day Breaks</span>
+          <span class="text-xs">🆓</span> <span>0 Leaves</span>
         </button>
         <button type="button" class="chip-btn" data-leaves="1">
-          <span class="chip-title">1 Leave</span>
-          <span class="chip-desc">Smart 4-Day Bridge</span>
+          <span class="text-xs">🌴</span> <span>1 Leave</span>
         </button>
         <button type="button" class="chip-btn" data-leaves="2">
-          <span class="chip-title">2 Leaves</span>
-          <span class="chip-desc">5-6 Day Vacations</span>
+          <span class="text-xs">✈️</span> <span>2 Leaves</span>
         </button>
         <button type="button" class="chip-btn" data-leaves="3">
-          <span class="chip-title">3 Leaves</span>
-          <span class="chip-desc">6+ Day Festival</span>
+          <span class="text-xs">🎉</span> <span>3+ Leaves</span>
         </button>
-        
-        <!-- Custom Stepper Chip -->
-        <div class="chip-btn custom-chip" id="customChipWrapper">
-          <div class="flex items-center justify-between w-full">
-            <span class="chip-title">Custom</span>
-            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 border border-amber-500/20">4+ PTO</span>
-          </div>
-          <div class="stepper-box flex items-center justify-between w-full mt-1 bg-slate-100/90 border border-slate-200/80 rounded-lg px-2 py-0.5 transition-colors">
-            <button type="button" id="btnDecLeave" class="stepper-btn font-bold text-xs hover:text-slate-900 cursor-pointer select-none text-slate-600">−</button>
-            <span class="stepper-val text-xs font-mono font-bold text-slate-800 select-none"><span id="customLeavesDisplay">4</span> Leaves</span>
-            <input type="hidden" id="customLeavesInput" value="4" />
-            <button type="button" id="btnIncLeave" class="stepper-btn font-bold text-xs hover:text-slate-900 cursor-pointer select-none text-slate-600">+</button>
-          </div>
-        </div>
+      </div>
+
+      <span class="border-r border-zinc-800 h-6 mx-1 shrink-0"></span>
+
+      <!-- Right: Month Filter Pills (Single Line) -->
+      <div class="flex items-center gap-2 shrink-0" id="monthTabsContainer">
+        <button type="button" class="month-tab-btn active" data-month="ALL">
+          <span class="text-xs">🗓️</span> <span>All Months</span>
+        </button>
+        <button type="button" class="month-tab-btn" data-month="08">
+          <span class="text-xs">☀️</span> <span>August</span>
+        </button>
+        <button type="button" class="month-tab-btn" data-month="09">
+          <span class="text-xs">🌧️</span> <span>September</span>
+        </button>
+        <button type="button" class="month-tab-btn" data-month="10">
+          <span class="text-xs">🍂</span> <span>October</span>
+        </button>
+        <button type="button" class="month-tab-btn" data-month="11">
+          <span class="text-xs">🥭</span> <span>November</span>
+        </button>
+        <button type="button" class="month-tab-btn" data-month="12">
+          <span class="text-xs">🎄</span> <span>December</span>
+        </button>
       </div>
 
     </div>
@@ -162,34 +150,34 @@ import Footer from "../components/Footer.astro";
     
     <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
       <div class="flex items-center gap-3">
-        <span class="font-mono text-xs font-bold px-3 py-1 bg-slate-900 text-white rounded-full" id="resultsBadge">0 Plans</span>
-        <span class="text-xs text-slate-600 font-medium" id="resultsSubtext">Showing options with 0 leaves</span>
+        <span class="font-mono text-xs font-bold px-3.5 py-1 bg-[#ff2b63] text-white rounded-full shadow-md" id="resultsBadge">0 Plans</span>
+        <span class="text-xs text-zinc-400 font-medium" id="resultsSubtext">Showing options with 0 leaves</span>
         
         <!-- Custom Premium Dropdown -->
         <div class="relative w-full sm:w-[240px]" id="customSortDropdown">
-          <button type="button" id="sortDropdownBtn" class="flex items-center justify-between w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 text-[11px] sm:text-xs font-bold rounded-full px-4 py-2 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all shadow-sm">
+          <button type="button" id="sortDropdownBtn" class="flex items-center justify-between w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 hover:text-white text-[11px] sm:text-xs font-bold rounded-full px-4 py-2 outline-none transition-all shadow-sm cursor-pointer">
             <span id="sortDropdownLabel">Sort: Highest Efficiency</span>
-            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
+            <svg id="sortDropdownArrow" class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
           </button>
-          <!-- Menu (Hidden by default) -->
-          <div id="sortDropdownMenu" class="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 transition-all duration-200 opacity-0 scale-95 origin-top-right pointer-events-none hidden">
+          <!-- Menu -->
+          <div id="sortDropdownMenu" class="absolute right-0 mt-2 w-full bg-[#141417] border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50 transition-all duration-200 opacity-0 scale-95 origin-top-right pointer-events-none">
             <div class="py-1 flex flex-col">
-              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="efficiency">
+              <button type="button" class="sort-option w-full text-left px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center justify-between cursor-pointer" data-value="efficiency">
                 Highest Efficiency
-                <svg class="w-4 h-4 text-emerald-500 check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="w-4 h-4 text-emerald-400 check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
               </button>
-              <button type="button" class="sort-option w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center justify-between" data-value="date">
+              <button type="button" class="sort-option w-full text-left px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center justify-between cursor-pointer" data-value="date">
                 Chronological (Dates)
-                <svg class="w-4 h-4 text-emerald-500 hidden check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="w-4 h-4 text-emerald-400 hidden check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
               </button>
             </div>
           </div>
         </div>
       </div>
-      <div class="results-legend-bar flex items-center gap-4 text-xs text-slate-600 font-medium">
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-500"></span><span>Weekend</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span><span>Public Holiday</span></div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span><span>Apply Leave (PTO)</span></div>
+      <div class="results-legend-bar flex items-center gap-4 text-xs text-zinc-400 font-semibold">
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></span><span>Weekend</span></div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span><span>Public Holiday</span></div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span><span>Apply Leave (PTO)</span></div>
       </div>
     </div>
 
@@ -197,10 +185,10 @@ import Footer from "../components/Footer.astro";
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="vacationGrid"></div>
 
     <!-- Empty State -->
-    <div class="hidden text-center py-20 px-4 sm:px-6 bg-white border border-slate-200 rounded-2xl shadow-xs" id="emptyState">
-      <div class="w-16 h-16 rounded-full bg-slate-50 text-3xl flex items-center justify-center mx-auto mb-4 border border-slate-200">🏖️</div>
-      <h3 class="font-bold text-lg text-slate-900 mb-2">No Long Weekend Found for this Budget</h3>
-      <p class="text-xs text-slate-500 max-w-md mx-auto">Try selecting another leave budget (e.g. 1, 2, or 3 leaves) or check "All Upcoming" to view all available bridges.</p>
+    <div class="hidden text-center py-20 px-4 sm:px-6 bg-[#141417] border border-zinc-800 rounded-2xl shadow-xl" id="emptyState">
+      <div class="w-16 h-16 rounded-full bg-zinc-900 text-3xl flex items-center justify-center mx-auto mb-4 border border-zinc-800">🏖️</div>
+      <h3 class="font-extrabold text-lg text-white mb-2">No Long Weekend Found for this Budget</h3>
+      <p class="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">Try selecting another leave budget (e.g. 1, 2, or 3+ leaves) or select "All Months" to view all available bridge vacations.</p>
     </div>
 
   </main>
