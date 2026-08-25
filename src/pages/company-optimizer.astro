@@ -1141,9 +1141,22 @@ const VENDOR_SCRIPTS = [
     }
   }
 
-  function progress(message: string) {
+  /**
+   * Updates the spinner's headline and, optionally, the line under it.
+   *
+   * The second argument is new. This used to write the headline only, so the
+   * sub-line kept whatever setBusy() put there at the start — "Everything
+   * happens on your device" — for the entire read, including the OCR pass.
+   * That is the one step slow enough to need explaining: a scanned page takes
+   * several seconds while the rest of the file goes by in milliseconds, and a
+   * spinner that sits still with a privacy note under it reads as a hang.
+   * Every call site now says what is happening AND why the wait is expected.
+   */
+  function progress(message: string, sub?: string) {
     const t = el("spinnerText");
     if (t) t.textContent = message;
+    const s = el("spinnerSub");
+    if (s && sub) s.textContent = sub;
   }
 
   async function handleCleanFileParsing(file: File) {
@@ -1162,13 +1175,16 @@ const VENDOR_SCRIPTS = [
           throw new Error("pdf.js did not load");
         }
         ensurePdfWorker();
-        progress("Reading your PDF…");
+        progress("Reading your PDF…", "Everything happens on your device");
         const buffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) })
           .promise;
 
         for (let n = 1; n <= pdf.numPages; n++) {
-          progress(`Reading page ${n} of ${pdf.numPages}…`);
+          progress(
+            `Reading page ${n} of ${pdf.numPages}…`,
+            "Everything happens on your device"
+          );
           const page = await pdf.getPage(n);
           const content = await page.getTextContent();
           const pageText = content.items.map((i: any) => i.str).join(" ");
@@ -1176,7 +1192,10 @@ const VENDOR_SCRIPTS = [
 
           // A near-empty text layer means the page is a scan, not typed text.
           if (pageText.trim().length < 40 && typeof Tesseract !== "undefined") {
-            progress(`Page ${n} is a scan — recognising the text…`);
+            progress(
+              `Scanning page ${n} of ${pdf.numPages}…`,
+              "This page is an image, so it takes a few seconds"
+            );
             const viewport = page.getViewport({ scale: 1.8 });
             const canvas = document.createElement("canvas");
             canvas.width = viewport.width;
@@ -1196,7 +1215,10 @@ const VENDOR_SCRIPTS = [
         if (typeof Tesseract === "undefined") {
           throw new Error("tesseract.js did not load");
         }
-        progress("Recognising the text in your image…");
+        progress(
+          "Scanning your image…",
+          "Reading text from a picture takes a few seconds"
+        );
         const canvas = await preprocessImageForOcr(file);
         const ocr = await Tesseract.recognize(canvas, "eng");
         text = ocr.data.text;
