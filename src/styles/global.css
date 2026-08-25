@@ -363,20 +363,49 @@
   line-height: 1;
 }
 /* The compound pill holds two stepper buttons, so it needs less side padding
-   than a plain label pill. */
+   than a plain label pill. The block padding is trimmed to match: the steppers
+   inside are now a full 1.5rem tall (see below) and without this the pill would
+   stand ~6px taller than every sibling in the rail. */
 .pill-compound {
   padding-inline: 0.5rem;
+  padding-block: 0.25rem;
   gap: 0.375rem;
 }
 
-/* Stepper nested inside the custom-leaves pill. */
+/* The number between the two steppers is a button as well — pressing it selects
+   the custom budget. At its natural height it was 50x16, so it read as a label
+   and missed the 24px floor like the steppers did. `items-baseline` is kept
+   from the markup because it is what lines the figure up with the word beside
+   it; the height comes from padding rather than from re-centring. */
+.pill-compound [data-leaves="custom"] {
+  min-height: 1.5rem;
+  padding-block: 0.25rem;
+}
+
+/* Stepper nested inside the custom-leaves pill.
+   ---------------------------------------------------------------------------
+   These were 1.125rem square — 18x18 CSS px, under the 24x24 floor WCAG 2.5.8
+   sets for a pointer target, and they are not incidental controls: the steppers
+   are the only way to choose any budget above two leaves.
+
+   The box is grown rather than papered over with an oversized ::after. An
+   overlay large enough to matter would have to reach across the 0.375rem gap
+   into the value button on one side and out through the pill's padding on the
+   other, so the three targets would overlap and a press near the middle would
+   land on whichever pseudo-element happened to stack last. Overlapping hit
+   areas are the failure 2.5.8 exists to prevent, so widening them would have
+   traded a measurable problem for an invisible one.
+
+   ::after is still used, but only to bleed the target vertically past the pill.
+   Nothing sits above or below a stepper, so that direction is free. */
 .stepper-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.125rem;
-  height: 1.125rem;
-  border-radius: 0.3125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.375rem;
   background-color: var(--surface-sunken);
   color: var(--ink);
   font-size: 0.8125rem;
@@ -384,6 +413,25 @@
   line-height: 1;
   cursor: pointer;
   transition: background-color 0.15s var(--ease-out-soft);
+}
+.stepper-btn::after {
+  /* Vertical-only bleed: 24 wide x 40 tall. */
+  content: "";
+  position: absolute;
+  inset-block: -0.5rem;
+  inset-inline: 0;
+}
+
+/* A finger has no pixel to aim with, so on touch the steppers take the width
+   the rail can spare — it scrolls horizontally, and the pill is free to grow
+   sideways as long as it does not grow taller than its neighbours. */
+@media (pointer: coarse) {
+  .stepper-btn {
+    width: 2.125rem;
+  }
+  .stepper-btn::after {
+    inset-block: -0.625rem;
+  }
 }
 .stepper-btn:hover:not(:disabled) {
   background-color: var(--brand);
@@ -626,8 +674,11 @@
   text-align: center;
   user-select: none;
 }
+/* The day ribbon is the densest thing on the site and these two labels are the
+   smallest text on it, so they were the worst offenders at 9px. Raised with
+   .seg-label — see the note there. */
 .day-dow {
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -641,7 +692,7 @@
   font-variant-numeric: tabular-nums;
 }
 .day-tag {
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -856,8 +907,9 @@
   line-height: 0.95;
   font-variant-numeric: tabular-nums;
 }
+/* Raised off 9px with .seg-label — see the note there. */
 .banner-figure-label {
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -971,10 +1023,14 @@
     border-radius: 9999px;
   }
 }
+/* 0.625rem, not the 0.5625rem this and the three labels below used to
+   carry: 9px is under the floor where a 700-weight uppercase run with wide
+   tracking stays comfortably readable, and every one of them is a label whose
+   whole job is to say what the figure beside it means. */
 .seg-label {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1283,6 +1339,116 @@
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+/* --- Document prose (about, contact, privacy, terms) -----------------------
+   DocPage.astro wraps its slot in `.doc-prose` and says so in its own header
+   comment: "styles descendants … a spacing change happens once in global.css
+   rather than four times in markup." The class was never written. Every one of
+   those four pages therefore shipped as an undifferentiated wall — <h2> at the
+   same 16px and weight 400 as the paragraph under it, zero margin anywhere, and
+   Tailwind's preflight having already stripped the bullets off every <ul>. The
+   privacy policy's ten numbered clauses ran together as one block of text.
+
+   `.doc-prose-numbered` is the other half of the same promise, described in
+   DocPage's Props as "number the top-level sections with a CSS counter … where
+   clauses get cited by number".
+
+   Kept unlayered, next to `.prose-body`, because the whole point of the class
+   is that page files carry almost no classes for it to compete with. */
+.doc-prose {
+  /* Matches the `max-w-[68ch]` on the heading block above it in DocPage, which
+     was constrained while the prose beneath it ran the full 1280px. */
+  max-width: 68ch;
+  color: var(--body);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.doc-prose h2 {
+  margin-block: 2.5rem 0.75rem;
+  color: var(--ink);
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.doc-prose h3 {
+  margin-block: 1.75rem 0.5rem;
+  color: var(--ink);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+/* No leading gap above the first heading — the <hr> in DocPage already sets the
+   distance from the lede, and the two margins would stack. */
+.doc-prose > :first-child {
+  margin-top: 0;
+}
+
+.doc-prose p {
+  margin-block: 0 1rem;
+}
+.doc-prose ul,
+.doc-prose ol {
+  margin-block: 0 1rem;
+  padding-inline-start: 1.5rem;
+}
+/* Preflight zeroes list-style globally, which is right for the nav lists this
+   site is mostly made of and wrong here, where a bullet is the only thing
+   separating one clause from the next. */
+.doc-prose ul {
+  list-style: disc;
+}
+.doc-prose ol {
+  list-style: decimal;
+}
+.doc-prose li {
+  margin-block: 0.375rem;
+  padding-inline-start: 0.25rem;
+}
+.doc-prose li::marker {
+  color: var(--muted);
+}
+
+.doc-prose strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.doc-prose em {
+  font-style: italic;
+}
+.doc-prose a {
+  color: var(--brand-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.doc-prose hr {
+  margin-block: 2.5rem;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.doc-prose :last-child {
+  margin-bottom: 0;
+}
+
+/* Clause numbering for the two legal pages. The counter sits on the wrapper so
+   it restarts per page, and the number is set in mono because this project
+   reserves mono for figures you read exactly — a clause you cite by number is
+   precisely that. */
+.doc-prose-numbered {
+  counter-reset: doc-section;
+}
+.doc-prose-numbered h2 {
+  counter-increment: doc-section;
+}
+.doc-prose-numbered h2::before {
+  content: counter(doc-section) ". ";
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--brand-text);
+  font-variant-numeric: tabular-nums;
 }
 
 /* --- Utilities ------------------------------------------------------------ */
