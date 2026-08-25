@@ -3,7 +3,8 @@
   "sources": [
     "Department of Personnel and Training (DoPT), Govt of India Gazetted Holiday List",
     "Reserve Bank of India (RBI) Negotiable Instruments Act (NI Act) Section 25 List",
-    "State Government Official Gazettes (Karnataka, Maharashtra, Delhi, West Bengal, Tamil Nadu, Telangana)"
+    "State Government Official Gazettes (Karnataka, Maharashtra, Delhi, West Bengal, Tamil Nadu, Telangana)",
+    "U.S. Office of Personnel Management (OPM) Federal Holidays"
   ],
   "national_holidays": [
     {
@@ -432,22 +433,6 @@
         "longWeekendType": "direct_3_day"
       },
       {
-        "id": "us-good-friday-2026",
-        "name": "Good Friday",
-        "date": "2026-04-03",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-easter-2026",
-        "name": "Easter Sunday",
-        "date": "2026-04-05",
-        "day": "Sunday",
-        "state": "USA",
-        "longWeekendType": "weekend"
-      },
-      {
         "id": "us-memorial-2026",
         "name": "Memorial Day",
         "date": "2026-05-25",
@@ -465,19 +450,11 @@
       },
       {
         "id": "us-independence-obs-2026",
-        "name": "Independence Day Holiday",
+        "name": "Independence Day (observed)",
         "date": "2026-07-03",
         "day": "Friday",
         "state": "USA",
         "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-independence-2026",
-        "name": "Independence Day",
-        "date": "2026-07-04",
-        "day": "Saturday",
-        "state": "USA",
-        "longWeekendType": "weekend"
       },
       {
         "id": "us-labor-2026",
@@ -515,6 +492,14 @@
         "id": "us-christmas-2026",
         "name": "Christmas",
         "date": "2026-12-25",
+        "day": "Friday",
+        "state": "USA",
+        "longWeekendType": "direct_3_day"
+      },
+      {
+        "id": "us-new-year-2027",
+        "name": "New Year's Day",
+        "date": "2027-01-01",
         "day": "Friday",
         "state": "USA",
         "longWeekendType": "direct_3_day"
