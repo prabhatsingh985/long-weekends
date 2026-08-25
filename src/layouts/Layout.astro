@@ -120,16 +120,32 @@ const ogImage = new URL("/og-image.png", Astro.site).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- Paints the correct theme colour in browser UI before first paint. -->
-    <meta name="theme-color" content="#fcfcfd" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0b0b0e" media="(prefers-color-scheme: dark)" />
+    <!-- Paints the correct theme colour in browser UI before first paint.
+         Both values are the page canvas: parchment, and its dark counterpart. -->
+    <meta name="theme-color" content="#fefffc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#151614" media="(prefers-color-scheme: dark)" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Playfair Display was requested on every page and never used; dropping
-         it removes a font family from the critical path. -->
+    {/* Fraunces for display, Inter for everything else — the two substitutes
+        the style reference names for its custom ppmondwest and `af`.
+
+        Fraunces ships an optical-size axis, and `opsz` is pinned to the top of
+        its range (144) rather than left to vary. The face was drawn so that
+        high optical sizes thin the strokes and tighten the fit, which is
+        exactly the "literary, not shouted" register the reference asks for;
+        left on `auto` a browser would pick a chunkier cut at heading sizes and
+        undo it.
+
+        Only weights 400 and 500 are requested. The design forbids 600+ on the
+        serif, so shipping heavier cuts would be paying download cost for
+        something the CSS actively overrides.
+
+        This replaces Plus Jakarta Sans and JetBrains Mono. The mono face is
+        gone entirely: the reference has no monospace role, and the alignment
+        it was providing now comes from `.tabular`. */}
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@144,400;144,500&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 

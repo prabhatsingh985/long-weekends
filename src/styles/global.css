@@ -11,126 +11,180 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ==========================================================================
-   2. RAW THEME VALUES
+   2. RAW THEME VALUES  —  "literary journal beside a bonfire"
    --------------------------------------------------------------------------
-   Both themes are declared on the SAME element (<html>), so a single
-   `bg-surface` resolves correctly in either theme with no `dark:` variant
-   and no `!important`. Every pair below was contrast-checked; the ratio is
-   noted where it drove the choice.
+   The palette is the General Intelligence Company reference: a warm parchment
+   canvas, a green-tinted hairline, and one blue. Colour is close to absent by
+   design, so anything chromatic has to earn its place.
+
+   Two layers are declared. The NAMED tokens (--parchment, --mist, --dusk ...)
+   are the reference's own vocabulary and exist so this file can be read beside
+   the spec. The SEMANTIC tokens (--page, --ink, --border ...) are what every
+   component actually consumes, and they keep the names they had before the
+   redesign — which is why the component layer below did not have to be
+   rewritten wholesale in order to change how the site looks.
+
+   Both themes are declared on the SAME element (<html>), so one `bg-surface`
+   resolves correctly in either with no `dark:` variant and no `!important`.
+   Every pair is contrast-checked; the ratio is noted where it drove a choice.
    ========================================================================== */
 :root {
   color-scheme: light;
 
-  /* Neutrals — one family only. The old code mixed Tailwind `slate` and
-     `zinc`, which read as two different greys side by side. */
-  --page:          #fcfcfd;
-  --surface:       #ffffff;
-  --surface-soft:  #f7f7f8;  /* section bands, subtle fills */
-  --surface-sunken:#f2f2f4;  /* input wells, tracks */
-  --border:        #e4e4e7;  /* decorative hairline */
-  --border-strong: #c9c9cf;  /* interactive edges, hover */
-  --ink:           #131316;  /* headings          18.1:1 */
-  --body:          #56565e;  /* paragraphs         7.1:1 */
-  /* Ratios above are against --page. Muted is quoted against --surface-sunken
-     instead, because that is the darkest surface it lands on (input wells and
-     the month rail) and it was the pair that used to fail: at the old #75757f
-     muted read 4.08:1 there. Captions run as small as 0.625rem, so the 3:1
-     large-text allowance does not apply — all four light surfaces need 4.5:1. */
-  --muted:         #6c6c76;  /* captions           4.6:1 worst case */
+  /* --- The reference palette, verbatim -------------------------------- */
+  --parchment:   #fefffc;  /* page canvas — warmer than white on purpose */
+  --paper:       #ffffff;  /* elevated surfaces */
+  --linen:       #f9faf7;  /* inputs, subtle washes */
+  --ink-black:   #171717;
+  --graphite:    #2c2c2c;  /* headlines            13.9:1 on parchment */
+  --charcoal:    #444141;  /* body                 10.1:1 */
+  --ash:         #646464;  /* muted captions        5.9:1 */
+  --fog:         #b4b8b4;  /* disabled only — 2.0:1, never for meaningful text */
+  --mist:        #dee2de;  /* the signature hairline */
+  --twilight:    #282834;
+  --dusk:        #1f1f29;  /* the one filled surface */
+  --signal-blue: #41a1cf;
+  --cerulean:    #0081c0;
 
-  /* Brand. #ff2b63 is the established brand colour and is kept as-is for
-     decorative fills, icon buttons and large bold type (3.6:1 — clears the
-     3:1 bar for graphics and large text, but NOT small text). */
-  --brand:         #ff2b63;
-  --brand-strong:  #db0a45;  /* white small text on brand   5.1:1 */
-  --brand-text:    #d10440;  /* brand as body text on page  5.4:1 */
-  --brand-50:      #fff1f5;
-  --brand-100:     #ffe1ea;
-  --brand-200:     #ffc7d8;
-  --brand-300:     #ff9dba;
-  --brand-400:     #ff6693;
-  --brand-600:     #db0a45;
-  --brand-700:     #b30838;
+  /*
+   * Signal Blue, split in two.
+   *
+   * The reference uses #41a1cf for a CTA's border AND its text. As a border it
+   * measures 2.90:1 against parchment and as text the same — under the 3:1
+   * WCAG 2.5.8 wants for a control's boundary and well under the 4.5:1 its
+   * label needs. Since that border is, in the spec's own words, "the entire
+   * visual identity of the button", it is kept exactly as drawn and only the
+   * TEXT is deepened. Side by side the two read as the same blue; one of them
+   * is legible in sunlight.
+   */
+  --signal-blue-text: #337ea1;  /* 4.5:1 on parchment */
 
-  /* Day semantics. The three states a day can be in are the core content of
-     this product, so they get first-class tokens rather than ad-hoc Tailwind
-     palette classes. */
-  --holiday-bg:     #e7f6ef;
-  --holiday-border: #a7dec6;
-  --holiday-text:   #04613d;  /* on its own tint  6.8:1 */
-  --holiday-dot:    #0e9f6e;  /* on surface       3.4:1 */
+  /* --- Semantic layer: what components actually consume ---------------- */
+  --page:           var(--parchment);
+  --surface:        var(--paper);
+  --surface-soft:   var(--linen);
+  --surface-sunken: var(--linen);
+  --border:         var(--mist);
+  --border-strong:  var(--twilight);
+  --ink:            var(--graphite);
+  --body:           var(--charcoal);
+  --muted:          var(--ash);
 
-  --weekend-bg:     #eeeefb;
-  --weekend-border: #c3c3f0;
-  --weekend-text:   #33339c;  /* 8.7:1 */
-  --weekend-dot:    #5b5bd6;  /* 5.4:1 */
+  /*
+   * `--brand` is a border and accent colour, never a fill. The reference is
+   * explicit: "Do not fill buttons with #41a1cf". The system's only filled
+   * button is Dusk, which is why --brand-strong is near-black rather than blue.
+   */
+  --brand:         var(--signal-blue);
+  --brand-strong:  var(--dusk);
+  --brand-text:    var(--signal-blue-text);
+  --brand-50:      #f2f8fb;
+  --brand-100:     #e4f1f7;
+  --brand-200:     #c4e0ee;
+  --brand-300:     #92c8e0;
+  --brand-400:     var(--signal-blue);
+  --brand-600:     var(--signal-blue-text);
+  --brand-700:     #29647f;
 
-  --pto-bg:         #fef3e2;
-  --pto-border:     #f3ce93;
-  --pto-text:       #8a4b04;  /* 6.2:1 */
-  --pto-dot:        #b86a08;  /* 4.1:1 — amber needs deepening on white */
+  /*
+   * Day semantics, pulled far down in saturation.
+   *
+   * These three states are the core content of the product, so they cannot go
+   * fully monochrome — but nine vivid tints would wreck a palette the spec
+   * describes as "95% neutral with one blue". They are muted to roughly the
+   * weight of the mist hairline and still clear AA on their own fills. Colour
+   * is not doing the work alone in any case: PTO is the only dashed cell and
+   * the only one with a cost marker, and every cell keeps a written tag.
+   */
+  --holiday-bg:     #eef3ef;
+  --holiday-border: #cadbd1;
+  --holiday-text:   #2f5d46;  /* 6.7:1 on its own tint */
+  --holiday-dot:    #4a7d63;  /* 4.8:1 on paper */
 
-  /* Focus ring — must hit 3:1 against every surface it lands on. */
-  --focus:      #db0a45;
-  --focus-halo: #ffffff;
+  --weekend-bg:     #eeeff4;
+  --weekend-border: #ccd0e0;
+  --weekend-text:   #3d4468;  /* 8.2:1 */
+  --weekend-dot:    #5b6291;  /* 5.8:1 */
 
-  /* Elevation. Airbnb's card lift is a wide, soft, low-opacity shadow. */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 3px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 2px 6px rgb(0 0 0 / 0.05), 0 6px 16px -4px rgb(0 0 0 / 0.10);
-  --shadow-lg: 0 4px 10px rgb(0 0 0 / 0.06), 0 16px 32px -8px rgb(0 0 0 / 0.14);
-  --shadow-pop: 0 8px 20px -4px rgb(0 0 0 / 0.12), 0 18px 44px -12px rgb(0 0 0 / 0.18);
+  --pto-bg:         #f5f1e8;
+  --pto-border:     #e0d3b6;
+  --pto-text:       #6b5227;  /* 6.5:1 */
+  --pto-dot:        #8f7136;  /* 4.6:1 */
+
+  --focus:      var(--twilight);
+  --focus-halo: var(--parchment);
+
+  /*
+   * Elevation, straight from the reference. Note how little there is: this
+   * system separates surfaces with a 1px mist border, not with shadow, and
+   * gives buttons no shadow at all.
+   */
+  --shadow-sm:  rgba(0, 0, 0, 0.05) 0px 1px 8px 0px;
+  --shadow-md:  rgba(0, 0, 0, 0.08) 0px 1px 1px 0px, rgba(0, 0, 0, 0.08) 0px 4px 5px 0px;
+  --shadow-lg:  rgba(0, 0, 0, 0.06) 0px 2px 2px 0px, rgba(0, 0, 0, 0.04) 0px 0px 0px 5px;
+  --shadow-pop: rgba(0, 0, 0, 0.15) 0px 2px 6px 0px;
 }
 
+/*
+ * The dark theme is DERIVED, not quoted.
+ *
+ * The reference is light-only and publishes no dark palette, but this site
+ * ships a theme toggle that people have already set. Rather than drop the
+ * feature or invent a second design language, every value below is the same
+ * relationship translated: a canvas warmer and greener than pure black,
+ * surfaces separated by a hairline rather than a shadow, and one blue lifted
+ * just far enough to stay legible. Ratios are against this theme's own page.
+ */
 .dark {
   color-scheme: dark;
 
-  /* One dark base. The old code had #0c0c0e on the navbar/hero and #0b0f19
-     forced onto <body>, leaving a visible horizontal seam under the header. */
-  --page:          #0b0b0e;
-  --surface:       #141418;
-  --surface-soft:  #1a1a20;
-  --surface-sunken:#101014;
-  --border:        #26262e;
-  --border-strong: #383842;
-  --ink:           #f4f4f6;  /* 16.7:1 */
-  --body:          #a6a6b0;  /*  7.6:1 */
-  --muted:         #8a8a96;  /*  5.4:1 */
+  --parchment:   #151614;  /* the bonfire side of the same room */
+  --paper:       #1c1e1b;
+  --linen:       #212320;
+  --ink-black:   #ffffff;
+  --graphite:    #f2f3ef;  /* 16.3:1 */
+  --charcoal:    #c2c4be;  /* 10.3:1 */
+  --ash:         #8f918b;  /*  5.7:1 — 5.3:1 on --surface, its worst case */
+  --fog:         #4a4d48;
+  --mist:        #2f322e;  /* the hairline, carried across */
+  --twilight:    #d8dad4;  /* inverts: it is the strong edge in both themes */
+  --dusk:        #f2f3ef;  /* the filled button flips to paper-on-dark */
+  --signal-blue: #5cb8e3;  /* 8.1:1 as a border */
+  --cerulean:    #2596cf;
 
-  --brand:         #ff2b63;
-  --brand-strong:  #ff2b63;  /* 5.4:1 on dark — full-strength brand is safe here */
-  --brand-text:    #ff7ba1;  /* 8.1:1 */
-  --brand-50:      #2a0a14;
-  --brand-100:     #3d0f1e;
-  --brand-200:     #5c1630;
-  --brand-300:     #8a2247;
-  --brand-400:     #ff6693;
-  --brand-600:     #ff5583;
-  --brand-700:     #ff7ba1;
+  --signal-blue-text: #7cc9ee;  /* 9.9:1 */
 
-  --holiday-bg:     #0c2a1e;
-  --holiday-border: #1f5c42;
-  --holiday-text:   #7fd9ae;  /* 9.1:1 */
-  --holiday-dot:    #10b981;  /* 7.2:1 */
+  --border-strong: #4a4d48;
+  --brand-strong:  var(--dusk);
+  --brand-50:      #12222b;
+  --brand-100:     #16303c;
+  --brand-200:     #1d4557;
+  --brand-300:     #2f6b85;
+  --brand-700:     #a5daf2;
 
-  --weekend-bg:     #191a38;
-  --weekend-border: #3a3b78;
-  --weekend-text:   #afaff2;  /* 8.2:1 */
-  --weekend-dot:    #7c7ce8;  /* 5.2:1 */
+  --holiday-bg:     #16241d;
+  --holiday-border: #2c4a3a;
+  --holiday-text:   #8fd4b0;  /* 9.4:1 */
+  --holiday-dot:    #5fa77f;
 
-  --pto-bg:         #2e1d06;
-  --pto-border:     #6b4610;
-  --pto-text:       #f5c97b;  /* 10.5:1 */
-  --pto-dot:        #f0a32a;  /*  8.7:1 */
+  --weekend-bg:     #1a1c2e;
+  --weekend-border: #383d5c;
+  --weekend-text:   #aeb4e8;  /* 8.4:1 */
+  --weekend-dot:    #7f86bd;
 
-  --focus:      #ff7ba1;   /* 7.5:1 on dark surfaces */
-  --focus-halo: #0b0b0e;
+  --pto-bg:         #26200f;
+  --pto-border:     #4d422a;
+  --pto-text:       #e0c184;  /* 9.4:1 */
+  --pto-dot:        #b9954f;
 
-  /* Shadows barely register on dark backgrounds, so elevation switches to
-     a lifted border plus a faint inner highlight. */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.5);
-  --shadow-lg: 0 8px 28px rgb(0 0 0 / 0.6);
-  --shadow-pop: 0 12px 40px rgb(0 0 0 / 0.7);
+  --focus:      #7cc9ee;
+  --focus-halo: var(--parchment);
+
+  /* Shadow barely registers on a dark canvas; the border does the separating. */
+  --shadow-sm:  rgba(0, 0, 0, 0.4) 0px 1px 8px 0px;
+  --shadow-md:  rgba(0, 0, 0, 0.5) 0px 2px 8px 0px;
+  --shadow-lg:  rgba(0, 0, 0, 0.6) 0px 8px 28px 0px;
+  --shadow-pop: rgba(0, 0, 0, 0.7) 0px 12px 40px 0px;
 }
 
 /* ==========================================================================
@@ -140,11 +194,23 @@
    value, which is what lets one class resolve per-theme.
    ========================================================================== */
 @theme inline {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+  /*
+   * Fraunces stands in for the reference's ppmondwest and Inter for its `af`;
+   * both are named substitutes in the spec and both are on Google Fonts.
+   *
+   * There is no mono family any more. This project used to reserve JetBrains
+   * Mono for "figures you read exactly", but the reference has no monospace
+   * role at all and a mono face fights the editorial register. The FUNCTION
+   * that convention existed for — figures lining up in a column — is kept by
+   * `.tabular`, which is what those places actually needed. `--font-mono`
+   * stays defined and points at the sans, so the `font-mono` utility already
+   * scattered through the markup degrades to Inter rather than to a browser
+   * default monospace.
+   */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system,
                "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  /* Mono is reserved for figures you compare: dates, day numbers, leave
-     counts, efficiency multipliers. Sans is for language you read. */
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: var(--font-sans);
 
   --color-page:           var(--page);
   --color-surface:        var(--surface);
@@ -155,6 +221,18 @@
   --color-ink:   var(--ink);
   --color-body:  var(--body);
   --color-muted: var(--muted);
+
+  --color-parchment: var(--parchment);
+  --color-paper:     var(--paper);
+  --color-linen:     var(--linen);
+  --color-graphite:  var(--graphite);
+  --color-charcoal:  var(--charcoal);
+  --color-ash:       var(--ash);
+  --color-fog:       var(--fog);
+  --color-mist:      var(--mist);
+  --color-twilight:  var(--twilight);
+  --color-dusk:      var(--dusk);
+  --color-cerulean:  var(--cerulean);
 
   --color-brand:        var(--brand);
   --color-brand-strong: var(--brand-strong);
@@ -184,10 +262,17 @@
 
   --color-focus: var(--focus);
 
-  /* Airbnb's roundness: pills for controls, 16px for cards. */
-  --radius-control: 0.75rem;
-  --radius-card:    1rem;
-  --radius-panel:   1.25rem;
+  /*
+   * The reference's radii: 4 and 8 for buttons, 12-16 for cards, 24 for large
+   * surfaces, and a 50px pill reserved for the navigation. Nothing sits between
+   * 24 and the nav pill — "this is not a soft-rounded design".
+   */
+  --radius-sm:      0.25rem;  /*  4px */
+  --radius-control: 0.5rem;   /*  8px — buttons */
+  --radius-card:    0.75rem;  /* 12px */
+  --radius-panel:   1rem;     /* 16px */
+  --radius-surface: 1.5rem;   /* 24px — large surfaces only */
+  --radius-nav:     50px;     /* the navigation pill, and nothing else */
 
   --shadow-soft: var(--shadow-sm);
   --shadow-card: var(--shadow-md);
@@ -224,15 +309,16 @@
   :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
   }
   :focus:not(:focus-visible) {
     outline: none;
   }
 
+  /* Mist rather than a chromatic fill — the palette has no filled accent. */
   ::selection {
-    background-color: var(--brand);
-    color: #ffffff;
+    background-color: var(--brand-100);
+    color: var(--ink);
   }
 
   /* Native form controls follow the theme instead of flashing white. */
@@ -247,13 +333,47 @@
     color: var(--ink);
   }
 
-  h1, h2, h3, h4 {
+  /*
+   * Headings are the serif, and they are weight 400.
+   *
+   * This is the single loudest instruction in the reference: "Set all
+   * ppmondwest headings to weight 400, never 600 or 700 — the serif does the
+   * work", and "Do not use weight 600+; the serif's personality is in its thin
+   * strokes." The old design leaned on font-extrabold everywhere, so the
+   * `font-extrabold` / `font-bold` utilities still scattered through the
+   * markup would drag Fraunces back to 800 unless they are overruled here.
+   * That is what the !important is for — it is not a specificity patch, it is
+   * the design rule being enforced in one place instead of by editing several
+   * hundred class attributes.
+   *
+   * Tracking follows the spec's scale: -0.04em at 27px, easing to -0.02em as
+   * the size grows.
+   */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 400 !important;
     color: var(--ink);
     letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  /* h4 stays in the sans: at this size the serif reads as a mistake rather
+     than a voice, and the spec puts the serif at 27px and above. */
+  h4 {
+    font-family: var(--font-sans);
+    color: var(--ink);
+    letter-spacing: -0.012em;
     text-wrap: balance;
   }
   p {
     text-wrap: pretty;
+  }
+
+  /* The reference pairs display type at 1.1 with body at 1.5; the contrast
+     between the two is deliberate, not incidental. */
+  body {
+    line-height: 1.5;
+    letter-spacing: -0.01em;
   }
 
   /* Respect the OS "reduce motion" setting everywhere, once. */
@@ -286,7 +406,7 @@
   left: 0.5rem;
   z-index: 200;
   padding: 0.625rem 1rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-control);
   background-color: var(--ink);
   color: var(--surface);
   font-size: 0.8125rem;
@@ -309,13 +429,15 @@
   justify-content: center;
   gap: 0.4375rem;
   flex: none;
-  padding: 0.5rem 0.9375rem;
-  border-radius: 9999px;
+  padding: 0.5rem 0.875rem;
+  /* 8px, not a pill. The reference reserves full rounding for the navigation
+     and puts every other control at 4 or 8px. */
+  border-radius: var(--radius-control);
   border: 1px solid var(--border);
-  background-color: var(--surface);
+  background-color: transparent;
   color: var(--body);
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
@@ -347,11 +469,12 @@
    no browser-support caveat. */
 .pill[aria-pressed="true"],
 .pill.is-on {
-  background-color: var(--ink);
-  border-color: var(--ink);
-  color: var(--surface);
-  font-weight: 700;
-  box-shadow: var(--shadow-md);
+  /* Dusk — the system's one filled surface. No shadow: selection is carried by
+     the fill and the border, the way everything else here works. */
+  background-color: var(--brand-strong);
+  border-color: var(--twilight);
+  color: var(--paper);
+  font-weight: 500;
 }
 .pill[aria-pressed="true"] .pill-glyph,
 .pill.is-on .pill-glyph {
@@ -486,9 +609,8 @@
   color: var(--ink);
 }
 .workweek-btn[aria-pressed="true"] {
-  background-color: var(--ink);
-  color: var(--surface);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--brand-strong);
+  color: var(--paper);
 }
 
 /* --- Buttons -------------------------------------------------------------- */
@@ -504,56 +626,95 @@
    moved. The `[hidden]` attribute is unaffected either way — preflight marks it
    `!important`, so the popovers and flag spans that rely on it still hide. */
 @layer components {
+  /*
+   * Buttons in this system are defined by a border, never by elevation.
+   *
+   * Three rules from the reference drive everything below. Radius is 8px, not
+   * a pill — "do not use radius values above 24px except for the navigation".
+   * There is no box-shadow — "the system uses borders and backdrop-blur instead
+   * of elevation". And the label sits at weight 500 in the sans, not 700; the
+   * old design shouted at 700 everywhere and that is what made it read as a
+   * product rather than a page.
+   */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    line-height: 1;
+    border-radius: var(--radius-control);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;  /* 15px — the reference's button size */
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
     cursor: pointer;
     transition:
       background-color 0.18s var(--ease-out-soft),
       border-color 0.18s var(--ease-out-soft),
-      color 0.18s var(--ease-out-soft),
-      box-shadow 0.18s var(--ease-out-soft),
-      transform 0.18s var(--ease-out-soft);
+      color 0.18s var(--ease-out-soft);
   }
-  .btn:active {
-    transform: scale(0.97);
-  }
+  /* No transform on press. The reference has no motion vocabulary at all, and
+     a 0.97 squash reads as app-like next to type this quiet. */
 
+  /*
+   * The primary CTA: outlined in Signal Blue, filled with nothing.
+   *
+   * This is the largest single departure from the old design, where
+   * `.btn-brand` was a filled near-black slab with a shadow. The reference is
+   * unambiguous — "the chromatic border is the entire visual identity of the
+   * button — no fill, no shadow" — and equally clear that the blue must not
+   * become a fill: "Do not fill buttons with #41a1cf".
+   *
+   * Border keeps the reference blue exactly; the label uses the deepened one.
+   * See the note on --signal-blue-text for why the two differ.
+   */
   .btn-brand {
-    padding: 0.75rem 1.25rem;
-    /* --brand-strong, not --brand: white small text needs 4.5:1. */
-    background-color: var(--brand-strong);
-    color: #ffffff;
-    box-shadow: var(--shadow-md);
+    padding: 0.5rem 0.875rem;
+    background-color: transparent;
+    border: 1px solid var(--brand);
+    color: var(--brand-text);
   }
   .btn-brand:hover {
-    background-color: var(--brand-700);
-    box-shadow: var(--shadow-lg);
+    /* A wash, not a fill — barely a tint, so the border still does the work. */
+    background-color: var(--brand-50);
+    border-color: var(--brand-text);
   }
 
+  /* The neutral cousin, for a second action beside the primary one. */
   .btn-ghost {
-    padding: 0.625rem 1.125rem;
-    background-color: var(--surface);
+    padding: 0.5rem 0.875rem;
+    background-color: transparent;
     border: 1px solid var(--border);
-    color: var(--ink);
+    color: var(--body);
   }
   .btn-ghost:hover {
     border-color: var(--border-strong);
+    color: var(--ink);
     background-color: var(--surface-soft);
+  }
+
+  /*
+   * The only filled button in the system. Dusk, white label, used sparingly —
+   * the reference puts it in the footer and other high-emphasis moments and
+   * nowhere else. It exists so that a page which genuinely needs one loud
+   * action has something to reach for that is not the blue.
+   */
+  .btn-filled {
+    padding: 0.5rem 1rem;
+    background-color: var(--brand-strong);
+    border: 1px solid var(--twilight);
+    color: var(--paper);
+  }
+  .btn-filled:hover {
+    opacity: 0.88;
   }
 
   .btn-icon {
     width: 2.25rem;
     height: 2.25rem;
-    border-radius: 9999px;
+    border-radius: var(--radius-control);
     border: 1px solid var(--border);
-    background-color: var(--surface);
+    background-color: transparent;
     color: var(--body);
     cursor: pointer;
     display: inline-flex;
@@ -572,28 +733,34 @@
 
   /* The size modifier comes after the variants above so it wins the padding on
      source order alone. The old build reached for `!important` here, which then
-     had to be undone in three other places. */
+     had to be undone in three other places.
+
+     13px is the reference's caption size and the floor for this system; the
+     padding keeps the control's box above the 24px pointer-target minimum. */
   .btn-sm {
-    padding: 0.4375rem 0.8125rem;
-    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
   }
 }
 
-/* --- Surfaces ------------------------------------------------------------- */
+/* --- Surfaces -------------------------------------------------------------
+   A card here is white paper, a 12px corner and one green-tinted hairline.
+   The reference calls that border "the visual signature", and the shadow is
+   deliberately almost nothing — separation comes from the edge, not the lift.
+*/
 .card {
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   transition:
     border-color 0.2s var(--ease-out-soft),
-    box-shadow 0.2s var(--ease-out-soft),
-    transform 0.2s var(--ease-out-soft);
+    box-shadow 0.2s var(--ease-out-soft);
 }
+/* No translateY on hover. Cards in this system do not levitate; the edge
+   darkens and that is the whole interaction. */
 .card-interactive:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
 }
 
 .panel {
@@ -669,7 +836,7 @@
   align-items: center;
   gap: 0.125rem;
   padding: 0.4375rem 0.25rem 0.375rem;
-  border-radius: 0.625rem;
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   text-align: center;
   user-select: none;
@@ -783,10 +950,10 @@
   align-items: center;
   gap: 0.3125rem;
   padding: 0.25rem 0.5625rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.4;
   white-space: nowrap;
 }
@@ -847,84 +1014,90 @@
   background: linear-gradient(to left, var(--page), transparent);
 }
 
-/* --- Card banner (the "illustrated header") --------------------------------
-   No image assets: each banner is a deep two-stop gradient, a faint dot grid
-   and one oversized motif glyph. Every light stop below was checked against
-   white at >= 4.5:1, so the overlaid figures stay legible on all of them and
-   the banner needs no separate dark-mode treatment. */
+/* --- Card header ----------------------------------------------------------
+   This was nine deep two-stop gradients with a dot grid and an oversized
+   rotated emoji — a different vivid colour per festival family. It was the
+   single biggest thing standing between the old look and this one: the
+   reference describes a palette that is "95% neutral with one blue" and says
+   plainly, "Do not introduce new accent colors."
+
+   So the gradients are gone and the header is now typographic. A linen wash,
+   one mist hairline along the bottom, the festival's motif kept but shrunk
+   from a 68px background texture to a small glyph that sits in the line of
+   text, and the day count set as a serif figure. What used to be carried by
+   colour is now carried by type — which is the whole argument of this design.
+
+   A side effect worth naming: the banner no longer needs its own dark-mode
+   treatment. It used to hardcode white text because every gradient was dark;
+   now it uses the same tokens as everything else and follows the theme.
+*/
 .banner {
   position: relative;
-  overflow: hidden;
-  isolation: isolate;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 0.875rem;
-  min-height: 5.25rem;
-  color: #ffffff;
-  background-image: linear-gradient(135deg, var(--bnr-a), var(--bnr-b));
-  /* Fallback so an unmapped festival never renders a transparent banner. */
-  --bnr-a: #b30838;
-  --bnr-b: #c40a3e;
+  padding: 0.875rem 1rem 0.75rem;
+  background-color: var(--surface-soft);
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
 }
-/* Faint dot grid — texture, not decoration: it reads as calendar squares. */
-.banner::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(
-    rgb(255 255 255 / 0.16) 1px,
-    transparent 1px
-  );
-  background-size: 10px 10px;
-}
+
 .banner-motif {
-  position: absolute;
-  right: -0.375rem;
-  top: -0.625rem;
-  z-index: -1;
-  font-size: 4.25rem;
+  font-size: 1rem;
   line-height: 1;
-  opacity: 0.28;
-  transform: rotate(-12deg);
+  margin-right: 0.375rem;
   pointer-events: none;
   user-select: none;
 }
+
 .banner-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / 0.85);
-}
-.banner-figure {
-  font-family: var(--font-mono);
-  font-size: 1.875rem;
-  font-weight: 700;
-  line-height: 0.95;
-  font-variant-numeric: tabular-nums;
-}
-/* Raised off 9px with .seg-label — see the note there. */
-.banner-figure-label {
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / 0.85);
+  font-size: 0.8125rem;  /* caption */
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--muted);
 }
 
-.bnr-festive { --bnr-a: #7a2a00; --bnr-b: #a83a06; }  /* 6.42:1 */
-.bnr-spring  { --bnr-a: #8a1258; --bnr-b: #a81450; }  /* 7.29:1 */
-.bnr-monsoon { --bnr-a: #04463c; --bnr-b: #0a5f50; }  /* 7.59:1 */
-.bnr-winter  { --bnr-a: #12275c; --bnr-b: #1d4380; }  /* 9.69:1 */
-.bnr-civic   { --bnr-a: #2a2a3c; --bnr-b: #3f3f57; }  /* 10.19:1 */
-.bnr-summer  { --bnr-a: #0a4a6e; --bnr-b: #0e6a96; }  /* 5.96:1 */
-.bnr-harvest { --bnr-a: #5c3c06; --bnr-b: #8f6009; }  /* 5.46:1 */
-.bnr-sacred  { --bnr-a: #3d2560; --bnr-b: #523281; }  /* 9.85:1 */
-.bnr-brand   { --bnr-a: #b30838; --bnr-b: #c40a3e; }  /* 6.07:1 */
+/* The number is the loudest thing on the card, and in this system loud means
+   serif, not heavy. Weight 400 — the face does the work. */
+.banner-figure {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.banner-figure-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/*
+ * The nine `.bnr-*` classes are kept as no-ops on purpose.
+ *
+ * plan-view.ts still assigns one per festival, and each still carries a motif
+ * glyph and a season label that the eyebrow uses — that mapping is genuinely
+ * useful copy ("Festival of lights", "Monsoon break") and deleting it would
+ * throw away more than it cleaned up. Only the colour is dropped. If a future
+ * design wants per-season tinting back, these are the hooks, and the sensible
+ * move would be a wash at --brand-50 strength rather than a saturated fill.
+ */
+.bnr-festive,
+.bnr-spring,
+.bnr-monsoon,
+.bnr-winter,
+.bnr-civic,
+.bnr-summer,
+.bnr-harvest,
+.bnr-sacred,
+.bnr-brand {
+  /* intentionally empty — see the note above */
+}
 
 /* --- Popover / menu ------------------------------------------------------- */
 .popover {
@@ -1020,7 +1193,7 @@
    one won would come down to the order Tailwind happened to emit them in. */
 @media (min-width: 640px) {
   .seg {
-    border-radius: 9999px;
+    border-radius: var(--radius-control);
   }
 }
 /* 0.625rem, not the 0.5625rem this and the three labels below used to
@@ -1118,14 +1291,14 @@
   display: flex;
   gap: 0.25rem;
   padding: 0.25rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-control);
   background-color: var(--surface-sunken);
   border: 1px solid var(--border);
 }
 .tab-btn {
   flex: 1 1 auto;
   padding: 0.5rem 1rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-control);
   border: 1px solid transparent;
   background-color: transparent;
   color: var(--muted);
@@ -1211,7 +1384,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.1875rem 0.1875rem 0.1875rem 0.5rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-control);
   border: 1px solid var(--holiday-border);
   background-color: var(--holiday-bg);
   color: var(--holiday-text);
