@@ -27,13 +27,39 @@
 import RegionMenu from "./RegionMenu.astro";
 import WorkweekToggle from "./WorkweekToggle.astro";
 
+interface Props {
+  /**
+   * Render the region and work-week controls. Turn it OFF on any page with no
+   * results grid.
+   *
+   * This prop is the note DocPage.astro and ErrorPage.astro have always pointed
+   * at. For a while they were the only thing that knew about it: both passed
+   * `tools={false}`, this file declared no Props at all, and Astro discarded the
+   * attribute in silence. Every doc and error page therefore shipped two region
+   * triggers and four work-week buttons that dispatched `lw:region` and
+   * `lw:workweek` into a document with nothing listening — a visitor could pick
+   * "United States", watch the flag change, and get no other response from the
+   * page. Controls that cannot do anything are worse than absent ones, because
+   * the reader spends attention working out that nothing happened.
+   */
+  tools?: boolean;
+}
+
+const { tools = true } = Astro.props;
+
 const pathname = Astro.url.pathname;
 const onOptimizer = pathname.includes("company-optimizer");
 
 /* The region control picks which public-holiday list to use. On the optimizer
    an uploaded office list replaces that list entirely, so the control would sit
-   there doing nothing — it is left out rather than left dead. */
-const showRegion = !onOptimizer;
+   there doing nothing — it is left out rather than left dead. The same argument
+   is what `tools` generalises to pages with no calendar at all. */
+const showRegion = tools && !onOptimizer;
+
+/* The brand chip labels which calendar is in play — "IN"/"US", or "OFFICE" on
+   the optimizer. With no controls there is no calendar for it to label, so it
+   would be a bare country code floating beside the wordmark. */
+const showBrandChip = tools;
 ---
 
 <header
@@ -62,45 +88,50 @@ const showRegion = !onOptimizer;
             wordmark with nothing to explain it. Shown from `sm` up, where the
             pill is the only other place region appears. On the optimizer it
             reads "OFFICE", which nothing else says, so it stays at every size. */}
-        <span
-          id="brandRegionText"
-          class:list={[
-            "font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text",
-            onOptimizer ? "" : "hidden sm:inline",
-          ]}>{onOptimizer ? "OFFICE" : "IN"}</span
-        >
+        {
+          showBrandChip && (
+            <span
+              id="brandRegionText"
+              class:list={[
+                "font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text",
+                onOptimizer ? "" : "hidden sm:inline",
+              ]}
+            >
+              {onOptimizer ? "OFFICE" : "IN"}
+            </span>
+          )
+        }
       </span>
     </a>
 
     <!-- Desktop controls -->
-    <div
-      class="hidden lg:flex items-center gap-3 rounded-full border border-hairline bg-surface-soft px-4 py-1.5"
-    >
-      {
-        showRegion && (
-          <Fragment>
-            <div class="flex items-center gap-2">
-              <span
-                id="navRegionLabel"
-                class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
-              >
-                Region
-              </span>
-              <RegionMenu id="navRegionDesktop" variant="bar" align="left" />
-            </div>
+    {
+      tools && (
+        <div class="hidden lg:flex items-center gap-3 rounded-full border border-hairline bg-surface-soft px-4 py-1.5">
+          {showRegion && (
+            <Fragment>
+              <div class="flex items-center gap-2">
+                <span
+                  id="navRegionLabel"
+                  class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
+                >
+                  Region
+                </span>
+                <RegionMenu id="navRegionDesktop" variant="bar" align="left" />
+              </div>
 
-            <span class="w-px h-4 bg-hairline-strong" aria-hidden="true" />
-          </Fragment>
-        )
-      }
-      <div class="flex items-center gap-2">
-        <span
-          class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
-          >Workweek</span
-        >
-        <WorkweekToggle />
-      </div>
-    </div>
+              <span class="w-px h-4 bg-hairline-strong" aria-hidden="true" />
+            </Fragment>
+          )}
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted">
+              Workweek
+            </span>
+            <WorkweekToggle />
+          </div>
+        </div>
+      )
+    }
 
     <!-- Right controls -->
     <div class="flex items-center gap-2">
@@ -168,20 +199,27 @@ const showRegion = !onOptimizer;
     class="max-w-[1280px] mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-2"
   >
     {showRegion && <RegionMenu id="navRegionMobile" variant="pill" align="left" />}
-    <WorkweekToggle />
+    {tools && <WorkweekToggle />}
 
-    {/* Pushed to the far end so the two controls stay together on the left. The
-        label is shortened — the bar above says the same thing in full from `lg`,
-        where there is room for it. */}
+    {/* Pushed to the far end so the two controls stay together on the left — but
+        only from `sm`. Below that the row is too narrow to hold all three, so it
+        wraps, and `ml-auto` on a wrapped item pins it alone against the right
+        edge of its own line: a single button floating in an otherwise empty row,
+        which reads as a layout fault rather than a deliberate corner. Left to
+        flow naturally it lands under the region pill, where it looks like the
+        third item in a list, because that is what it is.
+
+        The label is shortened — the bar above says the same thing in full from
+        `lg`, where there is room for it. */}
     {
       onOptimizer ? (
-        <a href="/" class="btn btn-ghost btn-sm no-underline ml-auto shrink-0">
+        <a href="/" class="btn btn-ghost btn-sm no-underline sm:ml-auto shrink-0">
           <span aria-hidden="true">←</span> National
         </a>
       ) : (
         <a
           href="/company-optimizer"
-          class="btn btn-ghost btn-sm no-underline ml-auto shrink-0"
+          class="btn btn-ghost btn-sm no-underline sm:ml-auto shrink-0"
         >
           <span aria-hidden="true">🏢</span> Office
         </a>

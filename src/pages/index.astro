@@ -694,7 +694,17 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
         </p>
       </div>
 
-      <div class="mt-14 border-t border-hairline pt-10">
+      {/* `id="faq"` is a real destination, not decoration: 404.astro offers
+           "Frequently asked questions" as one of its four recovery links and
+           points it at /#faq, which landed at the top of the homepage because no
+           such anchor existed.
+
+           scroll-mt clears the two sticky bars that stack above it — the same
+           12rem `#results` uses, and for the same reason. Without it the browser
+           aligns the heading to y=0, where the navbar and filter bar are already
+           sitting, and the reader arrives looking at the first answer with no
+           question above it. */}
+      <div id="faq" class="mt-14 scroll-mt-[12rem] border-t border-hairline pt-10">
         <span
           class="mb-1 block font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text"
           >Got questions?</span

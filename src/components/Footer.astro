@@ -15,11 +15,25 @@ const countries = [
   { href: "/?region=USA", code: "US" as const, label: "United States (federal)" },
 ];
 
+/**
+ * Each label is a promise about what the link returns, so each one is checked
+ * against the solver rather than written from memory.
+ *
+ * The fourth entry used to read "Diwali & Durga Puja runs" and point at
+ * `/?month=10`. Diwali 2026 falls on 8 November, so the month was wrong; Durga
+ * Puja is a West-Bengal-only holiday that the region selector cannot even
+ * reach, so the second festival was unreachable at any budget. Landing on the
+ * default zero-leave budget, that link returned a single card — Mahatma
+ * Gandhi's Birthday — under a heading naming two festivals it did not contain.
+ *
+ * It now carries the budget as well as the month, because Diwali falls on a
+ * Sunday in 2026 and costs a leave day to be worth anything at all.
+ */
 const leaveMath = [
   { href: "/?leaves=0", label: "0 leaves — free 3-day breaks" },
   { href: "/?leaves=1", label: "1 leave — 4-day bridges" },
   { href: "/?leaves=2", label: "2 leaves — 5–6 day trips" },
-  { href: "/?month=10", label: "Diwali & Durga Puja runs" },
+  { href: "/?month=11&leaves=1", label: "Diwali week — 1 leave" },
 ];
 
 /**
