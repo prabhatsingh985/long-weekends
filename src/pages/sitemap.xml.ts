@@ -55,16 +55,16 @@ interface Entry {
 export const ENTRIES: Entry[] = [
   // The calculator. Its content genuinely shifts as breaks pass, and it is the
   // page every search term in the FAQ is aimed at.
-  { path: "/", lastmod: "2026-08-24", changefreq: "daily", priority: "1.0" },
+  { path: "/", lastmod: "2026-08-25", changefreq: "daily", priority: "1.0" },
   {
     path: "/company-optimizer",
-    lastmod: "2026-08-24",
+    lastmod: "2026-08-25",
     changefreq: "weekly",
     priority: "0.9",
   },
   { path: "/about", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.5" },
   { path: "/contact", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.4" },
-  { path: "/privacy", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.3" },
+  { path: "/privacy", lastmod: "2026-08-25", changefreq: "yearly", priority: "0.3" },
   { path: "/terms", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.3" },
 ];
 

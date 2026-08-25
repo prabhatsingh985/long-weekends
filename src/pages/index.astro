@@ -14,10 +14,23 @@ import Footer from "../components/Footer.astro";
 import { getUpcomingCutoffIso, solveVacationPlans } from "../data/vacation-solver";
 import { escapeHtml, formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
 
-const TITLE =
-  "Next Long Weekend 2026 – Leave Calculator India | The Long Weekends";
+/**
+ * The brand suffix is deliberately absent from this one title.
+ *
+ * "Next Long Weekend 2026 – Leave Calculator India | The Long Weekends" was 67
+ * characters, and a search result shows roughly 60 — so the part already being
+ * cut was the brand. Adding the second year to that string would have taken it
+ * to 74 and started eating "India" as well. Dropping the suffix buys back the
+ * room for both years and puts the highest-volume query this page answers at
+ * the front, where it is never truncated. The site name still reaches the SERP
+ * through og:site_name in Layout.astro, which is what Google reads for it.
+ *
+ * Every other page keeps its suffix; they are not competing for a head term
+ * and they are not over the limit.
+ */
+const TITLE = "Next Long Weekend 2026 & 2027 – India Leave Calculator";
 const DESCRIPTION =
-  "Find the next long weekend in 2026 and calculate exact leaves needed to turn holidays into vacations. Plan smarter PTO for every upcoming long weekend.";
+  "Find the next long weekend in 2026 or 2027 and the exact leaves needed to turn public holidays into a longer break. Free planner for India and the US.";
 
 /**
  * Server-rendered highlights.

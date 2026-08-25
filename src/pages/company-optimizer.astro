@@ -18,10 +18,12 @@ import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import { getTodayIso, CALENDAR_START, CALENDAR_END } from "../data/vacation-solver";
 
-const TITLE =
-  "Company Holiday Optimizer – Office Long Weekend Planner | The Long Weekends";
+/* 75 characters before, so "Office Long Weekend Planner" was being cut off
+   mid-phrase in results. Shortened to fit the ~60 a SERP actually shows, with
+   both years in the part that survives. */
+const TITLE = "Company Holiday Optimizer 2026 & 2027 – Office Leave Planner";
 const DESCRIPTION =
-  "Upload your company holiday list to find every long weekend for your office. Generate a personalized leave plan with 0–3+ PTO days in 2026.";
+  "Upload your company holiday list to find every long weekend your office actually observes in 2026 and 2027. Plan 0–3+ PTO days. Nothing leaves your browser.";
 
 /**
  * pdf.js and tesseract.js, read by the page script as globals.
