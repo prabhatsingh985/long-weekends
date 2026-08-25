@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # working notes, not project code
 FIX_PROMPT.md
+
+# wrangler local state
+.wrangler/

@@ -11,7 +11,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy": "vitest run && astro build && wrangler pages deploy",
+    "deploy:preview": "vitest run && astro build && wrangler pages deploy --branch=preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -19,6 +21,7 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.125.0"
   }
 }

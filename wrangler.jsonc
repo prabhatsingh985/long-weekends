@@ -1,0 +1,34 @@
+{
+  // Cloudflare Pages project name — this becomes thelongweekends.pages.dev.
+  "name": "thelongweekends",
+  "compatibility_date": "2026-08-25",
+
+  // Declaring the output directory here is what lets `wrangler pages deploy`
+  // run with no arguments, so the command in package.json and the command a
+  // person types by hand cannot deploy two different directories.
+  "pages_build_output_dir": "./dist",
+
+  /**
+   * Deliberately absent: an `assets` block with `html_handling` and
+   * `not_found_handling`.
+   *
+   * Those are Workers Static Assets options and Pages ignores them. Pages does
+   * the same two things by its own default, which is the only reason this site
+   * needs no configuration at all:
+   *
+   *   - astro.config.mjs sets `build.format: "file"` and
+   *     `trailingSlash: "never"`, so the build emits about.html rather than
+   *     about/index.html. Pages resolves /about to about.html natively, which
+   *     is exactly what the canonical tags and sitemap.xml already declare.
+   *   - dist/404.html is served for any unmatched path, with a 404 status. It
+   *     carries <meta name="robots" content="noindex">, so it stays out of
+   *     search results while remaining crawlable — see the note in
+   *     public/robots.txt about why blocking it would be worse.
+   *
+   * Worth knowing if this ever moves to Workers Static Assets, which is what
+   * both Cloudflare and the Astro docs now point new projects at: the same two
+   * behaviours have to be asked for explicitly there, with
+   * `"html_handling": "auto-trailing-slash"` and
+   * `"not_found_handling": "404-page"`.
+   */
+}
