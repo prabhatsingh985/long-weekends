@@ -23,11 +23,39 @@ const TITLE =
 const DESCRIPTION =
   "Upload your company holiday list to find every long weekend for your office. Generate a personalized leave plan with 0–3+ PTO days in 2026.";
 
-/* pdf.js and tesseract.js are read by the page script as globals, so they have
-   to be present before it runs — Layout emits these as blocking head tags. */
+/**
+ * pdf.js and tesseract.js, read by the page script as globals.
+ *
+ * Both are pinned to an exact version and carry an SRI hash; Layout renders
+ * them with `crossorigin="anonymous"` so the hash is actually checked, and
+ * `defer` so they no longer block first paint. See Layout's VendorScript.
+ *
+ * tesseract.js was previously requested as `@5` — a floating major, on the page
+ * that reads people's uploaded holiday lists. jsDelivr resolves that to
+ * whatever 5.x exists today, so the code running here could change without a
+ * commit. 5.1.1 is what it resolved to when this was pinned.
+ *
+ * To change a version: fetch the new file and regenerate the hash with
+ *   openssl dgst -sha384 -binary FILE | openssl base64 -A
+ * A stale hash does not degrade — the browser refuses to run the script.
+ *
+ * Worth being precise about what this does and does not buy, because
+ * privacy.astro documents it: SRI guarantees the *code* is the code we pinned.
+ * It does not remove the third-party origin. The browser still contacts cdnjs
+ * and jsDelivr on this page, and tesseract.js fetches its WASM core and English
+ * model from a CDN at recognition time. Self-hosting all of that would mean
+ * committing several megabytes of binaries, which is a repository decision
+ * rather than a fix.
+ */
 const VENDOR_SCRIPTS = [
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
-  "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js",
+  {
+    src: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+    integrity: "sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e",
+  },
+  {
+    src: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js",
+    integrity: "sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F",
+  },
 ];
 
 const MONTH_NAMES = [
@@ -62,7 +90,7 @@ if (curMonth > 1) {
   title={TITLE}
   description={DESCRIPTION}
   path="/company-optimizer"
-  preloadScripts={VENDOR_SCRIPTS}
+  vendorScripts={VENDOR_SCRIPTS}
 >
   <Navbar />
 
@@ -631,9 +659,28 @@ if (curMonth > 1) {
   declare const pdfjsLib: any;
   declare const Tesseract: any;
 
-  if (typeof pdfjsLib !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  /**
+   * Point pdf.js at its worker, at the moment a PDF is actually opened.
+   *
+   * This ran at module scope behind a `typeof pdfjsLib !== "undefined"` guard,
+   * which was safe only because the library was a blocking head script and had
+   * therefore always finished by the time this module ran. Now that both vendor
+   * scripts are deferred, that assumption is one ordering change away from
+   * being wrong — and the failure would be silent: the guard would skip, the
+   * worker would stay unset, and every PDF would fail with a message about the
+   * file rather than about us.
+   *
+   * Called from the PDF branch instead, where the library is provably present.
+   * The worker carries its own SRI-pinned version to match the main bundle;
+   * pdf.js refuses to run a worker whose version does not match.
+   */
+  const PDF_WORKER_SRC =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  function ensurePdfWorker() {
+    if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
+    }
   }
 
   /* ======================================================================
@@ -1139,6 +1186,13 @@ if (curMonth > 1) {
         file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
       if (isPdf) {
+        // A blocked or failed CDN leaves the global undefined. Saying so beats
+        // a TypeError surfacing as "could not read your file", which points the
+        // reader at their own document.
+        if (typeof pdfjsLib === "undefined") {
+          throw new Error("pdf.js did not load");
+        }
+        ensurePdfWorker();
         progress("Reading your PDF…");
         const buffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) })
@@ -1167,6 +1221,12 @@ if (curMonth > 1) {
           }
         }
       } else if (file.type.startsWith("image/")) {
+        // Same reasoning as the pdf.js guard above: an image is nothing but
+        // pixels without OCR, so say the recogniser is missing rather than
+        // implying the photo was unreadable.
+        if (typeof Tesseract === "undefined") {
+          throw new Error("tesseract.js did not load");
+        }
         progress("Recognising the text in your image…");
         const canvas = await preprocessImageForOcr(file);
         const ocr = await Tesseract.recognize(canvas, "eng");

@@ -24,11 +24,31 @@ interface Props {
    * allowed for a noindex to be seen.
    */
   noindex?: boolean;
-  /** Extra <script>/<link> tags a page needs before its own body runs. */
-  preloadScripts?: string[];
+  /**
+   * Third-party libraries a page needs as globals.
+   *
+   * This used to be `string[]` and rendered a bare `<script src>`: no
+   * `integrity`, no `crossorigin`, and one of the two URLs carried a floating
+   * major version. That combination means the CDN — not this repository —
+   * decides what code runs, on the one page that reads the visitor's uploaded
+   * documents. A compromised or merely re-published bundle would have executed
+   * with no signal at all.
+   *
+   * `integrity` is therefore not optional in the type. A hash that cannot be
+   * omitted is the only version of this rule that survives the next person
+   * adding a script in a hurry.
+   */
+  vendorScripts?: VendorScript[];
 }
 
-const { title, description, path = "/", noindex = false, preloadScripts = [] } =
+export interface VendorScript {
+  /** Absolute URL, pinned to an exact version — never a range or a dist-tag. */
+  src: string;
+  /** Subresource Integrity hash, e.g. "sha384-…". Regenerate if `src` changes. */
+  integrity: string;
+}
+
+const { title, description, path = "/", noindex = false, vendorScripts = [] } =
   Astro.props;
 
 /**
@@ -113,7 +133,27 @@ const ogImage = new URL("/og-image.png", Astro.site).href;
       rel="stylesheet"
     />
 
-    {preloadScripts.map((src) => <script is:inline src={src}></script>)}
+    {/* `crossorigin` is required for `integrity` to be checked at all — without
+        it the response is opaque and the browser silently skips verification,
+        which is the failure mode that looks exactly like success.
+
+        `defer` because these blocked the parser before, on the heaviest page on
+        the site: ~390KB of library ahead of first paint. Deferred classic
+        scripts still run in document order and still finish before
+        DOMContentLoaded, so they are ready by the time the page script's init()
+        needs them — and company-optimizer.astro no longer configures the pdf.js
+        worker at module scope, so it does not depend on that ordering either. */}
+    {
+      vendorScripts.map((s) => (
+        <script
+          is:inline
+          src={s.src}
+          integrity={s.integrity}
+          crossorigin="anonymous"
+          defer
+        />
+      ))
+    }
 
     <!--
       Theme resolution must run before first paint, otherwise a dark-mode user

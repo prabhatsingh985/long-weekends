@@ -14,7 +14,10 @@
  *   - No fetch/XHR to any first-party endpoint. There is no backend.
  *   - Third-party origins the browser really does contact: Google Fonts on every
  *     page, and on /company-optimizer only, cdnjs (pdf.js) and jsDelivr
- *     (tesseract.js, which pulls its English model at runtime).
+ *     (tesseract.js, which pulls its English model at runtime). Both libraries
+ *     are version-pinned and SRI-hashed — see VENDOR_SCRIPTS in
+ *     company-optimizer.astro — which fixes WHICH code runs but does not remove
+ *     the request, so the list below is unchanged by it.
  *
  * Those last ones are the part a boilerplate policy would have missed, and they
  * are the only way an IP address of yours reaches a third party. If a script,
@@ -126,6 +129,14 @@ const DESCRIPTION =
     None of these receive the contents of your holiday list. They serve code and
     fonts; the work is done locally. If you visit only the national calendar, Google
     Fonts is the sole third party involved.
+  </p>
+  <p>
+    The two libraries are requested at a <strong>fixed version</strong> and with a
+    cryptographic fingerprint of the exact file we expect. If either server ever
+    returned different code — through compromise or simple re-publication — your
+    browser would refuse to run it rather than run it silently. That protects the
+    code, not the connection: the requests above still happen, and still reveal what
+    any HTTP request reveals.
   </p>
 
   <h2>Server logs</h2>
