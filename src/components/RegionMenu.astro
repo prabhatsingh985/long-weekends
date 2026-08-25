@@ -59,10 +59,14 @@ const isPill = variant === "pill";
 const triggerText = isPill ? REGIONS[0].short : REGIONS[0].label;
 
 /* The bar variant draws no edge of its own — it lives inside the control bar's
-   border and would otherwise read as a box inside a box. */
+   border and would otherwise read as a box inside a box. Having no border also
+   left it with no vertical padding, so its hit area was the 20px of its own
+   text: under the 24px WCAG 2.5.8 floor, and the only control on the site still
+   below it after the stepper and footer-link fixes. `py-1 -my-1` grows the box
+   and pulls the layout back, so the control bar's height is unchanged. */
 const triggerClass = isPill
   ? "flex items-center gap-1.5 rounded-full border border-hairline bg-surface-soft py-1.5 pl-2 pr-2 text-[0.8125rem] font-bold text-ink cursor-pointer hover:border-hairline-strong transition-colors"
-  : "flex items-center gap-1.5 bg-transparent text-[0.8125rem] font-bold text-ink cursor-pointer hover:text-brand-text transition-colors";
+  : "flex items-center gap-1.5 bg-transparent py-1 -my-1 text-[0.8125rem] font-bold text-ink cursor-pointer hover:text-brand-text transition-colors";
 
 const menuSide = align === "right" ? "right-0" : "left-0";
 ---
