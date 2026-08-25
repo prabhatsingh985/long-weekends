@@ -270,16 +270,53 @@ const BUDGETS = [
 
     {/* Same wrap-safety as the countdown badge above: this label is ~35
         characters, which does not fit one line at 320px. */}
+    {/* The second tool, presented as one.
+         ---------------------------------------------------------------
+         This was a pink-tinted pill — brand-50 fill, brand-200 border, an
+         emoji and a question — floating under the search capsule. At that
+         size and colour it read as a promotional badge rather than a way in,
+         which is the one thing it must not look like: the office optimizer is
+         the only part of this site a visitor cannot get to any other way, and
+         it is the feature that makes the calculator useful to someone whose
+         employer ignores half the gazetted list.
+
+         So it is a card now, sized and bordered like the result cards further
+         down the page, with the three things an entry point needs: a name, a
+         sentence saying what it does, and a visible action. The tinted fill is
+         gone — on this page the only filled surface is the primary button, and
+         a second one competed with it. */}
     <a
       href="/company-optimizer"
-      class="group inline-flex max-w-full items-center gap-2.5 mt-7 px-4 py-2.5 rounded-2xl sm:rounded-full border border-brand-200 bg-brand-50 text-[0.8125rem] font-bold text-brand-text hover:border-brand-300 transition-colors no-underline"
+      class="group mt-8 block w-full max-w-[42rem] rounded-card border border-hairline bg-surface p-4 text-left no-underline shadow-soft transition-colors hover:border-hairline-strong sm:p-5"
     >
-      <span class="shrink-0" aria-hidden="true">🏢</span>
-      <span class="text-left">Your office list differs? Upload it</span>
-      <span
-        class="shrink-0 group-hover:translate-x-0.5 transition-transform"
-        aria-hidden="true">→</span
-      >
+      <div class="flex items-center gap-3.5 sm:gap-4">
+        {/* A bordered tile rather than a bare emoji: it gives the glyph a
+             defined size so the row keeps its rhythm at every width, and it
+             reads as an icon rather than as punctuation inside the sentence. */}
+        <span
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-control border border-hairline bg-surface-soft text-lg sm:h-11 sm:w-11 sm:text-xl"
+          aria-hidden="true">🏢</span
+        >
+
+        <span class="min-w-0 grow">
+          <span class="block text-[0.9375rem] font-extrabold leading-snug text-ink">
+            Company Holiday Optimizer
+          </span>
+          {/* Two lines at 320px, one from `sm`. Left to wrap on its own rather
+               than truncated — the sentence is the whole pitch. */}
+          <span class="mt-0.5 block text-[0.8125rem] leading-relaxed text-body">
+            Your office list differs? Upload it and plan around the days you
+            actually get.
+          </span>
+        </span>
+
+        {/* Hidden below `sm`: at 320px the arrow was taking width the sentence
+             needed, and the whole card is the link either way. */}
+        <span
+          class="hidden shrink-0 text-muted transition-transform group-hover:translate-x-0.5 sm:block"
+          aria-hidden="true">→</span
+        >
+      </div>
     </a>
   </div>
 </section>

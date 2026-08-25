@@ -97,6 +97,62 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     // menus never get a scrollbar they have no use for.
     const available = Math.max(MIN_USABLE, useAbove ? spaceAbove : spaceBelow);
     menu.style.maxHeight = needed > available ? `${available}px` : "";
+
+    placeHorizontally();
+  }
+
+  /**
+   * Keeps the menu inside the viewport left-to-right.
+   *
+   * This function is the other half of a job `place()` was only doing
+   * vertically. Horizontal position was left entirely to a Tailwind class in
+   * the markup — `right-0` or `left-0` — which is a static guess about where
+   * the trigger will sit, and the sort control breaks that guess: its row is
+   * `flex-wrap`, so below roughly 500px the heading pushes the Sort button onto
+   * its own line at the LEFT of the container, while the menu stays pinned to
+   * the container's RIGHT edge and extends 240px leftwards from there. At 418px
+   * that put its left edge 47px outside the viewport, with the labels
+   * ("Soonest first", "Longest break") sliced off — visible and unusable.
+   *
+   * Fixed here rather than with a breakpoint on that one menu, because the bug
+   * belongs to every menu this factory builds: any trigger near either edge of
+   * a narrow screen can reproduce it. The anchoring class still decides the
+   * preferred side; this only nudges the result back inside when that side
+   * would overflow, so the common case is untouched.
+   *
+   * The correction is written to the `--popover-shift` custom property rather
+   * than straight to `transform`, and that detail matters. `.pop-in` animates
+   * `transform`, and a running CSS animation outranks an inline style — so an
+   * inline `transform` here would be ignored for the 160ms the menu is opening,
+   * showing it clipped and then snapping it into place. The property is
+   * composed into both the static rule and the keyframes in global.css, so the
+   * menu animates open already in the right position.
+   *
+   * Cleared first so a previous frame's correction is never measured as part
+   * of the natural position.
+   */
+  function placeHorizontally() {
+    menu.style.setProperty("--popover-shift", "0px");
+
+    const margin = 8;
+    const viewport = document.documentElement.clientWidth;
+    const rect = menu.getBoundingClientRect();
+
+    let shift = 0;
+    if (rect.left < margin) {
+      shift = margin - rect.left;
+    } else if (rect.right > viewport - margin) {
+      shift = viewport - margin - rect.right;
+    }
+
+    // A menu wider than the screen cannot be shifted fully into view; pinning
+    // its left edge at least keeps the labels readable from their start rather
+    // than splitting the overflow across both edges.
+    if (rect.width > viewport - margin * 2) {
+      shift = margin - rect.left;
+    }
+
+    menu.style.setProperty("--popover-shift", `${Math.round(shift)}px`);
   }
 
   function focusAt(i: number) {
