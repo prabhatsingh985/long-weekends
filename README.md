@@ -1,7 +1,7 @@
 # The Long Weekends
 
-A leave planner for 2026. Public holidays are fixed; your leave balance is not.
-Tell it how many days you can spare and it finds every way to turn a holiday
+A leave planner for 2026 and 2027. Public holidays are fixed; your leave
+balance is not. Tell it how many days you can spare and it finds every way to turn a holiday
 into a long break, ranked by how many days off each leave day buys.
 
 Live at **[thelongweekends.com](https://thelongweekends.com)**.
@@ -26,7 +26,7 @@ Requires Node ≥ 22.12.
 ## How it fits together
 
 ```
-holidays_2026.json          the only data file — gazetted + state + US federal
+holidays.json               the only data file — gazetted + state + US federal
 src/data/vacation-solver.ts the engine: calendar -> candidate breaks -> ranked plans
 src/scripts/plan-view.ts    all rendering: cards, day ribbon, modal calendar, sorting
 src/scripts/results.ts      the interactive shell both result pages mount
@@ -57,9 +57,11 @@ window of 3–21 consecutive days across the calendar and keeps the ones where:
 - the number of working days inside equals the leave budget **exactly**, and
 - the window returns at least 1.3 days off per leave day spent.
 
-Survivors are grouped by `festival + strategy + leave count`, the longest in each
-group wins, and anything starting on or before `fromDate` is dropped — a break
-that has already begun cannot be planned for.
+Survivors are grouped by `festival + occurrence date + strategy + leave count`,
+the longest in each group wins, and anything starting on or before `fromDate` is
+dropped — a break that has already begun cannot be planned for. The occurrence
+date is in the key because without it a festival that recurs, such as Good
+Friday, collapses to a single plan across all years.
 
 Two date helpers look redundant and are not. `getTodayIso()` clamps into the data
 window; `getUpcomingCutoffIso()` deliberately does not, because clamping plus the
@@ -67,13 +69,20 @@ strict `startDate > cutoff` filter would silently delete every 1 January plan.
 
 ## Holiday data
 
-`holidays_2026.json` holds `national_holidays` (17 gazetted days in 2026, plus
-New Year 2027) and `state_specific_holidays` keyed by `KA`, `MH`, `DL`, `WB`,
-`TN` and `USA`. Sources are listed in the file's own `sources` array.
+`holidays.json` holds `national_holidays` (17 gazetted days in 2026 and 17 in
+2027, plus a New Year bridge row for the following January) and
+`state_specific_holidays` keyed by `KA`, `MH`, `DL`, `WB`, `TN` and `USA`.
+Sources are listed in the file's own `sources` array.
 
-The planning window is `2026-01-01` to `2027-01-10`, declared as `CALENDAR_START`
-/ `CALENDAR_END` in the solver. Extending the year means editing the JSON, those
-two constants, and the figures the tests pin.
+The planning window is `CALENDAR_START` to `CALENDAR_END` in the solver —
+currently `2026-01-01` to `2028-01-10`. Those two strings are the **only** place
+the range is written; `buildCalendarMap()` derives its loop bounds from them.
+Extending to another year means adding rows to the JSON, moving `CALENDAR_END`,
+and updating whatever figures the tests pin.
+
+> **2027 dates are not gazette-verified yet.** See
+> [HOLIDAYS_2027_VERIFY.md](HOLIDAYS_2027_VERIFY.md) for what has been
+> cross-checked and what still needs confirming against state notifications.
 
 **Editing this file will move numbers the site states out loud.** `npm test`
 recomputes all of them and fails if the copy no longer matches — see below.

@@ -35,6 +35,20 @@ export interface ResultsOptions {
   /** Context for the modal grid: weekends/holidays outside the plan. */
   calendar?: () => Map<string, CalendarDay> | null;
   todayIso: string;
+  /**
+   * Inclusive ISO bounds for the month rail, e.g. the visitor's cutoff and
+   * CALENDAR_END. The rail is built from this on the CLIENT.
+   *
+   * It used to be written in page frontmatter, which froze it at build time in
+   * two ways that both got worse when the data grew past one year. It listed
+   * months that had already passed — a build in August still offered August in
+   * November, greyed out but occupying the rail — and it could not offer months
+   * added after the build, so extending the calendar into 2027 would have left
+   * eleven months of new content unreachable behind a rail that stopped at
+   * January. Built here, it is always exactly the span the visitor can still
+   * plan inside.
+   */
+  monthRange?: { from: string; to: string };
   initialLeaves?: number;
   /** Highest value the custom stepper will go to. */
   maxLeaves?: number;
@@ -82,9 +96,60 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
         )
       )
     : [];
-  const monthPills = monthRail
-    ? Array.from(monthRail.querySelectorAll<HTMLElement>("[data-month]"))
-    : [];
+  /**
+   * Pills are keyed "YYYY-MM", not "MM".
+   *
+   * A bare month number was unambiguous only while the data covered one year.
+   * With 2026 and 2027 both present, filtering on "11" matched November in
+   * BOTH — so picking November returned two different Novembers interleaved,
+   * and the count beside the pill was the sum of two years.
+   */
+  function buildMonthRail(): HTMLElement[] {
+    if (!monthRail || !options.monthRange) {
+      return monthRail
+        ? Array.from(monthRail.querySelectorAll<HTMLElement>("[data-month]"))
+        : [];
+    }
+
+    const { from, to } = options.monthRange;
+    const mk = (value: string, long: string, short: string) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pill";
+      b.dataset.month = value;
+      b.setAttribute("aria-pressed", String(value === "ALL"));
+      const s1 = document.createElement("span");
+      s1.className = "sm:hidden";
+      s1.textContent = short;
+      const s2 = document.createElement("span");
+      s2.className = "hidden sm:inline";
+      s2.textContent = long;
+      b.append(s1, s2);
+      return b;
+    };
+
+    const pills = [mk("ALL", "All months", "All")];
+    let [y, m] = [Number(from.slice(0, 4)), Number(from.slice(5, 7))];
+    const [ey, em] = [Number(to.slice(0, 4)), Number(to.slice(5, 7))];
+    // Guard against a bad range spinning forever; 36 months is far more than
+    // the data will ever hold.
+    for (let guard = 0; guard < 36 && (y < ey || (y === ey && m <= em)); guard++) {
+      const value = `${y}-${String(m).padStart(2, "0")}`;
+      const name = MONTH_NAMES[m - 1];
+      // The year is always shown. The rail now spans two calendar years, so
+      // "Nov" alone no longer identifies a month.
+      pills.push(mk(value, `${name} ${y}`, `${name.slice(0, 3)} ${String(y).slice(2)}`));
+      if (++m > 12) {
+        m = 1;
+        y++;
+      }
+    }
+
+    monthRail.replaceChildren(...pills);
+    return pills;
+  }
+
+  const monthPills = buildMonthRail();
 
   /* --- state ------------------------------------------------------------- */
   let leaves = options.initialLeaves ?? 0;
@@ -98,16 +163,21 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
   const isCustom = () => !budgetPills.some((p) => p.dataset.leaves === String(leaves));
 
   /* --- painting ---------------------------------------------------------- */
-  function inMonth(plan: VacationPlan, mm: string): boolean {
+  function inMonth(plan: VacationPlan, key: string): boolean {
     // Matches the solver's own rule: a break that starts in October and ends in
     // November belongs to both months, because that is how a person looking for
     // "something in November" thinks about it.
-    return plan.startDate.slice(5, 7) === mm || plan.endDate.slice(5, 7) === mm;
+    return plan.startDate.slice(0, 7) === key || plan.endDate.slice(0, 7) === key;
+  }
+
+  /** "November 2026" from a "2026-11" pill key. */
+  function nameOf(key: string): string {
+    return `${MONTH_NAMES[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)}`;
   }
 
   function monthLabel(): string {
-    if (month === "ALL") return "every month left this year";
-    return MONTH_NAMES[Number(month) - 1];
+    if (month === "ALL") return "every month still ahead";
+    return nameOf(month);
   }
 
   function paintPills() {
@@ -144,8 +214,8 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
       const btn = p as HTMLButtonElement;
       btn.disabled = count === 0;
       btn.title = count
-        ? `${count} ${count === 1 ? "break" : "breaks"} in ${MONTH_NAMES[Number(mm) - 1]}`
-        : `Nothing in ${MONTH_NAMES[Number(mm) - 1]} for this budget`;
+        ? `${count} ${count === 1 ? "break" : "breaks"} in ${nameOf(mm)}`
+        : `Nothing in ${nameOf(mm)} for this budget`;
       if (mm === month && count > 0) selectedStillValid = true;
     });
 
@@ -162,36 +232,87 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
     }
   }
 
+  /**
+   * True when NO leave budget can produce a break — the bundled calendar is
+   * spent, as opposed to this one budget being unlucky.
+   *
+   * Deliberately a probe rather than `isCalendarExhausted()`. That helper only
+   * turns true after the last date in the data, but the results dry up well
+   * before then: the final break sits weeks or months short of the end, and in
+   * that gap the empty state used to tell a zero-leave visitor that "one leave
+   * day is usually enough to bridge it" and offer a button that returned the
+   * same empty grid. Asking the solver is the only way to know which of the two
+   * situations this is.
+   *
+   * Only reached when the grid is already empty at "all months", so the extra
+   * solver runs are rare and bounded.
+   */
+  function nextViableBudget(from: number): number | null {
+    const ceiling = Math.min(maxLeaves, Math.max(from, 0) + 5);
+    for (let l = Math.max(from, 0); l <= ceiling; l++) {
+      if (options.solve(l).length > 0) return l;
+    }
+    return null;
+  }
+
+  /** True when NO budget produces anything: the calendar is spent. */
+  function calendarIsSpent(): boolean {
+    return nextViableBudget(0) === null;
+  }
+
   function paintEmptyState() {
     if (!emptyState) return;
     const show = visible.length === 0;
     emptyState.hidden = !show;
     if (!show) return;
 
-    // Two different problems need two different escape hatches.
+    // THREE different problems, and they need different answers. The third one
+    // is the one this used to get wrong.
     const monthIsTheProblem = month !== "ALL" && all.length > 0;
+    const spent = !monthIsTheProblem && all.length === 0 && calendarIsSpent();
+
     if (emptyTitle) {
-      emptyTitle.textContent = monthIsTheProblem
-        ? `Nothing worth taking in ${monthLabel()}`
-        : leaves === 0
-          ? "No free long weekends left"
-          : `Nothing lines up for ${pluralLeaves(leaves)}`;
+      emptyTitle.textContent = spent
+        ? "The calendar has run out"
+        : monthIsTheProblem
+          ? `Nothing worth taking in ${monthLabel()}`
+          : leaves === 0
+            ? "No free long weekends left"
+            : `Nothing lines up for ${pluralLeaves(leaves)}`;
     }
     if (emptySub) {
-      emptySub.textContent = monthIsTheProblem
-        ? `There are ${all.length} other breaks in the rest of the year for this budget.`
-        : leaves === 0
-          ? "Every remaining public holiday falls mid-week. One leave day is usually enough to bridge it."
-          : "Try a different number of leaves — the holidays left may need one more or one fewer.";
+      emptySub.textContent = spent
+        ? "Every break on this calendar has already passed. More dates arrive when the next year's holiday list is published."
+        : monthIsTheProblem
+          ? `There are ${all.length} other breaks still ahead for this budget.`
+          : leaves === 0
+            ? "Every remaining public holiday falls mid-week. One leave day is usually enough to bridge it."
+            : "Try a different number of leaves — the holidays left may need one more or one fewer.";
     }
     if (emptyAction) {
       if (monthIsTheProblem) {
+        emptyAction.hidden = false;
         emptyAction.textContent = "Show every month";
         emptyAction.dataset.act = "clear-month";
       } else {
-        const next = leaves === 0 ? 1 : leaves + 1;
-        emptyAction.textContent = `Try ${pluralLeaves(next)} instead`;
-        emptyAction.dataset.act = "more-leaves";
+        /**
+         * The suggested budget is the next one that ACTUALLY returns something,
+         * not simply `leaves + 1`.
+         *
+         * An escape hatch that leads nowhere is worse than none, and +1 walks
+         * into that constantly: an isolated midweek holiday needs two leave
+         * days to reach a weekend at all, so a zero-leave visitor was offered
+         * "Try 1 leave instead" and got the same empty grid back. When nothing
+         * at any budget helps — the calendar is spent — the button goes away
+         * rather than being relabelled.
+         */
+        const next = nextViableBudget(leaves + 1);
+        emptyAction.hidden = next === null;
+        if (next !== null) {
+          emptyAction.textContent = `Try ${pluralLeaves(next)} instead`;
+          emptyAction.dataset.act = "more-leaves";
+          emptyAction.dataset.leaves = String(next);
+        }
       }
     }
   }
@@ -291,7 +412,10 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
       month = "ALL";
       applyFilter();
     } else {
-      setCustom(leaves === 0 ? 1 : leaves + 1);
+      // Whatever the label promised. It used to recompute `leaves + 1` here
+      // while the label named the next VIABLE budget, so the two could differ
+      // and the button would land somewhere other than where it said.
+      setCustom(Number(emptyAction.dataset.leaves) || leaves + 1);
     }
   });
 

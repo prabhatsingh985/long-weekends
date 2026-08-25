@@ -1,7 +1,14 @@
 import type { VacationPlan, CalendarDay, RegionCode } from "../types";
-import holidaysData from "../../holidays_2026.json";
+import holidaysData from "../../holidays.json";
 
-export const NATIONAL_HOLIDAYS_2026 = holidaysData.national_holidays;
+/**
+ * The data file was `holidays_2026.json` and this binding was
+ * `NATIONAL_HOLIDAYS_2026`, back when it held a single year. It now carries
+ * 2026 and 2027, so both names were about to become false — and a year baked
+ * into a name invites the worse mistake of adding a second file beside it and
+ * having two sources of truth for the same question.
+ */
+export const NATIONAL_HOLIDAYS = holidaysData.national_holidays;
 export const STATE_SPECIFIC_HOLIDAYS = holidaysData.state_specific_holidays;
 
 /** Re-exported for convenience; the single definition lives in ../types. It
@@ -17,18 +24,30 @@ export const REGION_STATE_MAP: Record<RegionCode, string[]> = {
   USA: ["USA"],
 };
 
-/** Inclusive bounds of the holiday data we actually hold. */
+/**
+ * Inclusive bounds of the holiday data we actually hold.
+ *
+ * These two strings are the ONLY place the window is written. buildCalendarMap
+ * used to repeat them as `new Date(2026, 0, 1)` and `new Date(2027, 0, 10)`,
+ * which meant extending the calendar required editing the same fact in three
+ * places and the two copies could disagree without anything failing — the
+ * solver would simply stop finding breaks in a year the data covered.
+ *
+ * The end runs ten days past the last full year so a New Year break can be
+ * bridged from December into January.
+ */
 export const CALENDAR_START = "2026-01-01";
-export const CALENDAR_END = "2027-01-10";
+export const CALENDAR_END = "2028-01-10";
 
 /**
  * Today, clamped into the span the holiday data covers.
  *
  * The previous version fell back to a hardcoded "2026-08-20" for any date
- * before 2026 and did nothing at all for dates after the data ends — so from
- * 2027-01-11 onwards every query silently returned zero plans with no way for
- * the UI to tell "no matches" apart from "we have run out of calendar".
- * Callers can now compare against CALENDAR_END to detect that case.
+ * before the window and did nothing at all for dates after the data ends — so
+ * once the calendar ran out, every query silently returned zero plans with no
+ * way for the UI to tell "no matches" apart from "we have run out of calendar".
+ * Callers compare against CALENDAR_END, or call isCalendarExhausted(), to tell
+ * the two apart; the results grid does exactly that in its empty state.
  */
 export function getTodayIso(): string {
   const now = new Date();
@@ -104,7 +123,7 @@ export function buildCalendarMap(
   const holidayMap = new Map<string, string>();
 
   const knownFestivals = new Map<string, string>();
-  NATIONAL_HOLIDAYS_2026.forEach((h) => knownFestivals.set(h.date, h.name));
+  NATIONAL_HOLIDAYS.forEach((h) => knownFestivals.set(h.date, h.name));
   Object.values(STATE_SPECIFIC_HOLIDAYS).forEach((arr) => {
     arr.forEach((h) => {
       if (!knownFestivals.has(h.date)) knownFestivals.set(h.date, h.name);
@@ -127,7 +146,7 @@ export function buildCalendarMap(
       holidayMap.set(h.date, h.name);
     });
   } else {
-    NATIONAL_HOLIDAYS_2026.forEach((h) => {
+    NATIONAL_HOLIDAYS.forEach((h) => {
       holidayMap.set(h.date, h.name);
     });
 
@@ -143,8 +162,14 @@ export function buildCalendarMap(
   }
 
   const calendar = new Map<string, CalendarDay>();
-  const startDate = new Date(2026, 0, 1);
-  const endDate = new Date(2027, 0, 10);
+  // Derived from the constants rather than repeated as literals — see the note
+  // on CALENDAR_START. Parsed component-wise so the range is local midnight,
+  // matching formatLocalIso below; `new Date("2026-01-01")` is UTC and would
+  // start the calendar a day early for anyone east of Greenwich.
+  const [sy, sm, sd] = CALENDAR_START.split("-").map(Number);
+  const [ey, em, ed] = CALENDAR_END.split("-").map(Number);
+  const startDate = new Date(sy, sm - 1, sd);
+  const endDate = new Date(ey, em - 1, ed);
 
   const curr = new Date(startDate);
   while (curr <= endDate) {
@@ -321,11 +346,36 @@ export function solveVacationPlans(options: SolverOptions): VacationPlan[] {
     }
   }
 
+  /**
+   * One canonical plan per festival OCCURRENCE, per strategy, per leave budget.
+   *
+   * The occurrence part is why the year is in the key. While the data held a
+   * single year, `festival + strategy + leaves` was accidentally the same thing
+   * — every festival appeared once. The moment 2027 was added it stopped being:
+   * "Good Friday__zero__0" described Good Friday 2026 AND Good Friday 2027, the
+   * first one written won every tie, and the second silently vanished from the
+   * results. It cost the 2027 calendar its free Good Friday weekend and nine of
+   * the eleven US federal ones, all of which recur under the same name.
+   *
+   * The occurrence is the window's FIRST HOLIDAY, identified by its exact date
+   * rather than by its year. The year alone is not enough, and New Year is the
+   * case that proves it: 1 January 2027 and the observed 31 December 2027 are
+   * both "New Year's" in 2027, twelve months apart, and a year-granular key
+   * threw the December one away. Not startDate either — a pre-break beginning
+   * 31 December belongs to the January holiday inside it, not to the December
+   * it starts in.
+   *
+   * What this still collapses is the only thing it was ever meant to: several
+   * window LENGTHS around the same holiday at the same strategy and budget,
+   * where the longest wins.
+   */
   const canonicalDeals = new Map<string, VacationPlan>();
 
   plans.forEach((plan) => {
     const festKey = cleanFestivalName(plan.festivalName);
-    const groupKey = `${festKey}__${plan.strategy}__${plan.leavesRequired}`;
+    const occurrence =
+      plan.days.find((d) => d.type === "holiday")?.date ?? plan.startDate;
+    const groupKey = `${festKey}__${occurrence}__${plan.strategy}__${plan.leavesRequired}`;
 
     const existing = canonicalDeals.get(groupKey);
     if (!existing) {

@@ -47,6 +47,9 @@ const DESCRIPTION =
  * committing several megabytes of binaries, which is a repository decision
  * rather than a fix.
  */
+/* Default for the manual date field. */
+const today = getTodayIso();
+
 const VENDOR_SCRIPTS = [
   {
     src: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
@@ -58,32 +61,7 @@ const VENDOR_SCRIPTS = [
   },
 ];
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
 
-const today = getTodayIso();
-const curYear = Number(today.slice(0, 4));
-const curMonth = Number(today.slice(5, 7));
-
-const monthTabs: { value: string; label: string; short: string }[] = [
-  { value: "ALL", label: "All months", short: "All" },
-];
-for (let m = curMonth; m <= 12; m++) {
-  monthTabs.push({
-    value: String(m).padStart(2, "0"),
-    label: MONTH_NAMES[m - 1],
-    short: MONTH_NAMES[m - 1].slice(0, 3),
-  });
-}
-if (curMonth > 1) {
-  monthTabs.push({
-    value: "01",
-    label: `January ${curYear + 1}`,
-    short: `Jan ${String(curYear + 1).slice(2)}`,
-  });
-}
 ---
 
 <Layout
@@ -336,19 +314,8 @@ if (curMonth > 1) {
           <span id="monthFadeL" class="rail-fade rail-fade-l" aria-hidden="true"></span>
           <span id="monthFadeR" class="rail-fade rail-fade-r" aria-hidden="true"></span>
           <div id="monthRail" role="group" aria-label="Filter by month" class="rail py-0.5">
-            {
-              monthTabs.map((m) => (
-                <button
-                  type="button"
-                  class="pill"
-                  data-month={m.value}
-                  aria-pressed={m.value === "ALL" ? "true" : "false"}
-                >
-                  <span class="sm:hidden">{m.short}</span>
-                  <span class="hidden sm:inline">{m.label}</span>
-                </button>
-              ))
-            }
+            {/* Built on the client by mountResults() — see `monthRange` in
+                scripts/results.ts. */}
           </div>
         </div>
         <div class="hidden shrink-0 items-center gap-1 sm:flex">
@@ -1391,6 +1358,7 @@ if (curMonth > 1) {
           ? null
           : buildCalendarMap("ALL", state.workWeek, state.customHolidays),
       todayIso: today,
+      monthRange: { from: cutoff.slice(0, 7), to: CALENDAR_END.slice(0, 7) },
     });
 
     document.addEventListener("lw:workweek", (e) => {

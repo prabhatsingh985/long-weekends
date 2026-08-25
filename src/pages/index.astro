@@ -11,46 +11,13 @@ import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import Hero from "../components/Hero.astro";
 import Footer from "../components/Footer.astro";
-import { getTodayIso, getUpcomingCutoffIso, solveVacationPlans } from "../data/vacation-solver";
+import { getUpcomingCutoffIso, solveVacationPlans } from "../data/vacation-solver";
 import { escapeHtml, formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
 
 const TITLE =
   "Next Long Weekend 2026 – Leave Calculator India | The Long Weekends";
 const DESCRIPTION =
   "Find the next long weekend in 2026 and calculate exact leaves needed to turn holidays into vacations. Plan smarter PTO for every upcoming long weekend.";
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-const today = getTodayIso();
-const curYear = Number(today.slice(0, 4));
-const curMonth = Number(today.slice(5, 7));
-
-/**
- * The month rail used to be hardcoded to Aug–Dec, so it was wrong for seven
- * months of the year and would have been wrong for all of 2027. It is now
- * generated from today: this month to December, then January of next year,
- * which is as far as the bundled holiday data reaches.
- */
-const monthTabs: { value: string; label: string; short: string }[] = [
-  { value: "ALL", label: "All months", short: "All" },
-];
-for (let m = curMonth; m <= 12; m++) {
-  monthTabs.push({
-    value: String(m).padStart(2, "0"),
-    label: MONTH_NAMES[m - 1],
-    short: MONTH_NAMES[m - 1].slice(0, 3),
-  });
-}
-if (curMonth > 1) {
-  monthTabs.push({
-    value: "01",
-    label: `January ${curYear + 1}`,
-    short: `Jan ${String(curYear + 1).slice(2)}`,
-  });
-}
 
 /**
  * Server-rendered highlights.
@@ -169,6 +136,10 @@ const FAQ = [
   {
     q: "How many holidays will India have in 2026?",
     a: "There are <strong>17 gazetted national holidays</strong> in 2026, and this planner adds your state list on top of them: seven more for Karnataka, four for Maharashtra, three each for Delhi and West Bengal, and two for Tamil Nadu. Your own office calendar will differ again, which is what the Company Holiday Optimizer is for.",
+  },
+  {
+    q: "Does this cover 2027 as well?",
+    a: "Yes. The planner carries the full gazetted list for <strong>2027</strong> alongside 2026, so the results keep going rather than thinning out as the year closes. 2027 is a leaner year for free breaks — five that cost no leave at all, against nine in 2026, because more holidays land on a weekend — but Good Friday on 26 March, Mahavir Jayanti on 19 April, Id-ul-Zuha on 17 May and Diwali on 29 October each give a three-day weekend outright. Dates for 2027 follow the DoPT list published in July 2026; the moon-sighting festivals can still shift by a day.",
   },
   {
     q: "How does the long weekend calculator work?",
@@ -305,19 +276,10 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
             aria-label="Filter by month"
             class="rail py-0.5"
           >
-            {
-              monthTabs.map((m) => (
-                <button
-                  type="button"
-                  class="pill"
-                  data-month={m.value}
-                  aria-pressed={m.value === "ALL" ? "true" : "false"}
-                >
-                  <span class="sm:hidden">{m.short}</span>
-                  <span class="hidden sm:inline">{m.label}</span>
-                </button>
-              ))
-            }
+            {/* Built by mountResults() on the client. It was generated here
+                from the build date, which meant the rail listed months that had
+                already passed and could not list months added to the data after
+                the build. See `monthRange` in scripts/results.ts. */}
           </div>
         </div>
         <div class="hidden shrink-0 items-center gap-1 sm:flex">
@@ -556,7 +518,7 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
     aria-labelledby="reference-heading"
   >
     <div class="mx-auto max-w-[52rem]">
-      <span class="tag tag-brand mb-4">🗓️ 2026 vacation planner</span>
+      <span class="tag tag-brand mb-4">🗓️ 2026 &amp; 2027 vacation planner</span>
       <h2
         id="reference-heading"
         class="mb-4 text-2xl font-extrabold sm:text-3xl lg:text-4xl"
@@ -574,7 +536,9 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
         <p>
           The calculator identifies the <strong>next long weekend</strong> from
           today's date, your country (India or the United States) and the
-          official gazetted holiday list. Whether that's a three-day
+          official gazetted holiday list, which now runs through
+          <strong>2027</strong> so the answer does not thin out as the year
+          closes. Whether that's a three-day
           Saturday–Sunday–Monday or a nine-day stretch that bridges Diwali into
           a full week, every option is ranked by value: the most days off for the
           fewest leaves spent.
@@ -757,6 +721,7 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
 
 <script>
   import {
+    CALENDAR_END,
     getTodayIso,
     getUpcomingCutoffIso,
     buildCalendarMap,
@@ -783,6 +748,10 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
     // Shades weekends and holidays outside the plan in the modal grid.
     calendar: () => buildCalendarMap(region, workWeek),
     todayIso: today,
+    // From the visitor's own clock to the last month the data covers, so the
+    // rail never offers a month that has passed and never hides one that was
+    // added after the build.
+    monthRange: { from: cutoff.slice(0, 7), to: CALENDAR_END.slice(0, 7) },
   });
 
   /**
@@ -918,13 +887,21 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
     const leaves = params.get("leaves");
     if (leaves !== null) results?.setLeaves(Number(leaves) || 0);
 
-    // Driven by clicking the pill so there is exactly one code path for
-    // changing month — and so a month with nothing in it stays inert.
+    /* Driven by clicking the pill so there is exactly one code path for
+       changing month — and so a month with nothing in it stays inert.
+
+       The footer links carry a bare month ("?month=11") on purpose: a link
+       hardcoded to "2026-11" would quietly point into the past a year later.
+       A bare number is resolved to the SOONEST pill for that month, which is
+       what "show me November" means to someone reading a footer. A full
+       "YYYY-MM" is still honoured for anyone sharing a specific month. */
     const month = params.get("month");
     if (month) {
-      document
-        .querySelector<HTMLButtonElement>(`#monthRail [data-month="${month}"]`)
-        ?.click();
+      const rail = document.getElementById("monthRail");
+      const selector = /^\d{4}-\d{2}$/.test(month)
+        ? `[data-month="${month}"]`
+        : `[data-month$="-${month.padStart(2, "0")}"]`;
+      rail?.querySelector<HTMLButtonElement>(selector)?.click();
     }
   }
 
