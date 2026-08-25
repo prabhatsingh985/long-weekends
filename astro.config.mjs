@@ -17,6 +17,27 @@ export default defineConfig({
    * nobody has to remember that.
    */
   site: 'https://thelongweekends.com',
+
+  /**
+   * Emit `about.html`, not `about/index.html`.
+   *
+   * Layout.astro builds its canonicals from the `path` it is handed ("/about")
+   * and sitemap.xml.ts lists the same strings, so the two agreed with each
+   * other — and neither agreed with the server. Astro's default `directory`
+   * format writes `about/index.html`, which every static host serves at
+   * `/about/`, so all six sitemap entries pointed at a URL that answered with a
+   * 301 to the real one. The sitemap's own comment warns about exactly this.
+   *
+   * `file` format plus `trailingSlash: 'never'` makes the emitted path, the
+   * canonical tag and the sitemap entry the same string. The homepage is
+   * unaffected: it stays `index.html` served at `/`, which is why
+   * outputs/sitemap.test.ts asserts the `/` entry separately.
+   */
+  trailingSlash: 'never',
+  build: {
+    format: 'file',
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },

@@ -52,7 +52,7 @@ interface Entry {
  * list of pages you are asking to have indexed, so including them would ask for
  * the opposite of what their own meta tag says.
  */
-const ENTRIES: Entry[] = [
+export const ENTRIES: Entry[] = [
   // The calculator. Its content genuinely shifts as breaks pass, and it is the
   // page every search term in the FAQ is aimed at.
   { path: "/", lastmod: "2026-08-24", changefreq: "daily", priority: "1.0" },
