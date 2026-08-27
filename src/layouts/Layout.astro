@@ -155,6 +155,39 @@ const ogImage = new URL("/og-image.png", Astro.site).href;
       ))
     }
 
+    {/* Google Analytics 4.
+        --------------------------------------------------------------------
+        `is:inline` on both tags is required, not stylistic. Without it Astro
+        collects the script, bundles it and rewrites the src — which breaks the
+        async loader gtag.js expects and detaches it from the inline snippet
+        that configures it. Third-party tags always ship verbatim.
+
+        This is the first thing on the site that sets a cookie or sends a
+        request describing the visitor rather than fetching an asset. GA4 writes
+        `_ga` and `_ga_BR986NK1GM`, and reports each page view to Google with
+        the IP-derived location, device and referrer that any analytics product
+        collects.
+
+        That mattered enough to be worth saying twice, because
+        src/pages/privacy.astro used to state the opposite in as many words —
+        "no Google Analytics, no tag manager" — and its own header comment warns
+        that the page is wrong the moment a script is added. It was rewritten in
+        the same commit as this tag. If this ID is ever removed, or a second
+        third-party script is added, that page has to move with it. */}
+    <script
+      is:inline
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-BR986NK1GM"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-BR986NK1GM");
+    </script>
+
     <!--
       Theme resolution must run before first paint, otherwise a dark-mode user
       sees a white flash. Kept inline and synchronous on purpose.

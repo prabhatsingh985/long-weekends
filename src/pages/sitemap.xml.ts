@@ -64,7 +64,7 @@ export const ENTRIES: Entry[] = [
   },
   { path: "/about", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.5" },
   { path: "/contact", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.4" },
-  { path: "/privacy", lastmod: "2026-08-25", changefreq: "yearly", priority: "0.3" },
+  { path: "/privacy", lastmod: "2026-08-26", changefreq: "yearly", priority: "0.3" },
   { path: "/terms", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.3" },
 ];
 

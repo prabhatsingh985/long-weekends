@@ -6,9 +6,13 @@ into a long break, ranked by how many days off each leave day buys.
 
 Live at **[thelongweekends.com](https://thelongweekends.com)**.
 
-Static Astro site. No backend, no accounts, no analytics, no cookies. Every
-calculation — including reading an uploaded office holiday PDF — runs in the
-browser.
+Static Astro site. No backend and no accounts. Google Analytics counts page
+views; every calculation — including reading an uploaded office holiday PDF —
+runs in the browser and is never uploaded.
+
+> Adding or removing a third-party script makes `src/pages/privacy.astro`
+> wrong until it is edited. That page is written from an audit of the code, not
+> from a template.
 
 ## Commands
 

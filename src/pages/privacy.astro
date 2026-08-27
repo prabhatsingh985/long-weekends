@@ -9,8 +9,10 @@
  *   - localStorage holds exactly one key, `theme` (Layout.astro reads it before
  *     first paint, Navbar.astro writes it). The work-week choice is NOT stored;
  *     it lives in memory for the page view only.
- *   - No cookies: `document.cookie` appears nowhere in src/.
- *   - No analytics, tag manager, ad script or pixel of any kind.
+ *   - Cookies: Google Analytics 4 sets `_ga` and `_ga_BR986NK1GM`. Nothing in
+ *     src/ writes `document.cookie` directly; these come from gtag.js.
+ *   - Analytics: GA4, added 2026-08-26, loaded on every page from
+ *     Layout.astro. No tag manager, no ad script, no social pixel.
  *   - No fetch/XHR to any first-party endpoint. There is no backend.
  *   - Third-party origins the browser really does contact: Google Fonts on every
  *     page, and on /company-optimizer only, cdnjs (pdf.js) and jsDelivr
@@ -27,7 +29,7 @@ import DocPage from "../layouts/DocPage.astro";
 
 const TITLE = "Privacy Policy | The Long Weekends";
 const DESCRIPTION =
-  "The Long Weekends runs no analytics, sets no cookies and has no accounts. Exactly what is stored in your browser, and which third parties your browser contacts.";
+  "The Long Weekends has no accounts and no ads, and never uploads your holiday list. Exactly which cookies Google Analytics sets, what it measures, and how to opt out.";
 ---
 
 <DocPage
@@ -36,8 +38,8 @@ const DESCRIPTION =
   path="/privacy"
   eyebrow="Legal"
   heading="Privacy policy"
-  lede="The short version: there are no accounts, no cookies and no analytics. One value is saved in your browser — whether you prefer the dark theme — and it never leaves your device."
-  updated="2026-08-25"
+  lede="The short version: no accounts, no ads, and nothing you type here is ever uploaded. Google Analytics measures which pages get visited and sets two cookies to do it — how to switch that off is below."
+  updated="2026-08-26"
   numbered
 >
   <h2>Who this is</h2>
@@ -54,12 +56,14 @@ const DESCRIPTION =
   </p>
   <ul>
     <li>ask you to create an account, or collect a name, phone number or address;</li>
-    <li>set any cookie, for any purpose, including analytics or advertising;</li>
     <li>
-      run analytics of any kind — no Google Analytics, no tag manager, no
-      privacy-friendly alternative either;
+      set any advertising cookie, or share what you do here with an ad network;
     </li>
     <li>show advertising, or embed any advertising or social media tracking pixel;</li>
+    <li>
+      upload your holiday list — the calculator and the office optimizer both run
+      entirely in your browser;
+    </li>
     <li>have a mailing list, and so cannot add you to one;</li>
     <li>
       operate any server that receives your data — the site is a set of static
@@ -74,7 +78,7 @@ const DESCRIPTION =
 
   <h2>What is stored on your device</h2>
   <p>
-    Exactly one item, in your browser's <strong>local storage</strong> — not a
+    One item that we set, in your browser's <strong>local storage</strong> — not a
     cookie, so it is never attached to a network request and never sent to us or to
     anyone else:
   </p>
@@ -85,9 +89,55 @@ const DESCRIPTION =
     </li>
   </ul>
   <p>
-    That is the whole list. Your region and work-week choices are deliberately <em>not</em> stored: they last for the page view and reset when you leave. To
-    remove the stored theme, clear site data for this domain in your browser
-    settings, or use private browsing, where nothing persists at all.
+    That is the whole list of what <em>we</em> store. Your region and work-week
+    choices are deliberately <em>not</em> kept: they last for the page view and
+    reset when you leave. Google Analytics separately sets two cookies, described
+    in the next section. To remove all of it, clear site data for this domain in
+    your browser settings, or use private browsing, where nothing persists at all.
+  </p>
+
+  <h2>Analytics</h2>
+  <p>
+    This site uses <strong>Google Analytics 4</strong> to count page views. It was
+    added in August 2026; before that the site measured nothing at all, and earlier
+    versions of this page said so.
+  </p>
+  <p>What it records on each page view:</p>
+  <ul>
+    <li>
+      which page you looked at, when, and which site or search you arrived from;
+    </li>
+    <li>
+      your approximate location, derived by Google from your IP address — country
+      and city level, not an address;
+    </li>
+    <li>your device type, screen size, browser and operating system;</li>
+    <li>
+      a randomly generated identifier that lets Google tell a returning browser
+      from a new one. It is not tied to a name, an email or an account, because we
+      hold none of those.
+    </li>
+  </ul>
+  <p>
+    To do that it sets two cookies on this domain, <code>_ga</code> and
+    <code>_ga_BR986NK1GM</code>. They contain the random identifier and a
+    timestamp, and Google's default retention for them is two years.
+  </p>
+  <p>
+    We use this to see which pages people actually reach and which are dead ends —
+    nothing more. <strong>Your holiday list is never part of it.</strong> The file
+    you upload to the office optimizer is read in your browser and never leaves it,
+    and no date you enter is sent to Google or to us.
+  </p>
+  <p>
+    <strong>If you would rather not be counted</strong>, any of these works: install
+    Google's official <a
+      href="https://tools.google.com/dlpage/gaoptout"
+      rel="nofollow noopener"
+      target="_blank">Analytics opt-out add-on</a>, block cookies for this domain in
+    your browser settings, or use any content blocker — nearly all of them block
+    this script by default. The calculator works exactly the same either way; none
+    of its features depend on analytics loading.
   </p>
 
   <h2>Your office holiday list stays with you</h2>
@@ -105,11 +155,16 @@ const DESCRIPTION =
 
   <h2>Third parties your browser contacts</h2>
   <p>
-    We do not embed trackers, but the site does load resources from other people's
+    Beyond the analytics above, the site loads resources from other people's
     servers. Any HTTP request necessarily reveals your <strong>IP address</strong>, <strong>browser and operating system</strong>, and the page you were on, to
     whoever serves it. This is the complete list:
   </p>
   <ul>
+    <li>
+      <strong>Google Analytics</strong> (<code>googletagmanager.com</code>,
+      <code>google-analytics.com</code>) — the page-view counting described above.
+      Loaded on every page.
+    </li>
     <li>
       <strong>Google Fonts</strong> (<code>fonts.googleapis.com</code>, <code>fonts.gstatic.com</code>) — the two typefaces the site is set in. Loaded
       on every page. Google's handling of these requests is governed by its own
@@ -127,8 +182,9 @@ const DESCRIPTION =
   </ul>
   <p>
     None of these receive the contents of your holiday list. They serve code and
-    fonts; the work is done locally. If you visit only the national calendar, Google
-    Fonts is the sole third party involved.
+    fonts, or count a page view; the planning work is done locally. If you visit
+    only the national calendar, the two Google services above are the only third
+    parties involved.
   </p>
   <p>
     The two libraries are requested at a <strong>fixed version</strong> and with a
