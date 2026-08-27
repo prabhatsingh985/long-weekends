@@ -34,8 +34,10 @@ export interface BannerTheme {
 
 const THEME_RULES: { re: RegExp; theme: BannerTheme }[] = [
   {
-    // Diwali cluster: the lamps-and-lights run from Dussehra to Chhath.
-    re: /diwali|deepavali|dussehra|dasara|vijay|navami|ayudha|durga|chhath|kanakadasa|bhai|govardhan/i,
+    /* The Diwali cluster. It used to also list kanakadasa, chhath, durga,
+       ayudha and govardhan — names that only ever appeared in the Indian state
+       gazettes, so they have matched nothing since those lists were removed. */
+    re: /diwali|deepavali|dussehra|dasara|vijay|navami/i,
     theme: { cls: "bnr-festive", motif: "🪔", season: "Festival of lights" },
   },
 
@@ -73,13 +75,12 @@ const THEME_RULES: { re: RegExp; theme: BannerTheme }[] = [
     re: /\bholi\b|dhulandi|rangpanchami/i,
     theme: { cls: "bnr-spring", motif: "🎨", season: "Colours of spring" },
   },
+  /* A rule for India's regional new years — Ugadi, Gudi Padwa, Poila Boishakh,
+     Puthandu, Vishu, Bihu, Baisakhi — used to sit here. Every one of them was a
+     state holiday, so it died with the state lists. The spring new years still
+     in the data are Songkran and Nyepi, which have their own rule above. */
   {
-    // Regional new years, all of them spring.
-    re: /ugadi|gudi\s*padwa|poila|boishakh|puthandu|vishu|bihu|baisakhi|tamil new year|navreh/i,
-    theme: { cls: "bnr-spring", motif: "🌸", season: "New year, new season" },
-  },
-  {
-    re: /raksha|rakhi|janmashtami|ganesh|chaturthi|onam|nag panchami/i,
+    re: /raksha|rakhi|janmashtami|ganesh|chaturthi/i,
     theme: { cls: "bnr-monsoon", motif: "☔", season: "Monsoon break" },
   },
   {
@@ -87,7 +88,7 @@ const THEME_RULES: { re: RegExp; theme: BannerTheme }[] = [
     theme: { cls: "bnr-winter", motif: "❄️", season: "Year end" },
   },
   {
-    re: /pongal|sankranti|makar|lohri|thanksgiving|uzhavar|harvest/i,
+    re: /pongal|sankranti|makar|lohri|thanksgiving|harvest/i,
     theme: { cls: "bnr-harvest", motif: "🌾", season: "Harvest season" },
   },
   {
@@ -125,7 +126,7 @@ const THEME_RULES: { re: RegExp; theme: BannerTheme }[] = [
     /* The civic rule, widened from India and the US to the whole list.
        `\bnational\b` and not `national`, or every "International Labour Day"
        in Europe gets filed as somebody's national day. */
-    re: /republic|gandhi|ambedkar|netaji|shivaji|rajyotsava|maharashtra|karnataka|patel|king|presidents|juneteenth|veterans|columbus|indigenous|may day|\bnational\b|constitution|liberation|unification|unity|sovereignty|revolution|victory|armistice|remembrance|anzac|waitangi|australia day|canada day|bastille|foundation|proclamation|emancipation|freedom|heritage|reconciliation|coming of age|culture day|respect for the aged|sports day|children|emperor|queen|monarch|accession|flag day|statehood|hangul|peace memorial|retrocession|teachers|youth day|pancasila|heroes|bonifacio|rizal|valor|aquino|women's day|hispanic|portugal day|ochi|\bhus\b|czechoslovak|matariki|chakri|coronation|chulalongkorn|malaysia day|victoria day|agong|establishment day|liberty|defenders|human rights|democracy|family day|goodwill|armed forces|san mart|güemes|tiradentes|awareness|jamhuri|madaraka|mashujaa|mazingira|solidarity|cultural diversity|haatzmaut|public service/i,
+    re: /republic|gandhi|king|presidents|juneteenth|veterans|columbus|indigenous|may day|\bnational\b|constitution|liberation|unification|unity|sovereignty|revolution|victory|armistice|remembrance|anzac|waitangi|australia day|canada day|bastille|foundation|proclamation|emancipation|freedom|heritage|reconciliation|coming of age|culture day|respect for the aged|sports day|children|emperor|queen|monarch|accession|flag day|statehood|hangul|peace memorial|retrocession|teachers|youth day|pancasila|heroes|bonifacio|rizal|valor|aquino|women's day|hispanic|portugal day|ochi|\bhus\b|czechoslovak|matariki|chakri|coronation|chulalongkorn|malaysia day|victoria day|agong|establishment day|liberty|defenders|human rights|democracy|family day|goodwill|armed forces|san mart|güemes|tiradentes|awareness|jamhuri|madaraka|mashujaa|mazingira|solidarity|cultural diversity|haatzmaut|public service/i,
     theme: { cls: "bnr-civic", motif: "🏛️", season: "National holiday" },
   },
   {

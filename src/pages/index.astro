@@ -149,7 +149,7 @@ const FAQ = [
   },
   {
     q: "How many long weekends are there in 2026 in India?",
-    a: "<strong>Nine</strong>, if they have to be free — nine three-day weekends on the national calendar that need no leave at all. Widen the budget and the count climbs fast: one leave day unlocks 22 four-day breaks, and two or three days stretch several of them into six- and nine-day runs. State holidays and your own office list add more on top.",
+    a: "<strong>Nine</strong>, if they have to be free — nine three-day weekends on the national calendar that need no leave at all. Widen the budget and the count climbs fast: one leave day unlocks 22 four-day breaks, and two or three days stretch several of them into six- and nine-day runs. Your own office list will differ, which is what the Company Holiday Optimizer is for.",
   },
   {
     q: "Which months have the longest weekends in India in 2026?",
@@ -165,11 +165,11 @@ const FAQ = [
   },
   {
     q: "How many holidays will India have in 2026?",
-    a: "There are <strong>17 gazetted national holidays</strong> in 2026, and this planner adds your state list on top of them: seven more for Karnataka, four for Maharashtra, three each for Delhi and West Bengal, and two for Tamil Nadu. Your own office calendar will differ again, which is what the Company Holiday Optimizer is for.",
+    a: "There are <strong>17 gazetted national holidays</strong> in 2026. That is the nationwide list, which is what this planner works from for every country it covers. Your own office calendar will be shorter and will include days the gazette does not — upload it to the Company Holiday Optimizer and the same arithmetic runs against the days you actually get.",
   },
   {
     q: "Where do the holiday dates come from?",
-    a: `India's dates are transcribed from the DoPT gazetted notification with five state lists under it, and the US dates from the Office of Personnel Management's federal schedule. The other ${COUNTRIES.length - 2} countries are compiled from Google's published public-holiday calendars and cross-checked against Nager.Date, with every disagreement reviewed by hand. Only nationwide holidays are carried, plus regional ones observed by at least half a federal country's states — so Australia's King's Birthday is in and Bavaria's Corpus Christi is not. Dates set by a moon sighting can still move by a day.`,
+    a: `India's dates are transcribed from the DoPT gazetted notification and the US dates from the Office of Personnel Management's federal schedule. The other ${COUNTRIES.length - 2} countries are compiled from Google's published public-holiday calendars and cross-checked against Nager.Date, with every disagreement reviewed by hand. Every list is the nationwide one — this is a country-level planner and it does not carry sub-national calendars for anywhere. Dates set by a moon sighting can still move by a day.`,
   },
   {
     q: "Does this cover 2027 as well?",
@@ -464,7 +464,7 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
 
     <!-- Legend. The day ribbon on every card is the densest thing on the page,
          so it gets an explicit key rather than expecting colour to explain
-         itself. Each entry names its state in words as well. -->
+         itself. Each entry names its kind in words as well. -->
     <div
       class="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-control border border-hairline bg-surface-soft px-3.5 py-2.5"
     >
@@ -919,10 +919,10 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
 
   /** Applies ?region=/?leaves=/?month= — the shape the footer links use. */
   function applyParams(params: URLSearchParams) {
-    /* Any country code, plus the two legacy values ("ALL", "USA") and India's
-       sub-regions. This used to be an equality test against exactly those two
-       strings, so every `?region=` link the country picker can now produce
-       would have been silently ignored and left the visitor on India. */
+    /* Any country code, plus the two legacy values ("ALL", "USA"). This used to
+       be an equality test against exactly those two strings, so every
+       `?region=` link the country picker can now produce would have been
+       silently ignored and left the visitor on India. */
     const r = params.get("region");
     if (r && isKnownRegion(r)) {
       region = r;

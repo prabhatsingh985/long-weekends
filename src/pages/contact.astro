@@ -14,9 +14,11 @@
  */
 import DocPage from "../layouts/DocPage.astro";
 
+import { COUNTRIES } from "../data/countries";
+
 const TITLE = "Contact – Report a Wrong Holiday Date | The Long Weekends";
 const DESCRIPTION =
-  "Get in touch with The Long Weekends. Report an incorrect holiday date, a bug, or a state calendar you would like added.";
+  "Get in touch with The Long Weekends. Report an incorrect holiday date, a bug, or a country calendar you would like added.";
 
 const EMAIL = "hello@thelongweekends.com";
 
@@ -32,10 +34,13 @@ const reasons = [
       "The most valuable thing you can send. Tell us the holiday, the date shown, the date you believe is correct, and the notification you are going by if you have it.",
   },
   {
-    subject: "Add a state calendar",
-    title: "Your state is missing",
+    subject: "Add a country calendar",
+    title: "Your country is missing",
     body:
-      "Regional lists currently cover Karnataka, Maharashtra, Delhi, West Bengal and Tamil Nadu. If yours is not there, say which state and link its gazette if you can find it.",
+      `The planner covers ${COUNTRIES.length} countries. If yours is not one of them, say which, and link the official holiday notification if you can find it.`,
+    /* Rendered as a real element below, not as markup inside `body` — the
+       bodies are interpolated as text, so a tag in one would show as a tag. */
+    more: { href: "/countries", label: "See the full list" },
   },
   {
     subject: "Bug report",
@@ -94,6 +99,12 @@ const reasons = [
             {r.title}
           </a>{" "}
           — {r.body}
+          {r.more && (
+            <Fragment>
+              {" "}
+              <a href={r.more.href}>{r.more.label}</a>.
+            </Fragment>
+          )}
         </li>
       ))
     }

@@ -248,19 +248,22 @@ const SUPPLEMENTS = {
 /**
  * Caveats a country carries that the dates alone cannot express.
  *
- * Shown next to the results, because each one is a case where a correct
+ * Shown on the country card, because each one is a case where a correct
  * calendar still produces a misleading plan.
+ *
+ * Deliberately only country-level facts. There used to be an entry for every
+ * federal country explaining how its regions diverge — which states keep which
+ * day, what Scotland does differently. Those are gone: this is a country-level
+ * planner, sub-national lists are not offered for anywhere, and a note that
+ * itemises them invites the reader to look for a control that does not exist.
+ * The single sentence about regional variation now lives once, in the caveats
+ * on /countries, rather than forty-seven times in the data.
  */
 const NOTES = {
-  CN: "Golden Week is paid for: the State Council moves the neighbouring Saturday or Sunday to a working day, and publishes the swap each autumn. Those make-up days are not in this calendar, so a Chinese break shown here can cost a weekend it does not mention.",
+  CN: "Golden Week is paid for: the neighbouring Saturday or Sunday is moved to a working day, and the swap is published each autumn. Those make-up days are not in this calendar, so a Chinese break shown here can cost a weekend it does not mention.",
   ID: "2027 is an estimate. Indonesia fixes its holidays by joint decree a few months ahead, and the 2027 decree is not published yet. The collective-leave days (cuti bersama) it usually adds around Idul Fitri are not included, so the real year will be more generous.",
-  GB: "Scotland keeps a different list — 2 January and St Andrew's Day instead of Easter Monday — and Northern Ireland adds two more. These are the days common to England and Wales.",
-  IN: "Gazetted national holidays. Your state adds its own, and most IT employers publish a shorter list than the government's.",
-  AU: "State lists diverge sharply after the national days: Labour Day alone falls in March, May and October depending on where you sit.",
-  CH: "Only four holidays are federal. The rest are cantonal, and the ones here are those a majority of cantons keep.",
-  DE: "Nine holidays are nationwide; Bavaria and Baden-Württemberg keep several more. The ones here are those observed in at least half the states.",
-  MY: "State lists vary widely, and several holidays follow a moon sighting. The ones here are those kept in at least half the states.",
   AE: "The Islamic dates depend on a moon sighting and are typically confirmed only days ahead; the UAE also often extends Eid by decree.",
+  IN: "The gazetted national list. Most IT employers publish a shorter one, so the Company Holiday Optimizer will be closer to what you actually get.",
 };
 
 /* ========================================================================== */
@@ -445,10 +448,10 @@ const warnings = [];
  * India and the United States keep their hand-curated lists.
  *
  * Both predate this script and both are better than what it would produce.
- * India's is the DoPT gazetted list with five states layered under it, which
- * Google's calendar does not carry at all; the US one states each federal
- * holiday once on the date it is actually observed, where Google lists 4 July
- * 2026 twice — once on the Saturday and once on the Friday it moves to.
+ * India's is the DoPT gazetted list, hand-checked against the notification;
+ * the US one states each federal holiday once on the date it is actually
+ * observed, where Google lists 4 July 2026 twice — once on the Saturday and
+ * once on the Friday it moves to.
  *
  * So they are read out of holidays.json rather than out of an .ics, and the
  * `countries` block becomes a view onto them rather than a second copy. That
@@ -481,7 +484,7 @@ async function main() {
     if (country.code === "IN") {
       extracted = fromCuratedList("IN", existing.national_holidays);
     } else if (country.code === "US") {
-      extracted = fromCuratedList("US", existing.state_specific_holidays.USA);
+      extracted = fromCuratedList("US", existing.us_federal_holidays);
     } else {
       const ics = await cachedFetch(`${country.cal}.ics`, googleUrl(country.cal));
       extracted = extractCountry(country, ics);

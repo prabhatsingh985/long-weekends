@@ -1,12 +1,11 @@
 import type { VacationPlan, CalendarDay, RegionCode } from "../types";
 import holidaysData from "../../holidays.json";
-import {
-  COUNTRY_BY_CODE,
-  INDIA_SUB_REGIONS,
-  resolveCountryCode,
-} from "./countries";
+import { COUNTRY_BY_CODE, resolveCountryCode } from "./countries";
 
 /**
+ * India's gazetted list, kept as a named export because outputs/faq.test.ts
+ * pins figures against it and the homepage copy quotes those figures.
+ *
  * The data file was `holidays_2026.json` and this binding was
  * `NATIONAL_HOLIDAYS_2026`, back when it held a single year. It now carries
  * 2026 and 2027, so both names were about to become false — and a year baked
@@ -14,27 +13,21 @@ import {
  * having two sources of truth for the same question.
  */
 export const NATIONAL_HOLIDAYS = holidaysData.national_holidays;
-export const STATE_SPECIFIC_HOLIDAYS = holidaysData.state_specific_holidays;
+
+/**
+ * The US federal schedule, hand-transcribed from the OPM list.
+ *
+ * It used to live under `state_specific_holidays.USA` — the United States
+ * modelled as a state of India, which was a workable joke at two calendars and
+ * nonsense at forty-seven. It has its own key now. Like NATIONAL_HOLIDAYS it is
+ * exported because `countries.US` is generated from it and the tests check the
+ * two agree.
+ */
+export const US_FEDERAL_HOLIDAYS = holidaysData.us_federal_holidays;
 
 /** Re-exported for convenience; the single definition lives in ../types. It
  *  used to be imported above AND redeclared here, which is a TS conflict. */
 export type { RegionCode };
-
-/**
- * India's state groupings, kept as an export because it is part of this
- * module's published surface.
- *
- * It used to be the whole region system: a `Record<RegionCode, string[]>` whose
- * entries were four Indian sub-regions plus the string "USA", which is how the
- * United States came to be modelled as a state of India. That worked while
- * there were two calendars and stopped working at forty-seven, so region
- * resolution now lives in ./countries and this is only what it always
- * described — which Indian state lists layer on top of the national one.
- */
-export const REGION_STATE_MAP: Record<string, string[]> = {
-  ALL: [],
-  ...INDIA_SUB_REGIONS,
-};
 
 /**
  * Inclusive bounds of the holiday data we actually hold.
@@ -158,11 +151,6 @@ export function buildCalendarMap(
   // American or German office list now gets named days too.
   const knownFestivals = new Map<string, string>();
   (country?.holidays ?? []).forEach((h) => knownFestivals.set(h.date, h.name));
-  Object.values(STATE_SPECIFIC_HOLIDAYS).forEach((arr) => {
-    arr.forEach((h) => {
-      if (!knownFestivals.has(h.date)) knownFestivals.set(h.date, h.name);
-    });
-  });
 
   if (customHolidays && customHolidays.length > 0) {
     // An uploaded office list REPLACES the national list rather than merging
@@ -175,20 +163,21 @@ export function buildCalendarMap(
       holidayMap.set(dt, festivalName);
     });
   } else {
+    /**
+     * The country's own list, and nothing layered under it.
+     *
+     * There used to be a second pass here that merged Indian state gazettes on
+     * top — Karnataka's list for "SOUTH", Maharashtra's for "WEST" and so on.
+     * That went when the site became a country-level planner: sub-national
+     * lists existed for exactly one of the forty-seven countries, so they made
+     * India behave unlike everywhere else and implied a level of detail the
+     * other forty-six could not match. Anyone whose real list differs from the
+     * national one — which is most people — is better served by the Company
+     * Holiday Optimizer, which plans against their actual days rather than a
+     * guess based on where they live.
+     */
     (country?.holidays ?? []).forEach((h) => {
       holidayMap.set(h.date, h.name);
-    });
-
-    // Only India has sub-national lists, and only India's sub-regions resolve
-    // to anything here — REGION_STATE_MAP is empty for every other value.
-    const states = REGION_STATE_MAP[region] || [];
-    states.forEach((st) => {
-      const stateHols = STATE_SPECIFIC_HOLIDAYS[st] || [];
-      stateHols.forEach((h) => {
-        if (!holidayMap.has(h.date)) {
-          holidayMap.set(h.date, h.name);
-        }
-      });
     });
   }
 

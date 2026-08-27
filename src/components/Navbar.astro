@@ -279,8 +279,8 @@ const showBrandChip = tools;
    * The picker already carries the answer: every item has both `data-region`
    * (the value) and `data-country` (the ISO code it resolves to). Reading it
    * from there rather than importing the alias map keeps this script from
-   * needing the country data at all, and means a legacy value like "USA" or an
-   * India sub-region resolves by the same route as a plain code.
+   * needing the country data at all, and means a legacy value like "USA"
+   * resolves by the same route as a plain code.
    */
   function countryCodeFor(region: string): string | null {
     const item = document.querySelector<HTMLElement>(`[data-region="${CSS.escape(region)}"]`);

@@ -31,7 +31,7 @@ Requires Node ≥ 22.12.
 ## How it fits together
 
 ```
-holidays.json               the only data file — 47 countries, plus India's states
+holidays.json               the only data file — one calendar per country, 47 of them
 scripts/build-holidays.mjs  regenerates the country block from published calendars
 src/data/countries.ts       the country list as the UI wants it: groups, aliases, weekends
 src/data/flags.ts           flag artwork for all 47, drawn as SVG
@@ -86,10 +86,18 @@ strict `startDate > cutoff` filter would silently delete every 1 January plan.
   solver reads.
 - **`national_holidays`** — India's gazetted list, hand-transcribed. `countries.IN`
   is generated *from* it rather than beside it, so the two cannot drift.
-- **`state_specific_holidays`** — India's five state lists, plus the curated US
-  federal list that `countries.US` is generated from.
+- **`us_federal_holidays`** — the curated OPM list that `countries.US` is
+  generated from, same arrangement as India's.
 
 Sources are listed in the file's own `sources` array.
+
+There are **no sub-national lists**, for anywhere. India used to carry five
+state gazettes under `state_specific_holidays`, reachable through region values
+`SOUTH` / `WEST` / `NORTH` / `EAST`. They were removed: sub-national data
+existed for exactly one of the 47 countries, so it made India behave unlike
+everywhere else and implied a level of detail nothing else could match. Anyone
+whose real list differs from the national one is served by `/company-optimizer`
+instead, which plans against their actual days.
 
 ### Regenerating the country lists
 
@@ -105,10 +113,11 @@ review. India and the US are *not* compiled — they are read out of the curated
 lists above.
 
 What it keeps: nationwide public holidays, plus regional ones observed by at
-least half a federal country's subdivisions (recorded as `scope: "most"`).
-What it drops: observances, commemorative days and half-days — a "public
-holiday" here has to mean a day off, or the leave arithmetic on top of it is
-fiction.
+least half a federal country's subdivisions (recorded as `scope: "most"`, which
+is a data-quality decision inside the generator — the site never offers a
+regional calendar). What it drops: observances, commemorative days and
+half-days — a "public holiday" here has to mean a day off, or the leave
+arithmetic on top of it is fiction.
 
 Two hand-maintained exceptions live in the script's `SUPPLEMENTS` table, each
 with the source that was checked: Australia's Boxing Day substitutes, which
@@ -117,10 +126,11 @@ the decree that fixes it is not published yet.
 
 ### Region codes
 
-`?region=` accepts an ISO code (`DE`, `SG`), one of India's sub-regions
-(`SOUTH`, `WEST`, `NORTH`, `EAST`), or the two legacy values `ALL` and `USA`
-that predate the country picker. The legacy pair resolve to `IN` and `US`, so
-every link shared before this existed still works. `isKnownRegion()` in
+`?region=` accepts an ISO code (`DE`, `SG`) or the two legacy values `ALL` and
+`USA` that predate the country picker. The legacy pair resolve to `IN` and
+`US`, so every link shared before this existed still works. Anything else —
+including the retired `SOUTH` / `WEST` / `NORTH` / `EAST` — is rejected by
+`isKnownRegion()` and falls back to India. That function in
 `src/data/countries.ts` is the single gate; nothing else should pattern-match a
 region string.
 
@@ -140,7 +150,7 @@ and updating whatever figures the tests pin.
 
 > **2027 dates are not gazette-verified yet.** See
 > [HOLIDAYS_2027_VERIFY.md](HOLIDAYS_2027_VERIFY.md) for what has been
-> cross-checked for India and what still needs confirming against state
+> cross-checked for India and what still needs confirming against the
 > notifications. For the other countries, dates set by a moon sighting carry
 > `tentative: true` and Indonesia's whole 2027 is an estimate.
 
@@ -155,12 +165,13 @@ the site makes that would otherwise rot silently.
 - **`faq.test.ts`** recomputes every figure quoted in the homepage FAQ and on
   `/about` from the shipped solver — the nine free long weekends and their exact
   dates, the 22 four-day breaks across 13 festivals, the weekday split of the
-  gazetted list, the state counts, the spring cluster. If the holiday data
+  gazetted list, the spring cluster. If the holiday data
   changes, this fails and the copy on both pages has to be edited with it.
 - **`countries.test.ts`** is the equivalent for the other 45 countries, but pins
   *invariants* rather than dates — every country covers both years, states the
   right weekday for each date, has drawn flag artwork, yields real plans, and
-  resolves from its region code. Plus the two things that are easy to break
+  resolves from its region code. It also guards the removal of the state lists:
+  the retired sub-region values must stay unknown and must solve as plain India. Plus the two things that are easy to break
   silently: Israel's and Egypt's Friday–Saturday weekends, and the share of
   result cards that get a themed banner rather than the grey fallback.
 - **`sitemap.test.ts`** pins the canonical origin in `astro.config.mjs` to the

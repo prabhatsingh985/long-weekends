@@ -67,34 +67,27 @@ export const COUNTRY_CODES = COUNTRIES.map((c) => c.code);
 export const LEGACY_REGIONS: Record<string, string> = { ALL: "IN", USA: "US" };
 
 /**
- * India's state groupings, layered on top of the national list.
+ * Resolves any region value to a country code.
  *
- * These are region values in their own right — "SOUTH" resolves to India plus
- * Karnataka and Tamil Nadu — and they are the reason region codes are not
- * simply ISO codes. No other country has sub-national data, so no other
- * country has entries here.
+ * There used to be a third kind of value here: "SOUTH", "WEST", "NORTH" and
+ * "EAST", which meant India plus one or two state gazettes. They are gone.
+ * Sub-national lists existed for exactly one of the forty-seven countries, so
+ * they made India behave unlike everywhere else and promised a level of detail
+ * nothing else could match — and someone whose real list differs from the
+ * national one is better served by the Company Holiday Optimizer than by a
+ * guess based on which part of the country they sit in.
+ *
+ * An unrecognised value falls back to India rather than throwing: this runs on
+ * whatever a URL happens to contain.
  */
-export const INDIA_SUB_REGIONS: Record<string, string[]> = {
-  SOUTH: ["KA", "TN"],
-  WEST: ["MH"],
-  NORTH: ["DL"],
-  EAST: ["WB"],
-};
-
-/** Resolves any region value — ISO code, legacy alias, or India sub-region. */
 export function resolveCountryCode(region: string): string {
   if (LEGACY_REGIONS[region]) return LEGACY_REGIONS[region];
-  if (INDIA_SUB_REGIONS[region]) return "IN";
   return COUNTRY_BY_CODE[region] ? region : "IN";
 }
 
-/** True for any value the region control will accept. */
+/** True for any value the country control will accept. */
 export function isKnownRegion(region: string): boolean {
-  return (
-    region in LEGACY_REGIONS ||
-    region in INDIA_SUB_REGIONS ||
-    region in COUNTRY_BY_CODE
-  );
+  return region in LEGACY_REGIONS || region in COUNTRY_BY_CODE;
 }
 
 /**

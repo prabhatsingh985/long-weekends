@@ -34,17 +34,17 @@ export interface VacationPlan {
 }
 
 /**
- * A value the region control can hold.
+ * A value the country control can hold.
  *
- * Three kinds of string live in here, and the union used to enumerate only the
- * first two:
- *   - "ALL" and "USA", the original two choices. They are aliases now, not
- *     codes, and they survive because the footer links and any URL a visitor
+ * Two kinds of string:
+ *   - an ISO-3166 alpha-2 country code, for each country in holidays.json;
+ *   - "ALL" and "USA", the original two choices, which are aliases now rather
+ *     than codes. They survive because the footer links and any URL a visitor
  *     has already shared still carry them.
- *   - "SOUTH" | "WEST" | "NORTH" | "EAST", India's state groupings, which
- *     layer state holidays on top of the national list.
- *   - an ISO-3166 alpha-2 country code, for each of the countries in
- *     holidays.json.
+ *
+ * It used to also hold "SOUTH" | "WEST" | "NORTH" | "EAST", India's state
+ * groupings. Those are gone along with the state lists behind them — this is a
+ * country-level planner, and India was the only country that had them.
  *
  * It is a plain `string` rather than a union of all forty-seven codes on
  * purpose. The codes come from generated data — adding a country means running

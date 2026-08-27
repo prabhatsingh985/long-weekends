@@ -25,7 +25,6 @@ import {
   COUNTRY_BY_CODE,
   COUNTRY_GROUPS,
   LEGACY_REGIONS,
-  INDIA_SUB_REGIONS,
   resolveCountryCode,
   isKnownRegion,
   searchTextFor,
@@ -51,6 +50,23 @@ const read = (rel: string) =>
 
 const COUNTRIES_PAGE = read("../src/pages/countries.astro");
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/**
+ * Every plan title the site can produce, solved once.
+ *
+ * Two title assertions below each need the whole cross-product of countries and
+ * leave budgets, and running the solver twice over forty-seven calendars inside
+ * `it()` bodies took long enough to trip vitest's five-second per-test timeout —
+ * intermittently, which is the worst way for a suite to fail. Hoisted to module
+ * scope it runs once, during import, where there is no such clock.
+ */
+const EVERY_TITLE = [1, 2].flatMap((leaves) =>
+  COUNTRIES.flatMap((c) =>
+    solveVacationPlans({ leaves, region: c.code, fromDate: WHOLE_WINDOW }).map(
+      (p) => p.title
+    )
+  )
+);
 
 describe("the country list", () => {
   it("covers the countries the picker claims, with no duplicates", () => {
@@ -192,10 +208,16 @@ describe("region values resolve the way the URLs promise", () => {
     expect(isKnownRegion("USA")).toBe(true);
   });
 
-  it("resolves India's sub-regions to India", () => {
-    for (const key of Object.keys(INDIA_SUB_REGIONS)) {
+  /**
+   * "SOUTH", "WEST", "NORTH" and "EAST" used to mean India plus one or two
+   * state gazettes. They are not region values any more, and a link carrying
+   * one has to fall back to India rather than resolve to something that no
+   * longer exists.
+   */
+  it("no longer accepts the retired India sub-regions", () => {
+    for (const key of ["SOUTH", "WEST", "NORTH", "EAST"]) {
+      expect(isKnownRegion(key)).toBe(false);
       expect(resolveCountryCode(key)).toBe("IN");
-      expect(isKnownRegion(key)).toBe(true);
     }
   });
 
@@ -219,10 +241,21 @@ describe("region values resolve the way the URLs promise", () => {
     expect(viaAlias.map((p) => p.id)).toEqual(viaCode.map((p) => p.id));
   });
 
-  it("layers state holidays for an India sub-region but not for a country", () => {
+  /**
+   * The state-layering pass is gone, so a retired sub-region value now solves
+   * as plain India rather than India plus a gazette. This is the assertion that
+   * the layering really was removed and not merely hidden from the picker.
+   */
+  it("solves a retired sub-region identically to India", () => {
     const national = solveVacationPlans({ leaves: 0, region: "IN", fromDate: WHOLE_WINDOW });
     const south = solveVacationPlans({ leaves: 0, region: "SOUTH", fromDate: WHOLE_WINDOW });
-    expect(south.length).toBeGreaterThanOrEqual(national.length);
+    expect(south.map((p) => p.id)).toEqual(national.map((p) => p.id));
+  });
+
+  it("offers no country whose calendar is sub-national", () => {
+    // Every code the picker can produce is a country, not a region inside one.
+    const nonCountry = COUNTRIES.filter((c) => !/^[A-Z]{2}$/.test(c.code)).map((c) => c.code);
+    expect(nonCountry).toEqual([]);
   });
 });
 
@@ -349,17 +382,15 @@ describe("plan titles name festivals, not the scaffolding around them", () => {
     expect(cleanFestivalName("Bridge Public holiday")).toBe(BRIDGE_DAY);
     expect(cleanFestivalName("Tourist Bridge Holiday")).toBe(BRIDGE_DAY);
 
-    const withBridge = COUNTRIES.flatMap((c) =>
-      solveVacationPlans({ leaves: 1, region: c.code, fromDate: WHOLE_WINDOW })
-    ).filter((p) => p.title.includes(BRIDGE_DAY) && p.title.includes("&"));
-    expect(withBridge.map((p) => p.title)).toEqual([]);
+    const withBridge = EVERY_TITLE.filter(
+      (t) => t.includes(BRIDGE_DAY) && t.includes("&")
+    );
+    expect(withBridge).toEqual([]);
   });
 
   it("caps a title at two festivals and a count", () => {
-    const overlong = COUNTRIES.flatMap((c) =>
-      solveVacationPlans({ leaves: 2, region: c.code, fromDate: WHOLE_WINDOW })
-    ).filter((p) => (p.title.match(/&/g) ?? []).length > 1);
-    expect(overlong.map((p) => p.title)).toEqual([]);
+    const overlong = EVERY_TITLE.filter((t) => (t.match(/&/g) ?? []).length > 1);
+    expect(overlong).toEqual([]);
   });
 });
 

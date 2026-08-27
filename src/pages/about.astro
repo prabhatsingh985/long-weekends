@@ -58,8 +58,8 @@ const DESCRIPTION =
       Negotiable Instruments Act, which is what banks actually close for
     </li>
     <li>
-      state government gazettes for the regional lists — currently Karnataka,
-      Maharashtra, Delhi, West Bengal and Tamil Nadu
+      the <strong>U.S. Office of Personnel Management</strong> federal holiday
+      schedule, which states each holiday on the date it is actually observed
     </li>
   </ul>
   <p>
@@ -67,10 +67,17 @@ const DESCRIPTION =
     public-holiday calendars and cross-checked against Nager.Date, with every
     disagreement between the two reviewed by hand before it ships. The compiler
     lives in the repository rather than in someone’s notes, so each list can be
-    regenerated the moment a government publishes its next year. Only nationwide
-    holidays are carried — plus regional ones a majority of a federal country’s
-    states observe, which is how Australia’s King’s Birthday is included and
-    Bavaria’s Corpus Christi is not.
+    regenerated the moment a government publishes its next year.
+  </p>
+  <p>
+    Every list is the <strong>nationwide</strong> one. This is a country-level
+    planner: it does not carry sub-national calendars for anywhere, including
+    India. Where a country’s holidays genuinely vary from one part of it to
+    another, a day is included when it is observed across most of the country
+    and left out when it is not — so the calendar you get is the one a national
+    employer would publish, and your own office list is the thing that will
+    differ. That is what the <a href="/company-optimizer">office holiday
+    optimizer</a> is for.
   </p>
   <p>
     Dates set by lunar observation — Eid, Diwali, Vesak, Nyepi — can move by a
@@ -145,14 +152,15 @@ const DESCRIPTION =
       2028 so that a New Year bridge can be calculated. It stops there.
     </li>
     <li>
-      <strong>Sub-national lists exist for India only.</strong> Everywhere else
-      you get the national calendar, so a reader in Bavaria, Queensland or
-      Quebec will have days this does not know about.
+      <strong>It works at country level only.</strong> Every calendar here is
+      the national one, so wherever a country’s holidays vary internally you
+      may get days this does not know about — and it may show one you do not
+      get.
     </li>
     <li>
       <strong>China’s make-up workdays are not modelled.</strong> Golden Week is
-      paid for by turning a neighbouring weekend into working days, and the
-      State Council publishes that swap separately each autumn.
+      paid for by turning a neighbouring weekend into working days, and that
+      swap is published separately each autumn.
     </li>
     <li>
       <strong>Restricted or optional holidays</strong> are not modelled. Those vary

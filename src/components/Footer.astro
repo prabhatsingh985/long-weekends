@@ -235,8 +235,14 @@ const siteLinks = [
         class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
       >
         <p class="text-xs text-muted m-0">
-          © {year} The Long Weekends · Holiday dates cross-checked against DoPT
-          and RBI gazette notifications.
+          {/* This used to read "cross-checked against DoPT and RBI gazette
+              notifications" — true of India, and printed on every page of a
+              site that now carries {allCountriesCount} calendars. Naming the
+              two Indian sources under a Brazilian visitor's results was the
+              kind of small false note that costs a reader their trust in
+              everything above it. */}
+          © {year} The Long Weekends · Public holiday dates for{" "}
+          {allCountriesCount} countries, cross-checked against a second source.
         </p>
         <p class="text-xs text-muted m-0">
           Your holiday list never leaves your browser.

@@ -75,52 +75,23 @@ All three shifted observances matched.
 | 24 Dec 2027 | Fri | Christmas (observed) | Sat 25 Dec |
 | 31 Dec 2027 | Fri | New Year's Day (observed) | Sat 1 Jan 2028 |
 
-## ✅ High confidence — fixed-date state holidays
+## ✗ State holidays — removed
 
-These fall on the same calendar date every year, so only the weekday could be
-wrong, and that is machine-checked.
+This file used to carry two more sections here: a table of fixed-date state
+holidays, and a longer one of lunar state holidays that still needed checking
+against Karnataka's DPAR notification, Maharashtra's GAD GR and the rest.
 
-| Date | State | Holiday |
-| :-- | :-- | :-- |
-| 23 Jan 2027 | WB | Netaji Subhas Chandra Bose Jayanti |
-| 19 Feb 2027 | MH | Chhatrapati Shivaji Maharaj Jayanti |
-| 14 Apr 2027 | KA | Dr. B.R. Ambedkar Jayanti |
-| 14 Apr 2027 | TN | Tamil New Year (Puthandu) |
-| 1 May 2027 | MH | Maharashtra Day |
-| 1 Nov 2027 | KA | Kannada Rajyotsava |
+**Both are gone, along with the data they described.** The site is a
+country-level planner now: `holidays.json` carries one calendar per country and
+no sub-national lists for anywhere, so there are no state dates left to verify.
+See the "Holiday data" section of the README for why.
 
----
-
-## ⚠️ Needs checking against the state gazette
-
-These are lunar or panchang-derived and came from festival-calendar sites, not
-from a state government notification. Several are internally corroborated —
-noted where so — but **each state publishes its own list and can differ by a
-day**, and some of these are the holiday that creates a long weekend, so a
-one-day error changes the answer the site gives.
-
-| Date | Day | State | Holiday | Notes |
-| :-- | :-- | :-- | :-- | :-- |
-| 15 Jan 2027 | Fri | KA | Makar Sankranti | **Sources disagree — 14 vs 15 Jan.** 15 Jan chosen. Creates a 3-day weekend, so this one matters. |
-| 15 Jan 2027 | Fri | TN | Pongal | Same disagreement; Pongal tracks Sankranti. Also creates a 3-day weekend. |
-| 15 Jan 2027 | Fri | DL | Guru Gobind Singh Jayanti | Creates a 3-day weekend. |
-| 7 Apr 2027 | Wed | KA | Ugadi | Corroborated: Holi 23 Mar + 15 days, and Ram Navami 15 Apr is Ugadi + 8, which matches DoPT. |
-| 7 Apr 2027 | Wed | MH | Gudi Padwa | Same day as Ugadi by definition. |
-| 15 Apr 2027 | Thu | WB | Poila Boishakh | Sometimes observed 14 Apr. |
-| 17 Aug 2027 | Tue | DL | Raksha Bandhan | Corroborated: Janmashtami 25 Aug is Rakhi + 8, which matches DoPT. |
-| 4 Sep 2027 | Sat | KA, MH | Ganesh Chaturthi | Corroborated: Janmashtami + 10. Falls on a Saturday, so it adds nothing either way. |
-| 6 Oct 2027 | Wed | WB | Durga Puja (Saptami→Dashami) | Stored as the Saptami date; Dashami is DoPT's Dussehra, 9 Oct. |
-| 8 Oct 2027 | Fri | KA | Maha Navami / Ayudha Puja | Navami, the day before DoPT's Dussehra. Creates a 3-day weekend. |
-| 4 Nov 2027 | Thu | DL | Chhath Puja | Consistent with Diwali 29 Oct + 6 days. |
-| 16 Nov 2027 | Tue | KA | Kanakadasa Jayanti | Least corroborated row in the file. |
-
-### Where to check
-
-- **Karnataka** — DPAR General Holidays notification
-- **Maharashtra** — GAD public holiday GR
-- **Delhi** — GNCTD Services Department holiday list
-- **West Bengal** — Finance Dept (Audit Branch) holiday notification
-- **Tamil Nadu** — P&AR Department holiday GO
+The other 45 countries are compiled by `scripts/build-holidays.mjs`, which
+cross-checks each against a second source and prints every disagreement. Run it
+with `--report` to see the current list. What still needs a human eye there is
+the same class of problem as below: dates set by a moon sighting, and countries
+that had not published their 2027 list when the data was compiled — Indonesia's
+whole 2027 is an estimate for that reason.
 
 ---
 

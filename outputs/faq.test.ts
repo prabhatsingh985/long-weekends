@@ -25,9 +25,10 @@ import {
   cleanFestivalName,
   CALENDAR_END,
   NATIONAL_HOLIDAYS,
-  STATE_SPECIFIC_HOLIDAYS,
+  US_FEDERAL_HOLIDAYS,
 } from "../src/data/vacation-solver";
 import type { VacationPlan } from "../src/types";
+import HOLIDAY_DATA from "../holidays.json";
 
 /** Before the first day the data covers, so nothing is filtered as "past". */
 const WHOLE_YEAR = "2025-12-31";
@@ -211,29 +212,39 @@ describe("the gazetted national list", () => {
   });
 });
 
-describe("state holiday counts quoted on both pages", () => {
-  /** Per calendar year: the file now holds 2026 and 2027, and the sentence in
-   *  the FAQ is about 2026. */
+/**
+ * The state lists are gone, and so are the tests that pinned their counts.
+ *
+ * They used to check that Karnataka carried seven days in 2026 and that the FAQ
+ * said so in those words. Both the data and the sentence were removed when the
+ * site became country-level: sub-national lists existed for exactly one of the
+ * forty-seven countries, which made India behave unlike everywhere else. This
+ * guard replaces them — it fails if state copy or state data comes back.
+ */
+describe("nothing on the site offers a sub-national calendar", () => {
   it.each([
-    ["KA", 7],
-    ["MH", 4],
-    ["DL", 3],
-    ["WB", 3],
-    ["TN", 2],
-  ])("%s carries %i in 2026", (code, count) => {
-    const list = STATE_SPECIFIC_HOLIDAYS[code as keyof typeof STATE_SPECIFIC_HOLIDAYS];
-    expect(list.filter((h) => h.date.startsWith("2026"))).toHaveLength(count);
+    ["Karnataka"],
+    ["Maharashtra"],
+    ["Tamil Nadu"],
+    ["West Bengal"],
+    ["state list"],
+    ["your state"],
+  ])("the homepage does not mention %s", (phrase) => {
+    expect(INDEX.toLowerCase()).not.toContain(phrase.toLowerCase());
   });
 
-  it("is stated the same way in the FAQ", () => {
-    expect(INDEX).toContain(
-      "seven more for Karnataka, four for Maharashtra, three each for Delhi and West Bengal, and two for Tamil Nadu"
-    );
+  it("the about page does not offer regional lists", () => {
+    expect(ABOUT).not.toContain("Karnataka");
+    expect(ABOUT).not.toContain("state government gazettes");
+  });
+
+  it("the data file carries no state lists", () => {
+    expect(Object.keys(HOLIDAY_DATA)).not.toContain("state_specific_holidays");
   });
 });
 
 describe("the US federal calendar", () => {
-  const usa = STATE_SPECIFIC_HOLIDAYS.USA;
+  const usa = US_FEDERAL_HOLIDAYS;
 
   /** Neither is a federal holiday, and Easter is always a Sunday, so it used to
    *  produce a plan titled "Easter Sunday (Post-Break)". */
@@ -324,10 +335,8 @@ describe("the 2027 calendar", () => {
 
 describe("every holiday row is internally consistent", () => {
   const all = [
-    ...NATIONAL_HOLIDAYS.map((h) => ({ ...h, scope: "national" })),
-    ...Object.entries(STATE_SPECIFIC_HOLIDAYS).flatMap(([k, v]) =>
-      v.map((h) => ({ ...h, scope: k }))
-    ),
+    ...NATIONAL_HOLIDAYS.map((h) => ({ ...h, scope: "india" })),
+    ...US_FEDERAL_HOLIDAYS.map((h) => ({ ...h, scope: "us-federal" })),
   ];
   const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -356,8 +365,8 @@ describe("every holiday row is internally consistent", () => {
         seen.add(r.date);
       });
     };
-    check(NATIONAL_HOLIDAYS, "national");
-    Object.entries(STATE_SPECIFIC_HOLIDAYS).forEach(([k, v]) => check(v, k));
+    check(NATIONAL_HOLIDAYS, "india");
+    check(US_FEDERAL_HOLIDAYS, "us-federal");
     expect(dupes).toEqual([]);
   });
 });

@@ -215,6 +215,16 @@ const itemListJsonLd = JSON.stringify({
                       )}
                     </span>
 
+                    {/* The caveat that belongs to this country and no other —
+                        China's make-up workdays, Indonesia's estimated 2027.
+                        Only four countries carry one, so it reads as a warning
+                        rather than as boilerplate every card repeats. */}
+                    {country.note && (
+                      <span class="block border-t border-hairline pt-2.5 text-xs leading-relaxed text-muted">
+                        {country.note}
+                      </span>
+                    )}
+
                     <span class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
                       <span>
                         <span class="font-mono font-bold tabular">{row.holidays2026}</span> in
@@ -255,11 +265,11 @@ const itemListJsonLd = JSON.stringify({
           book a flight on a working Tuesday.
         </p>
         <p>
-          <strong class="text-ink">Regional days, where most of the country gets them.</strong>{" "}
-          Federal countries do not have one list. Australia's King's Birthday is a holiday in
-          six states of eight, Germany's Corpus Christi in a minority of its sixteen — so a
-          regional holiday is carried only where at least half the country observes it, and
-          the country page says so. Your state or canton will differ.
+          <strong class="text-ink">National only.</strong> This is a country-level planner: it
+          carries one calendar per country and no sub-national ones for anywhere. Where a
+          country's holidays genuinely vary internally, a day is included when most of the
+          country observes it and left out when it is not — so what you get is the calendar a
+          national employer would publish, not a local one.
         </p>
         <p>
           <strong class="text-ink">Dates that depend on a moon sighting move.</strong> Eid,
@@ -279,9 +289,9 @@ const itemListJsonLd = JSON.stringify({
       <h2 class="mt-10 text-lg font-extrabold text-ink sm:text-xl">Where the dates come from</h2>
       <div class="mt-4 space-y-4 text-sm leading-relaxed text-body">
         <p>
-          India's list is transcribed from the DoPT gazetted holiday notification with five
-          state lists layered under it, and the US list from the Office of Personnel
-          Management's federal holiday schedule. Both predate the rest and are hand-checked.
+          India's list is transcribed from the DoPT gazetted holiday notification and the US
+          list from the Office of Personnel Management's federal holiday schedule. Both predate
+          the rest and are hand-checked.
         </p>
         <p>
           The other {total - 2} countries are compiled from Google's published public-holiday

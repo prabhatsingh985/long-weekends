@@ -2,9 +2,12 @@
   "sources": [
     "Department of Personnel and Training (DoPT), Govt of India Gazetted Holiday List",
     "Reserve Bank of India (RBI) Negotiable Instruments Act (NI Act) Section 25 List",
-    "State Government Official Gazettes (Karnataka, Maharashtra, Delhi, West Bengal, Tamil Nadu, Telangana)",
     "U.S. Office of Personnel Management (OPM) Federal Holidays",
     "Google public holiday calendars (calendar.google.com), cross-checked against Nager.Date"
+  ],
+  "years": [
+    2026,
+    2027
   ],
   "national_holidays": [
     {
@@ -14,9 +17,6 @@
       "day": "Monday",
       "type": "National",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "National Holiday celebrating the Constitution of India. Falls on Monday offering a direct 3-day weekend (Sat 24 - Mon 26 Jan)."
     },
@@ -27,9 +27,6 @@
       "day": "Monday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Major festival honoring Lord Shiva. Falls on Monday creating a direct 3-day weekend (Sat 14 - Mon 16 Feb)."
     },
@@ -40,9 +37,6 @@
       "day": "Wednesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_2_leaves",
       "description": "Festival of Colors. Falls on Wednesday. Taking Thursday (Mar 5) and Friday (Mar 6) off yields a continuous 5-day holiday."
     },
@@ -53,9 +47,6 @@
       "day": "Saturday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Culmination of holy month of Ramadan. Falls on Saturday."
     },
@@ -66,9 +57,6 @@
       "day": "Tuesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_1_leave",
       "description": "Birth anniversary of Lord Mahavira. Falls on Tuesday. Taking Monday (Mar 30) off yields a 4-day weekend."
     },
@@ -79,9 +67,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Christian holy day commemorating the crucifixion. Falls on Friday creating a direct 3-day weekend (Fri 3 - Sun 5 Apr)."
     },
@@ -92,9 +77,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Commemorates the birth of Lord Buddha. Falls on Friday creating a direct 3-day weekend (Fri 1 - Sun 3 May)."
     },
@@ -105,9 +87,6 @@
       "day": "Wednesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_2_leaves",
       "description": "Feast of the Sacrifice. Falls on Wednesday."
     },
@@ -118,9 +97,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "First month of the Islamic calendar. Falls on Friday offering a direct 3-day weekend (Fri 26 - Sun 28 Jun)."
     },
@@ -131,9 +107,6 @@
       "day": "Saturday",
       "type": "National",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "National Holiday celebrating Indian independence. Falls on Saturday."
     },
@@ -144,9 +117,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Festival celebrating sibling bond. Falls on Friday providing a direct 3-day weekend (Fri 28 - Sun 30 Aug)."
     },
@@ -157,9 +127,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Birth anniversary of Lord Krishna. Falls on Friday providing a direct 3-day weekend (Fri 4 - Sun 6 Sep)."
     },
@@ -170,9 +137,6 @@
       "day": "Friday",
       "type": "National",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "National Holiday honoring Mahatma Gandhi. Falls on Friday providing a direct 3-day weekend (Fri 2 - Sun 4 Oct)."
     },
@@ -183,9 +147,6 @@
       "day": "Tuesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_1_leave",
       "description": "Victory of good over evil. Falls on Tuesday. Taking Monday (Oct 19) off gives a 4-day weekend."
     },
@@ -196,9 +157,6 @@
       "day": "Sunday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Festival of Lights. Falls on Sunday."
     },
@@ -209,9 +167,6 @@
       "day": "Tuesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_1_leave",
       "description": "Birth anniversary of Guru Nanak Dev Ji. Falls on Tuesday. Taking Monday (Nov 23) gives a 4-day weekend."
     },
@@ -222,9 +177,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Celebration of the Nativity of Jesus Christ. Falls on Friday providing a direct 3-day weekend (Fri 25 - Sun 27 Dec)."
     },
@@ -235,9 +187,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "New Year 2027 celebration. Falls on Friday offering a direct 3-day weekend (Fri 1 - Sun 3 Jan 2027)."
     },
@@ -248,9 +197,6 @@
       "day": "Tuesday",
       "type": "National",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_1_leave",
       "description": "National Holiday celebrating the Constitution of India. Falls on Tuesday; one leave on Monday 25 Jan yields a 4-day break."
     },
@@ -261,9 +207,6 @@
       "day": "Wednesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_2_leaves",
       "description": "Culmination of Ramadan. Falls midweek; date may shift by a day on moon sighting."
     },
@@ -274,9 +217,6 @@
       "day": "Tuesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_1_leave",
       "description": "Festival of Colours. Falls on Tuesday; one leave on Monday 22 Mar yields a 4-day break."
     },
@@ -287,9 +227,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Falls on Friday, giving a direct 3-day weekend (26-28 Mar)."
     },
@@ -300,9 +237,6 @@
       "day": "Thursday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_1_leave",
       "description": "Birth of Lord Rama. Falls on Thursday; one leave on Friday 16 Apr yields a 4-day break."
     },
@@ -313,9 +247,6 @@
       "day": "Monday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Birth anniversary of Lord Mahavira. Falls on Monday, giving a direct 3-day weekend."
     },
@@ -326,9 +257,6 @@
       "day": "Monday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Bakrid. Falls on Monday, giving a direct 3-day weekend; date may shift on moon sighting."
     },
@@ -339,9 +267,6 @@
       "day": "Thursday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_1_leave",
       "description": "Falls on Thursday; one leave on Friday 21 May yields a 4-day break."
     },
@@ -352,9 +277,6 @@
       "day": "Wednesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_2_leaves",
       "description": "Falls midweek; date may shift by a day on moon sighting."
     },
@@ -365,9 +287,6 @@
       "day": "Sunday",
       "type": "National",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Independence Day and Milad-un-Nabi fall on the same Sunday in 2027, so neither adds a day off."
     },
@@ -378,9 +297,6 @@
       "day": "Wednesday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "bridge_2_leaves",
       "description": "Falls midweek."
     },
@@ -391,9 +307,6 @@
       "day": "Saturday",
       "type": "National",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Falls on a Saturday in 2027."
     },
@@ -404,9 +317,6 @@
       "day": "Saturday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Falls on a Saturday in 2027."
     },
@@ -417,9 +327,6 @@
       "day": "Friday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "direct_3_day",
       "description": "Festival of Lights. Falls on Friday, giving a direct 3-day weekend (29-31 Oct)."
     },
@@ -430,9 +337,6 @@
       "day": "Sunday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Falls on a Sunday in 2027."
     },
@@ -443,9 +347,6 @@
       "day": "Saturday",
       "type": "Gazetted",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Falls on a Saturday in 2027."
     },
@@ -456,520 +357,221 @@
       "day": "Saturday",
       "type": "National",
       "isGazetted": true,
-      "states": [
-        "ALL"
-      ],
       "longWeekendType": "weekend",
       "description": "Carried so the window can bridge into 2028. Falls on a Saturday."
     }
   ],
-  "state_specific_holidays": {
-    "KA": [
-      {
-        "id": "ka-sankranti-2026",
-        "name": "Makar Sankranti",
-        "date": "2026-01-15",
-        "day": "Thursday",
-        "state": "Karnataka",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "ka-ugadi-2026",
-        "name": "Ugadi (Kannada New Year)",
-        "date": "2026-03-20",
-        "day": "Friday",
-        "state": "Karnataka",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "ka-ambedkar-2026",
-        "name": "Dr. B.R. Ambedkar Jayanti",
-        "date": "2026-04-14",
-        "day": "Tuesday",
-        "state": "Karnataka",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "ka-ganesh-2026",
-        "name": "Ganesh Chaturthi",
-        "date": "2026-09-14",
-        "day": "Monday",
-        "state": "Karnataka",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "ka-ayudha-2026",
-        "name": "Maha Navami / Ayudha Puja",
-        "date": "2026-10-19",
-        "day": "Monday",
-        "state": "Karnataka",
-        "longWeekendType": "direct_4_day_combo"
-      },
-      {
-        "id": "ka-rajyotsava-2026",
-        "name": "Kannada Rajyotsava",
-        "date": "2026-11-01",
-        "day": "Sunday",
-        "state": "Karnataka",
-        "longWeekendType": "weekend"
-      },
-      {
-        "id": "ka-kanakadasa-2026",
-        "name": "Kanakadasa Jayanti",
-        "date": "2026-11-27",
-        "day": "Friday",
-        "state": "Karnataka",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "ka-sankranti-2027",
-        "name": "Makar Sankranti",
-        "date": "2027-01-15",
-        "day": "Friday",
-        "state": "KA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "ka-ugadi-2027",
-        "name": "Ugadi (Kannada New Year)",
-        "date": "2027-04-07",
-        "day": "Wednesday",
-        "state": "KA",
-        "longWeekendType": "bridge_2_leaves"
-      },
-      {
-        "id": "ka-ambedkar-2027",
-        "name": "Dr. B.R. Ambedkar Jayanti",
-        "date": "2027-04-14",
-        "day": "Wednesday",
-        "state": "KA",
-        "longWeekendType": "bridge_2_leaves"
-      },
-      {
-        "id": "ka-ganesh-2027",
-        "name": "Ganesh Chaturthi",
-        "date": "2027-09-04",
-        "day": "Saturday",
-        "state": "KA",
-        "longWeekendType": "weekend"
-      },
-      {
-        "id": "ka-navami-2027",
-        "name": "Maha Navami / Ayudha Puja",
-        "date": "2027-10-08",
-        "day": "Friday",
-        "state": "KA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "ka-rajyotsava-2027",
-        "name": "Kannada Rajyotsava",
-        "date": "2027-11-01",
-        "day": "Monday",
-        "state": "KA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "ka-kanakadasa-2027",
-        "name": "Kanakadasa Jayanti",
-        "date": "2027-11-16",
-        "day": "Tuesday",
-        "state": "KA",
-        "longWeekendType": "bridge_1_leave"
-      }
-    ],
-    "MH": [
-      {
-        "id": "mh-shivaji-2026",
-        "name": "Chhatrapati Shivaji Maharaj Jayanti",
-        "date": "2026-02-19",
-        "day": "Thursday",
-        "state": "Maharashtra",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "mh-gudi-padwa-2026",
-        "name": "Gudi Padwa (Marathi New Year)",
-        "date": "2026-03-20",
-        "day": "Friday",
-        "state": "Maharashtra",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "mh-day-2026",
-        "name": "Maharashtra Day",
-        "date": "2026-05-01",
-        "day": "Friday",
-        "state": "Maharashtra",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "mh-ganesh-2026",
-        "name": "Ganesh Chaturthi",
-        "date": "2026-09-14",
-        "day": "Monday",
-        "state": "Maharashtra",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "mh-shivaji-2027",
-        "name": "Chhatrapati Shivaji Maharaj Jayanti",
-        "date": "2027-02-19",
-        "day": "Friday",
-        "state": "MH",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "mh-gudi-2027",
-        "name": "Gudi Padwa (Marathi New Year)",
-        "date": "2027-04-07",
-        "day": "Wednesday",
-        "state": "MH",
-        "longWeekendType": "bridge_2_leaves"
-      },
-      {
-        "id": "mh-maha-day-2027",
-        "name": "Maharashtra Day",
-        "date": "2027-05-01",
-        "day": "Saturday",
-        "state": "MH",
-        "longWeekendType": "weekend"
-      },
-      {
-        "id": "mh-ganesh-2027",
-        "name": "Ganesh Chaturthi",
-        "date": "2027-09-04",
-        "day": "Saturday",
-        "state": "MH",
-        "longWeekendType": "weekend"
-      }
-    ],
-    "DL": [
-      {
-        "id": "dl-guru-gobind-2026",
-        "name": "Guru Gobind Singh Jayanti",
-        "date": "2026-01-05",
-        "day": "Monday",
-        "state": "Delhi / NCR",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "dl-rakhi-2026",
-        "name": "Raksha Bandhan",
-        "date": "2026-08-28",
-        "day": "Friday",
-        "state": "Delhi / NCR",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "dl-chhath-2026",
-        "name": "Chhath Puja",
-        "date": "2026-11-15",
-        "day": "Sunday",
-        "state": "Delhi / NCR",
-        "longWeekendType": "weekend"
-      },
-      {
-        "id": "dl-gobind-2027",
-        "name": "Guru Gobind Singh Jayanti",
-        "date": "2027-01-15",
-        "day": "Friday",
-        "state": "DL",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "dl-rakhi-2027",
-        "name": "Raksha Bandhan",
-        "date": "2027-08-17",
-        "day": "Tuesday",
-        "state": "DL",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "dl-chhath-2027",
-        "name": "Chhath Puja",
-        "date": "2027-11-04",
-        "day": "Thursday",
-        "state": "DL",
-        "longWeekendType": "bridge_1_leave"
-      }
-    ],
-    "WB": [
-      {
-        "id": "wb-netaji-2026",
-        "name": "Netaji Subhas Chandra Bose Jayanti",
-        "date": "2026-01-23",
-        "day": "Friday",
-        "state": "West Bengal",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "wb-poila-2026",
-        "name": "Poila Boishakh (Bengali New Year)",
-        "date": "2026-04-15",
-        "day": "Wednesday",
-        "state": "West Bengal",
-        "longWeekendType": "bridge_2_leaves"
-      },
-      {
-        "id": "wb-durga-puja-2026",
-        "name": "Durga Puja (Maha Saptami to Vijaya Dashmi)",
-        "date": "2026-10-18",
-        "endDate": "2026-10-21",
-        "day": "Sunday to Wednesday",
-        "state": "West Bengal",
-        "longWeekendType": "mega_carnival"
-      },
-      {
-        "id": "wb-netaji-2027",
-        "name": "Netaji Subhas Chandra Bose Jayanti",
-        "date": "2027-01-23",
-        "day": "Saturday",
-        "state": "WB",
-        "longWeekendType": "weekend"
-      },
-      {
-        "id": "wb-poila-2027",
-        "name": "Poila Boishakh (Bengali New Year)",
-        "date": "2027-04-15",
-        "day": "Thursday",
-        "state": "WB",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "wb-durga-2027",
-        "name": "Durga Puja (Maha Saptami to Vijaya Dashmi)",
-        "date": "2027-10-06",
-        "day": "Wednesday",
-        "state": "WB",
-        "longWeekendType": "bridge_2_leaves"
-      }
-    ],
-    "TN": [
-      {
-        "id": "tn-pongal-2026",
-        "name": "Pongal / Thiruvalluvar Day / Uzhavar Thirunal",
-        "date": "2026-01-14",
-        "endDate": "2026-01-16",
-        "day": "Wednesday to Friday",
-        "state": "Tamil Nadu",
-        "longWeekendType": "direct_5_day_combo"
-      },
-      {
-        "id": "tn-puthandu-2026",
-        "name": "Tamil New Year (Puthandu)",
-        "date": "2026-04-14",
-        "day": "Tuesday",
-        "state": "Tamil Nadu",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "tn-pongal-2027",
-        "name": "Pongal / Thiruvalluvar Day / Uzhavar Thirunal",
-        "date": "2027-01-15",
-        "day": "Friday",
-        "state": "TN",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "tn-newyear-2027",
-        "name": "Tamil New Year (Puthandu)",
-        "date": "2027-04-14",
-        "day": "Wednesday",
-        "state": "TN",
-        "longWeekendType": "bridge_2_leaves"
-      }
-    ],
-    "USA": [
-      {
-        "id": "us-new-year-2026",
-        "name": "New Year's Day",
-        "date": "2026-01-01",
-        "day": "Thursday",
-        "state": "USA",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "us-mlk-2026",
-        "name": "M L King Day",
-        "date": "2026-01-19",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-presidents-2026",
-        "name": "Presidents' Day",
-        "date": "2026-02-16",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-memorial-2026",
-        "name": "Memorial Day",
-        "date": "2026-05-25",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-juneteenth-2026",
-        "name": "Juneteenth",
-        "date": "2026-06-19",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-independence-obs-2026",
-        "name": "Independence Day (observed)",
-        "date": "2026-07-03",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-labor-2026",
-        "name": "Labor Day",
-        "date": "2026-09-07",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-columbus-2026",
-        "name": "Columbus Day",
-        "date": "2026-10-12",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-veterans-2026",
-        "name": "Veterans Day",
-        "date": "2026-11-11",
-        "day": "Wednesday",
-        "state": "USA",
-        "longWeekendType": "bridge_2_leaves"
-      },
-      {
-        "id": "us-thanksgiving-2026",
-        "name": "Thanksgiving Day",
-        "date": "2026-11-26",
-        "day": "Thursday",
-        "state": "USA",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "us-christmas-2026",
-        "name": "Christmas",
-        "date": "2026-12-25",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-new-year-2027",
-        "name": "New Year's Day",
-        "date": "2027-01-01",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-mlk-2027",
-        "name": "M L King Day",
-        "date": "2027-01-18",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-presidents-2027",
-        "name": "Presidents' Day",
-        "date": "2027-02-15",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-memorial-2027",
-        "name": "Memorial Day",
-        "date": "2027-05-31",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-juneteenth-2027",
-        "name": "Juneteenth (observed)",
-        "date": "2027-06-18",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-independence-2027",
-        "name": "Independence Day (observed)",
-        "date": "2027-07-05",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-labor-2027",
-        "name": "Labor Day",
-        "date": "2027-09-06",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-columbus-2027",
-        "name": "Columbus Day",
-        "date": "2027-10-11",
-        "day": "Monday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-veterans-2027",
-        "name": "Veterans Day",
-        "date": "2027-11-11",
-        "day": "Thursday",
-        "state": "USA",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "us-thanksgiving-2027",
-        "name": "Thanksgiving Day",
-        "date": "2027-11-25",
-        "day": "Thursday",
-        "state": "USA",
-        "longWeekendType": "bridge_1_leave"
-      },
-      {
-        "id": "us-christmas-2027",
-        "name": "Christmas (observed)",
-        "date": "2027-12-24",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      },
-      {
-        "id": "us-new-year-2028",
-        "name": "New Year's Day (observed)",
-        "date": "2027-12-31",
-        "day": "Friday",
-        "state": "USA",
-        "longWeekendType": "direct_3_day"
-      }
-    ]
-  },
-  "years": [
-    2026,
-    2027
+  "us_federal_holidays": [
+    {
+      "id": "us-new-year-2026",
+      "name": "New Year's Day",
+      "date": "2026-01-01",
+      "day": "Thursday",
+      "longWeekendType": "bridge_1_leave"
+    },
+    {
+      "id": "us-mlk-2026",
+      "name": "M L King Day",
+      "date": "2026-01-19",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-presidents-2026",
+      "name": "Presidents' Day",
+      "date": "2026-02-16",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-memorial-2026",
+      "name": "Memorial Day",
+      "date": "2026-05-25",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-juneteenth-2026",
+      "name": "Juneteenth",
+      "date": "2026-06-19",
+      "day": "Friday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-independence-obs-2026",
+      "name": "Independence Day (observed)",
+      "date": "2026-07-03",
+      "day": "Friday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-labor-2026",
+      "name": "Labor Day",
+      "date": "2026-09-07",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-columbus-2026",
+      "name": "Columbus Day",
+      "date": "2026-10-12",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-veterans-2026",
+      "name": "Veterans Day",
+      "date": "2026-11-11",
+      "day": "Wednesday",
+      "longWeekendType": "bridge_2_leaves"
+    },
+    {
+      "id": "us-thanksgiving-2026",
+      "name": "Thanksgiving Day",
+      "date": "2026-11-26",
+      "day": "Thursday",
+      "longWeekendType": "bridge_1_leave"
+    },
+    {
+      "id": "us-christmas-2026",
+      "name": "Christmas",
+      "date": "2026-12-25",
+      "day": "Friday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-new-year-2027",
+      "name": "New Year's Day",
+      "date": "2027-01-01",
+      "day": "Friday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-mlk-2027",
+      "name": "M L King Day",
+      "date": "2027-01-18",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-presidents-2027",
+      "name": "Presidents' Day",
+      "date": "2027-02-15",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-memorial-2027",
+      "name": "Memorial Day",
+      "date": "2027-05-31",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-juneteenth-2027",
+      "name": "Juneteenth (observed)",
+      "date": "2027-06-18",
+      "day": "Friday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-independence-2027",
+      "name": "Independence Day (observed)",
+      "date": "2027-07-05",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-labor-2027",
+      "name": "Labor Day",
+      "date": "2027-09-06",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-columbus-2027",
+      "name": "Columbus Day",
+      "date": "2027-10-11",
+      "day": "Monday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-veterans-2027",
+      "name": "Veterans Day",
+      "date": "2027-11-11",
+      "day": "Thursday",
+      "longWeekendType": "bridge_1_leave"
+    },
+    {
+      "id": "us-thanksgiving-2027",
+      "name": "Thanksgiving Day",
+      "date": "2027-11-25",
+      "day": "Thursday",
+      "longWeekendType": "bridge_1_leave"
+    },
+    {
+      "id": "us-christmas-2027",
+      "name": "Christmas (observed)",
+      "date": "2027-12-24",
+      "day": "Friday",
+      "longWeekendType": "direct_3_day"
+    },
+    {
+      "id": "us-new-year-2028",
+      "name": "New Year's Day (observed)",
+      "date": "2027-12-31",
+      "day": "Friday",
+      "longWeekendType": "direct_3_day"
+    }
+  ],
+  "countryOrder": [
+    "IN",
+    "CN",
+    "JP",
+    "KR",
+    "TW",
+    "HK",
+    "SG",
+    "MY",
+    "ID",
+    "PH",
+    "VN",
+    "TH",
+    "AU",
+    "NZ",
+    "GB",
+    "IE",
+    "DE",
+    "FR",
+    "NL",
+    "BE",
+    "CH",
+    "AT",
+    "ES",
+    "PT",
+    "IT",
+    "PL",
+    "CZ",
+    "RO",
+    "UA",
+    "EE",
+    "SE",
+    "NO",
+    "DK",
+    "FI",
+    "GR",
+    "US",
+    "CA",
+    "MX",
+    "BR",
+    "AR",
+    "IL",
+    "AE",
+    "TR",
+    "EG",
+    "ZA",
+    "NG",
+    "KE"
   ],
   "countries": {
     "IN": {
@@ -981,7 +583,7 @@
         6
       ],
       "subdivisions": 0,
-      "note": "Gazetted national holidays. Your state adds its own, and most IT employers publish a shorter list than the government's.",
+      "note": "The gazetted national list. Most IT employers publish a shorter one, so the Company Holiday Optimizer will be closer to what you actually get.",
       "source": "Curated list — see `sources` above",
       "holidays": [
         {
@@ -1240,7 +842,7 @@
         6
       ],
       "subdivisions": 0,
-      "note": "Golden Week is paid for: the State Council moves the neighbouring Saturday or Sunday to a working day, and publishes the swap each autumn. Those make-up days are not in this calendar, so a Chinese break shown here can cost a weekend it does not mention.",
+      "note": "Golden Week is paid for: the neighbouring Saturday or Sunday is moved to a working day, and the swap is published each autumn. Those make-up days are not in this calendar, so a Chinese break shown here can cost a weekend it does not mention.",
       "source": "Google public holiday calendar (en.china)",
       "holidays": [
         {
@@ -3064,7 +2666,6 @@
         6
       ],
       "subdivisions": 16,
-      "note": "State lists vary widely, and several holidays follow a moon sighting. The ones here are those kept in at least half the states.",
       "source": "Google public holiday calendar (en.malaysia)",
       "holidays": [
         {
@@ -4558,7 +4159,6 @@
         6
       ],
       "subdivisions": 8,
-      "note": "State lists diverge sharply after the national days: Labour Day alone falls in March, May and October depending on where you sit.",
       "source": "Google public holiday calendar (en.australian)",
       "holidays": [
         {
@@ -4988,7 +4588,6 @@
         6
       ],
       "subdivisions": 3,
-      "note": "Scotland keeps a different list — 2 January and St Andrew's Day instead of Easter Monday — and Northern Ireland adds two more. These are the days common to England and Wales.",
       "source": "Google public holiday calendar (en.uk)",
       "holidays": [
         {
@@ -5309,7 +4908,6 @@
         6
       ],
       "subdivisions": 16,
-      "note": "Nine holidays are nationwide; Bavaria and Baden-Württemberg keep several more. The ones here are those observed in at least half the states.",
       "source": "Google public holiday calendar (en.german)",
       "holidays": [
         {
@@ -6038,7 +5636,6 @@
         6
       ],
       "subdivisions": 26,
-      "note": "Only four holidays are federal. The rest are cantonal, and the ones here are those a majority of cantons keep.",
       "source": "Google public holiday calendar (en.ch)",
       "holidays": [
         {
@@ -11702,54 +11299,5 @@
         }
       ]
     }
-  },
-  "countryOrder": [
-    "IN",
-    "CN",
-    "JP",
-    "KR",
-    "TW",
-    "HK",
-    "SG",
-    "MY",
-    "ID",
-    "PH",
-    "VN",
-    "TH",
-    "AU",
-    "NZ",
-    "GB",
-    "IE",
-    "DE",
-    "FR",
-    "NL",
-    "BE",
-    "CH",
-    "AT",
-    "ES",
-    "PT",
-    "IT",
-    "PL",
-    "CZ",
-    "RO",
-    "UA",
-    "EE",
-    "SE",
-    "NO",
-    "DK",
-    "FI",
-    "GR",
-    "US",
-    "CA",
-    "MX",
-    "BR",
-    "AR",
-    "IL",
-    "AE",
-    "TR",
-    "EG",
-    "ZA",
-    "NG",
-    "KE"
-  ]
+  }
 }
