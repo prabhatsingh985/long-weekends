@@ -7,6 +7,14 @@
  * document-level now lives here.
  */
 import "../styles/global.css";
+/**
+ * The flag artwork, defined once per page as `<symbol>`s.
+ *
+ * It lives in the layout rather than in the picker because the picker is
+ * rendered three times on the homepage and the artwork only needs to exist
+ * once. Every `<Flag>` anywhere on the page is a `<use>` pointing here.
+ */
+import FlagSprite from "../components/FlagSprite.astro";
 
 interface Props {
   title: string;
@@ -232,6 +240,9 @@ const OG_IMAGE_ALT =
   </head>
 
   <body class="min-h-screen flex flex-col">
+    {/* First in the body so every `<use>` after it resolves against a symbol
+        that is already parsed. */}
+    <FlagSprite />
     <a class="skip-link" href="#main">Skip to results</a>
     <slot />
   </body>

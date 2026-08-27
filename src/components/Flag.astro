@@ -2,58 +2,48 @@
 /**
  * A small country flag, drawn rather than typed.
  *
- * The regions used to be the flag emoji 🇮🇳 / 🇺🇸, which is a pair of Regional
- * Indicator letters that the font is expected to fuse into one glyph. Windows
- * never has: Segoe UI Emoji ships no flag glyphs, so Chrome and Edge on Windows
- * fall back to drawing the letters themselves and the region menu rendered as
- * bare "IN" and "US" tiles that looked like broken images. Roughly half the
- * audience for a work-holiday planner is on Windows, so the emoji was never a
- * safe way to say this.
+ * The regions used to be the flag emoji, which is a pair of Regional Indicator
+ * letters that the font is expected to fuse into one glyph. Windows never has:
+ * Segoe UI Emoji ships no flag glyphs, so Chrome and Edge on Windows fall back
+ * to drawing the letters themselves and the region menu rendered as bare "IN"
+ * and "US" tiles that looked like broken images. Roughly half the audience for
+ * a work-holiday planner is on Windows, so the emoji was never a safe way to
+ * say this.
  *
- * An inline SVG renders identically everywhere and stays crisp at any zoom.
- * Deliberately simplified for the size it is drawn at — the chakra is a ring
- * rather than 24 spokes, and the US canton carries no stars, because at 20px
- * wide both would collapse into mud.
+ * The artwork lives in src/data/flags.ts and is emitted once per page by
+ * FlagSprite.astro; this component is the reference to it. It used to hold the
+ * two flags inline, which was reasonable at two countries and is not at
+ * forty-seven — the homepage draws the country list three times over.
+ *
+ * `code` is the ISO-3166 alpha-2 code, matching the keys of the country data.
+ * An unknown code falls back to a neutral tile rather than an empty box, so a
+ * country added to the data before its artwork still renders something with the
+ * right footprint.
  */
+import { FLAGS } from "../data/flags";
+
 interface Props {
-  code: "IN" | "US";
+  code: string;
   /** Extra classes for sizing in context. */
   class?: string;
+  /**
+   * Accessible name. Omit it wherever the flag sits beside its own country
+   * name, which is every current usage — naming it there would make a menu item
+   * announce as "India India Gazetted public…".
+   */
+  label?: string;
 }
 
-const { code, class: extra = "" } = Astro.props;
-
-/** 13 bands, odd ones red. Height 14 / 13 = 1.0769. */
-const STRIPE = 14 / 13;
-const redStripes = Array.from({ length: 13 }, (_, i) => i).filter((i) => i % 2 === 0);
+const { code, class: extra = "", label } = Astro.props;
+const id = FLAGS[code] ? `flag-${code}` : "flag-fallback";
 ---
 
-{/* Decorative in every current usage: the flag always sits beside its own
-    text label, so naming it here would make a menu item announce as
-    "India Pan-India IT Gazetted public…". */}
-{
-  code === "IN" ? (
-    <svg class:list={["flag", extra]} viewBox="0 0 20 14" aria-hidden="true">
-      <rect width="20" height="14" fill="#ff9933" />
-      <rect y="4.667" width="20" height="4.666" fill="#ffffff" />
-      <rect y="9.333" width="20" height="4.667" fill="#138808" />
-      <circle
-        cx="10"
-        cy="7"
-        r="1.7"
-        fill="none"
-        stroke="#0a3d91"
-        stroke-width="0.5"
-      />
-      <circle cx="10" cy="7" r="0.4" fill="#0a3d91" />
-    </svg>
-  ) : (
-    <svg class:list={["flag", extra]} viewBox="0 0 20 14" aria-hidden="true">
-      <rect width="20" height="14" fill="#ffffff" />
-      {redStripes.map((i) => (
-        <rect y={i * STRIPE} width="20" height={STRIPE} fill="#b22234" />
-      ))}
-      <rect width="8.4" height={STRIPE * 7} fill="#3c3b6e" />
-    </svg>
-  )
-}
+<svg
+  class:list={["flag", extra]}
+  viewBox="0 0 20 14"
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+>
+  <use href={`#${id}`}></use>
+</svg>

@@ -1,5 +1,10 @@
 import type { VacationPlan, CalendarDay, RegionCode } from "../types";
 import holidaysData from "../../holidays.json";
+import {
+  COUNTRY_BY_CODE,
+  INDIA_SUB_REGIONS,
+  resolveCountryCode,
+} from "./countries";
 
 /**
  * The data file was `holidays_2026.json` and this binding was
@@ -15,13 +20,20 @@ export const STATE_SPECIFIC_HOLIDAYS = holidaysData.state_specific_holidays;
  *  used to be imported above AND redeclared here, which is a TS conflict. */
 export type { RegionCode };
 
-export const REGION_STATE_MAP: Record<RegionCode, string[]> = {
+/**
+ * India's state groupings, kept as an export because it is part of this
+ * module's published surface.
+ *
+ * It used to be the whole region system: a `Record<RegionCode, string[]>` whose
+ * entries were four Indian sub-regions plus the string "USA", which is how the
+ * United States came to be modelled as a state of India. That worked while
+ * there were two calendars and stopped working at forty-seven, so region
+ * resolution now lives in ./countries and this is only what it always
+ * described — which Indian state lists layer on top of the national one.
+ */
+export const REGION_STATE_MAP: Record<string, string[]> = {
   ALL: [],
-  SOUTH: ["KA", "TN"],
-  WEST: ["MH"],
-  NORTH: ["DL"],
-  EAST: ["WB"],
-  USA: ["USA"],
+  ...INDIA_SUB_REGIONS,
 };
 
 /**
@@ -115,15 +127,37 @@ export function formatLocalIso(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Which weekdays are rest days for a region, honouring the work-week toggle.
+ *
+ * Two things this has to get right that a hardcoded Saturday-Sunday pair did
+ * not. Israel and Egypt rest on Friday and Saturday, so treating their Sunday
+ * as a weekend both hides a real working day and swallows the Sunday holidays
+ * that are the whole point of their calendars. And the six-day toggle has to
+ * drop the country's SECOND rest day, not Saturday specifically — which is why
+ * `weekend` is ordered with the more significant day first.
+ */
+function weekendDaysFor(region: RegionCode, workWeek: number): Set<number> {
+  const country = COUNTRY_BY_CODE[resolveCountryCode(region)];
+  const [primary, secondary] = country?.weekend ?? [0, 6];
+  return workWeek === 6 ? new Set([primary]) : new Set([primary, secondary]);
+}
+
 export function buildCalendarMap(
   region: RegionCode = "ALL",
   workWeek: number = 5,
   customHolidays?: string[]
 ): Map<string, CalendarDay> {
   const holidayMap = new Map<string, string>();
+  const countryCode = resolveCountryCode(region);
+  const country = COUNTRY_BY_CODE[countryCode];
 
+  // Names a company list can borrow, so an uploaded date that happens to be a
+  // real holiday shows its real name rather than "Company Holiday". Drawn from
+  // the country in play rather than only from India's list, which is why an
+  // American or German office list now gets named days too.
   const knownFestivals = new Map<string, string>();
-  NATIONAL_HOLIDAYS.forEach((h) => knownFestivals.set(h.date, h.name));
+  (country?.holidays ?? []).forEach((h) => knownFestivals.set(h.date, h.name));
   Object.values(STATE_SPECIFIC_HOLIDAYS).forEach((arr) => {
     arr.forEach((h) => {
       if (!knownFestivals.has(h.date)) knownFestivals.set(h.date, h.name);
@@ -140,16 +174,13 @@ export function buildCalendarMap(
       const festivalName = knownFestivals.get(dt) || "Company Holiday";
       holidayMap.set(dt, festivalName);
     });
-  } else if (region === "USA") {
-    const usaHols = STATE_SPECIFIC_HOLIDAYS["USA"] || [];
-    usaHols.forEach((h) => {
-      holidayMap.set(h.date, h.name);
-    });
   } else {
-    NATIONAL_HOLIDAYS.forEach((h) => {
+    (country?.holidays ?? []).forEach((h) => {
       holidayMap.set(h.date, h.name);
     });
 
+    // Only India has sub-national lists, and only India's sub-regions resolve
+    // to anything here — REGION_STATE_MAP is empty for every other value.
     const states = REGION_STATE_MAP[region] || [];
     states.forEach((st) => {
       const stateHols = STATE_SPECIFIC_HOLIDAYS[st] || [];
@@ -161,6 +192,7 @@ export function buildCalendarMap(
     });
   }
 
+  const weekendDays = weekendDaysFor(region, workWeek);
   const calendar = new Map<string, CalendarDay>();
   // Derived from the constants rather than repeated as literals — see the note
   // on CALENDAR_START. Parsed component-wise so the range is local midnight,
@@ -175,7 +207,7 @@ export function buildCalendarMap(
   while (curr <= endDate) {
     const isoDate = formatLocalIso(curr);
     const dayOfWeek = curr.getDay();
-    const isWeekend = workWeek === 5 ? (dayOfWeek === 0 || dayOfWeek === 6) : (dayOfWeek === 0);
+    const isWeekend = weekendDays.has(dayOfWeek);
     const isHol = holidayMap.has(isoDate);
     const holName = holidayMap.get(isoDate) || null;
 
@@ -211,10 +243,77 @@ function getDayNumber(isoDate: string): string {
  * "Raksha Bandhan (Pre-Break)" read as two different festivals and the list
  * shows one weekend twice.
  */
+/**
+ * What a holiday that exists only because of its neighbours is called.
+ *
+ * Exported so the title builder can recognise it without matching on prose.
+ */
+export const BRIDGE_DAY = "Bridge Day";
+
 export function cleanFestivalName(name: string): string {
   let cleaned = name.split("/")[0].split("(")[0].trim();
-  cleaned = cleaned.replace(/\s+Day$/, "").replace(/\s+Jayanti$/, "").replace(/'s Birthday$/, "").trim();
-  return cleaned;
+
+  /**
+   * Scaffolding words a multi-day festival wears on its extra days.
+   *
+   * These arrived with the other forty-five countries and each one used to
+   * produce a separate "festival". China's Spring Festival is published as
+   * "Spring Festival Eve", "Chinese New Year" and seven days of "Spring
+   * Festival Holiday"; Taiwan and Korea prefix their substitute days with "Day
+   * off for"; Hong Kong writes "The day following the Mid-Autumn Festival". A
+   * ten-day break built from those came out titled "Spring Festival Holiday &
+   * Spring Festival Eve & Chinese New Year", which is one festival named three
+   * times and read as three.
+   *
+   * Stripped in a loop because they stack: "Second day of Chinese New Year
+   * Holiday" needs both ends taken off before it collapses onto the same
+   * festival as the first day.
+   */
+  const LEADING =
+    /^(?:the\s+)?(?:substitute\s+(?:bank\s+)?holiday\s+for|day\s+(?:off\s+for|following(?:\s+the)?)|first|second|third|fourth|fifth)\s+(?:day\s+of\s+)?/i;
+  const TRAILING = /\s+(?:holidays?|eve|observed|golden\s+week\s+holiday)$/i;
+
+  let previous: string;
+  do {
+    previous = cleaned;
+    cleaned = cleaned.replace(LEADING, "").replace(TRAILING, "").trim();
+  } while (cleaned !== previous && cleaned.length > 0);
+
+  /**
+   * Names that describe the mechanism rather than an occasion.
+   *
+   * Japan grants the weekday between two holidays automatically and calls it a
+   * "Bridge Public holiday"; Argentina does the same as a "Tourist Bridge
+   * Holiday". Stripping the scaffolding above leaves "Bridge Public", which is
+   * not a thing — and it was appearing in card titles as though it were a
+   * festival, next to the real one it bridges to.
+   */
+  if (/^(?:bridge\s+public|tourist\s+bridge|bridge|public)$/i.test(cleaned)) {
+    return BRIDGE_DAY;
+  }
+
+  // Kept last, and kept separate: these trim a name down to the festival it
+  // belongs to rather than removing scaffolding around it.
+  //
+  // Both apostrophes are matched. Google's calendars use the typographic one
+  // ("Presidents’ Day", "New Year’s Holiday") while the hand-written Indian and
+  // US lists use the typewriter one, and a rule that knows only about the
+  // second silently stops working on forty-five countries.
+  cleaned = cleaned
+    .replace(/\s+Day$/, "")
+    .replace(/\s+Jayanti$/, "")
+    .replace(/['’]s\s+Birthday$/, "")
+    // A trailing possessive, once "Day" is off the end. Without this the same
+    // festival appears twice in one title: Singapore publishes both "Chinese
+    // New Year's Day" and "Chinese New Year Holiday", which reduced to
+    // "Chinese New Year's" and "Chinese New Year" and read as two festivals.
+    // The cost is "Children" for Children's Day, which is a fair trade.
+    .replace(/['’]s?$/, "")
+    .trim();
+
+  // Everything above can strip a name to nothing — "Holiday" on its own, or
+  // "Day". A blank title is worse than a redundant one, so fall back.
+  return cleaned || name.trim();
 }
 
 function generateDealTitle(
@@ -230,7 +329,37 @@ function generateDealTitle(
     if (!distinctFestivals.includes(c)) distinctFestivals.push(c);
   });
 
-  const festivalLabel = distinctFestivals.length > 0 ? distinctFestivals.join(" & ") : cleanFestivalName(primaryHoliday);
+  /**
+   * A bridge day is named only when it is all there is.
+   *
+   * It is a consequence of the holidays either side of it, not an occasion of
+   * its own, so "Respect for the Aged & Bridge Day" names one festival and one
+   * mechanism as though they were two festivals. Dropped when anything real is
+   * in the window, kept when it is not — a window can consist of nothing else.
+   */
+  const named = distinctFestivals.filter((f) => f !== BRIDGE_DAY);
+  if (named.length > 0) {
+    distinctFestivals.length = 0;
+    distinctFestivals.push(...named);
+  }
+
+  /**
+   * At most two names, then a count.
+   *
+   * A long window can genuinely span four or five unrelated holidays — Japan's
+   * Golden Week is Constitution Memorial, Greenery and Children's Day, and a
+   * three-leave bridge picks up more. Joining all of them produced titles like
+   * "Constitution Memorial & Greenery & Children's & Constitution Memorial Day
+   * observed", which the card then truncated mid-word, so the reader got the
+   * first name and an ellipsis. Two names and "+2 more" fits, and says the same
+   * thing.
+   */
+  const festivalLabel =
+    distinctFestivals.length === 0
+      ? cleanFestivalName(primaryHoliday)
+      : distinctFestivals.length <= 2
+        ? distinctFestivals.join(" & ")
+        : `${distinctFestivals.slice(0, 2).join(" & ")} +${distinctFestivals.length - 2} more`;
 
   if (leavesNeeded === 0) {
     return `${festivalLabel}`;

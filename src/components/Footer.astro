@@ -7,12 +7,35 @@
  * Removed rather than wired up — the footer has no place for it.
  */
 import Flag from "./Flag.astro";
+import { COUNTRIES } from "../data/countries";
 
 const year = new Date().getFullYear();
 
+/** Counted, not written down — the shortlist below is hand-picked, this is not. */
+const allCountriesCount = COUNTRIES.length;
+
+/**
+ * Six calendars, then the door to the other forty-one.
+ *
+ * The column used to be the whole list, because the whole list was two. It
+ * cannot be now — forty-seven links would make the footer taller than most of
+ * the pages carrying it, and a footer nav is for the handful of destinations
+ * worth a permanent link, not for a directory. So this is the shortlist by
+ * audience size, and /countries is where the rest live.
+ *
+ * These are `?region=` links and the codes are ISO, except India and the US
+ * which keep the legacy "ALL" and "USA" values. Those two resolve identically
+ * to "IN" and "US", so the distinction is invisible — but they are the values
+ * in every link shared before this page existed, and keeping them in the footer
+ * keeps the path they exercise alive rather than leaving it untested.
+ */
 const countries = [
-  { href: "/?region=ALL", code: "IN" as const, label: "India (public & corporate)" },
-  { href: "/?region=USA", code: "US" as const, label: "United States (federal)" },
+  { href: "/?region=ALL", code: "IN", label: "India" },
+  { href: "/?region=USA", code: "US", label: "United States" },
+  { href: "/?region=GB", code: "GB", label: "United Kingdom" },
+  { href: "/?region=DE", code: "DE", label: "Germany" },
+  { href: "/?region=SG", code: "SG", label: "Singapore" },
+  { href: "/?region=AU", code: "AU", label: "Australia" },
 ];
 
 /**
@@ -115,6 +138,16 @@ const siteLinks = [
                 </li>
               ))
             }
+            {/* NOT a footer-filter-link: the others change a filter on the
+                current page, this one is a real navigation to another page. */}
+            <li>
+              <a
+                href="/countries"
+                class="inline-flex items-center gap-2 py-1 -my-1 text-[0.8125rem] font-semibold text-brand-text hover:text-ink transition-colors no-underline"
+              >
+                All {allCountriesCount} countries <span aria-hidden="true">→</span>
+              </a>
+            </li>
           </ul>
         </nav>
 

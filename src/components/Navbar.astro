@@ -12,7 +12,9 @@
  *    what fixes the mobile region control, which was never wired to anything.
  * 3. Region is a RegionMenu popover rather than a native <select>. A <select>'s
  *    open list is drawn by the OS: it ignores every design token, stays white
- *    in dark mode, and cannot hold the flag SVG. See RegionMenu.astro.
+ *    in dark mode, and cannot hold the flag SVG. See RegionMenu.astro — it is
+ *    a searchable country picker now, and initRegion() below binds every
+ *    instance of it on the page, including the one inside the hero capsule.
  * 4. Below `lg` the controls move OUT of the bar and into a second row under
  *    the header. Squeezing region + workweek into a 360px-wide bar next to the
  *    wordmark is what made the header feel cramped, and the workweek control
@@ -56,9 +58,11 @@ const onOptimizer = pathname.includes("company-optimizer");
    is what `tools` generalises to pages with no calendar at all. */
 const showRegion = tools && !onOptimizer;
 
-/* The brand chip labels which calendar is in play — "IN"/"US", or "OFFICE" on
-   the optimizer. With no controls there is no calendar for it to label, so it
-   would be a bare country code floating beside the wordmark. */
+/* The brand chip labels which calendar is in play — the ISO code of the chosen
+   country, or "OFFICE" on the optimizer. With no controls there is no calendar
+   for it to label, so it would be a bare country code floating beside the
+   wordmark. It is now the shortest thing on the page that says which of the
+   forty-seven you are looking at, which is why it earns its place. */
 const showBrandChip = tools;
 ---
 
@@ -270,20 +274,39 @@ const showBrandChip = tools;
     Array.from(document.querySelectorAll<HTMLElement>("[data-region-trigger]"));
 
   /**
+   * The country code a region value resolves to, read off the DOM.
+   *
+   * The picker already carries the answer: every item has both `data-region`
+   * (the value) and `data-country` (the ISO code it resolves to). Reading it
+   * from there rather than importing the alias map keeps this script from
+   * needing the country data at all, and means a legacy value like "USA" or an
+   * India sub-region resolves by the same route as a plain code.
+   */
+  function countryCodeFor(region: string): string | null {
+    const item = document.querySelector<HTMLElement>(`[data-region="${CSS.escape(region)}"]`);
+    return item?.dataset.country ?? null;
+  }
+
+  /**
    * Puts every region control into agreement and, for a real user choice, tells
    * the page about it.
    *
    * `broadcast` is the whole reason this takes an argument. A user picking from
    * a menu has to re-solve the grid (`lw:region`) and let other controls catch
-   * up (`lw:setregion`); a page telling us the region came from `?region=USA`
+   * up (`lw:setregion`); a page telling us the region came from `?region=DE`
    * must NOT re-emit, or the two events chase each other in a loop.
    */
   function applyRegion(region: string, broadcast: boolean) {
-    // Each trigger renders both flags and hides one. Swapping the `hidden`
-    // attribute keeps the drawn SVG — an <option> could only have held text.
-    document.querySelectorAll<HTMLElement>("[data-region-flag]").forEach((el) => {
-      el.toggleAttribute("hidden", el.dataset.regionFlag !== region);
-    });
+    const code = countryCodeFor(region);
+
+    // Each trigger holds ONE flag and this repoints it. It used to render every
+    // flag and hide all but one, which was reasonable at two countries and
+    // would be forty-six hidden SVGs per trigger now.
+    if (code) {
+      document.querySelectorAll<HTMLElement>("[data-region-flag] use").forEach((use) => {
+        use.setAttribute("href", `#flag-${code}`);
+      });
+    }
 
     // setValue marks the item and repaints the trigger text without firing
     // onSelect, so syncing the other menus cannot re-enter this function.
@@ -292,8 +315,8 @@ const showBrandChip = tools;
     // Only touch the brand chip on pages that actually have a region control.
     // The optimizer's chip reads "OFFICE", which is not a region at all.
     const chip = document.getElementById("brandRegionText");
-    if (chip && regionTriggers().length) {
-      chip.textContent = region === "USA" ? "US" : "IN";
+    if (chip && code && regionTriggers().length) {
+      chip.textContent = code;
     }
 
     if (broadcast) {
@@ -317,17 +340,19 @@ const showBrandChip = tools;
         trigger,
         menu,
         valueAttr: "data-region",
-        // Text only. The flags are handled above, and each instance carries its
-        // own data-label so the bar can say "United States" while the pill,
-        // which has no room for it, says "USA".
+        // Text only; the flag is repointed above. Each item carries its own
+        // data-label, so the trigger shows the country's name rather than the
+        // raw region value.
         display: trigger.querySelector<HTMLElement>("[data-region-display]"),
+        search: menu.querySelector<HTMLInputElement>("[data-region-search]"),
+        empty: menu.querySelector<HTMLElement>("[data-region-empty]"),
         onSelect: (region) => applyRegion(region, true),
       });
       if (handle) regionHandles.set(trigger, handle);
     });
   }
 
-  /** Lets a page set the region programmatically (e.g. from ?region=USA). */
+  /** Lets a page set the region programmatically (e.g. from ?region=DE). */
   function initRegionSync() {
     const root = document.documentElement;
     if (root.dataset.lwRegionSync === "1") return;

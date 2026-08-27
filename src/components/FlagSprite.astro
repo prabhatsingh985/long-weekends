@@ -1,0 +1,34 @@
+---
+/**
+ * Defines every flag once, as `<symbol>`s the `<Flag>` component points at.
+ *
+ * Rendered by Layout.astro, so it is present on every page that can show a
+ * flag. It exists because the region picker draws the whole country list three
+ * times on the homepage — once in the hero capsule, once in the desktop navbar
+ * and once in the mobile one — and the footer draws a handful more. Inlining
+ * the artwork would put roughly a hundred and fifty copies of it in the HTML;
+ * this way the artwork appears once and each use costs a `<use>` element.
+ *
+ * The wrapper is hidden with inline styles rather than a class or the `hidden`
+ * attribute. `hidden` would take the symbols out of the accessibility tree in a
+ * way some browsers extend to `<use>` references, and a class would depend on
+ * the stylesheet having loaded before the first flag paints.
+ */
+import { FLAGS, FLAG_FALLBACK } from "../data/flags";
+
+const entries = Object.entries(FLAGS);
+---
+
+<svg
+  aria-hidden="true"
+  focusable="false"
+  style="position:absolute;width:0;height:0;overflow:hidden"
+  data-flag-sprite
+>
+  {
+    entries.map(([code, body]) => (
+      <symbol id={`flag-${code}`} viewBox="0 0 20 14" set:html={body} />
+    ))
+  }
+  <symbol id="flag-fallback" viewBox="0 0 20 14" set:html={FLAG_FALLBACK} />
+</svg>

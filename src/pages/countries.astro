@@ -1,0 +1,301 @@
+---
+/**
+ * The country index: every calendar the planner carries, with its numbers.
+ *
+ * This page exists for two reasons that pull in the same direction.
+ *
+ * The first is navigational. The picker in the header is a filter box — good
+ * for someone who knows the country they want, useless for someone who wants to
+ * know whether their country is here at all. This is the page that answers that
+ * without making them guess and type.
+ *
+ * The second is that it is the only crawlable statement of what the site
+ * covers. The results grid is rendered on the client, so to a crawler the
+ * homepage is a search form; the coverage claim would live entirely in a
+ * sentence nobody could verify. Here, every country is a real link with real
+ * counts computed from the shipped data.
+ *
+ * EVERY NUMBER ON THIS PAGE IS DERIVED. Nothing is written down. The counts
+ * come from the same solver the results grid uses, so the page cannot claim a
+ * country has eleven free long weekends while the grid shows nine — which is
+ * exactly the drift that made the old hardcoded highlight cards go stale.
+ */
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import Flag from "../components/Flag.astro";
+import {
+  COUNTRIES,
+  COUNTRY_GROUPS,
+  holidayCount,
+  hasTentativeDates,
+  weekendLabel,
+} from "../data/countries";
+import { solveVacationPlans } from "../data/vacation-solver";
+
+/**
+ * Counted over the whole data window rather than from today.
+ *
+ * A build-time "from today" figure is frozen at the moment of the build and
+ * rots from there — by March it would be telling readers a country has three
+ * long weekends when it has three LEFT. "In 2026" is a fact about the year, so
+ * it stays true for as long as the year does.
+ */
+const WHOLE_WINDOW = "2025-12-31";
+
+const rows = COUNTRIES.map((country) => {
+  const free = solveVacationPlans({
+    leaves: 0,
+    workWeek: 5,
+    region: country.code,
+    fromDate: WHOLE_WINDOW,
+  });
+  const oneLeave = solveVacationPlans({
+    leaves: 1,
+    workWeek: 5,
+    region: country.code,
+    fromDate: WHOLE_WINDOW,
+  });
+  return {
+    country,
+    holidays2026: holidayCount(country, "2026"),
+    holidays2027: holidayCount(country, "2027"),
+    free: free.length,
+    oneLeave: oneLeave.length,
+    /** The longest run a single leave day buys — the headline number. */
+    bestOneLeave: oneLeave.reduce((n, p) => Math.max(n, p.totalDaysOff), 0),
+  };
+});
+
+const byCode = Object.fromEntries(rows.map((r) => [r.country.code, r]));
+
+const total = COUNTRIES.length;
+const totalHolidays = rows.reduce((n, r) => n + r.holidays2026 + r.holidays2027, 0);
+const totalFree = rows.reduce((n, r) => n + r.free, 0);
+
+/* The country with the most free long weekends, named rather than asserted —
+   it is the kind of fact a reader checks, and it moves with the data. */
+const mostFree = rows.reduce((a, b) => (b.free > a.free ? b : a));
+
+const TITLE = `Public Holidays in ${total} Countries – Long Weekend Calendars`;
+const DESCRIPTION =
+  `Long weekend planners for ${total} countries, from India and the US to Japan, Germany, Brazil and the UAE. ` +
+  `Public holiday dates for 2026 and 2027, with the leave days each break costs.`;
+
+/**
+ * One ItemList for the whole page.
+ *
+ * A crawler reading the homepage sees a search form; this is where the coverage
+ * claim becomes machine-readable. Kept to the country names and their URLs
+ * rather than dressed up as a richer type — an ItemList of real links is
+ * something Google can verify against the page, and a CollectionPage full of
+ * invented properties is not.
+ */
+const itemListJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: `Long weekend calendars for ${total} countries`,
+  numberOfItems: total,
+  itemListElement: COUNTRIES.map((c, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: c.name,
+    url: `https://thelongweekends.com/?region=${c.code}`,
+  })),
+}).replace(/</g, "\\u003c");
+---
+
+<Layout title={TITLE} description={DESCRIPTION} path="/countries">
+  <script slot="head" type="application/ld+json" is:inline set:html={itemListJsonLd} />
+
+  {/* tools={false}: the region control filters the results grid, and there is
+      no grid on this page — every country here is a link to one instead. */}
+  <Navbar tools={false} />
+
+  <main id="main" class="mx-auto w-full max-w-[1280px] grow px-4 py-10 sm:px-6 sm:py-14">
+    <div class="max-w-[68ch]">
+      <p class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-brand-text">
+        Coverage
+      </p>
+      <h1
+        class="mt-3 text-[1.75rem] font-extrabold leading-[1.15] tracking-tight text-ink sm:text-[2.25rem]"
+      >
+        Long weekends in {total} countries
+      </h1>
+      <p class="mt-4 text-base leading-relaxed text-body sm:text-lg">
+        Every country where software gets built, on one calendar. Pick yours and
+        the planner works out which public holidays are worth spending a leave
+        day next to — {totalHolidays.toLocaleString("en-GB")} holiday dates across
+        2026 and 2027, and {totalFree} long weekends that cost nothing at all.
+      </p>
+    </div>
+
+    {/* Three numbers rather than a paragraph of them: this is the claim the page
+        exists to make, and it should survive being skimmed. */}
+    <dl class="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-4 sm:gap-4">
+      {
+        [
+          { n: String(total), label: "countries covered" },
+          { n: String(totalHolidays.toLocaleString("en-GB")), label: "holiday dates, 2026–27" },
+          { n: String(totalFree), label: "free long weekends" },
+          { n: mostFree.country.name, label: `most free breaks (${mostFree.free})`, small: true },
+        ].map((stat) => (
+          <div class="card p-4">
+            <dd
+              class:list={[
+                "font-extrabold text-ink",
+                stat.small ? "text-lg leading-snug" : "font-mono text-2xl tabular",
+              ]}
+            >
+              {stat.n}
+            </dd>
+            <dt class="mt-1 text-xs font-semibold text-muted">{stat.label}</dt>
+          </div>
+        ))
+      }
+    </dl>
+
+    {
+      COUNTRY_GROUPS.map((group) => (
+        <section class="mt-10 sm:mt-14">
+          <h2
+            class="mb-4 flex items-baseline gap-3 text-lg font-extrabold text-ink sm:text-xl"
+            id={group.name.toLowerCase().replace(/[^a-z]+/g, "-")}
+          >
+            {group.name}
+            <span class="font-mono text-xs font-bold uppercase tracking-widest text-muted">
+              {group.countries.length} countries
+            </span>
+          </h2>
+
+          <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {group.countries.map((country) => {
+              const row = byCode[country.code];
+              return (
+                <li>
+                  {/* The whole card is the link, so the tap target is the card
+                      rather than the country name inside it. */}
+                  <a
+                    href={`/?region=${country.code}`}
+                    class="card card-interactive flex h-full flex-col gap-3 p-4 no-underline"
+                  >
+                    <span class="flex items-center gap-2.5">
+                      <Flag code={country.code} class="shrink-0" />
+                      <span class="min-w-0 grow">
+                        <span class="block truncate text-[0.9375rem] font-extrabold text-ink">
+                          {country.name}
+                        </span>
+                        <span class="block truncate text-xs text-muted">{country.hub}</span>
+                      </span>
+                      <span
+                        class="shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
+                        aria-hidden="true"
+                      >
+                        {country.code}
+                      </span>
+                    </span>
+
+                    {/* Two figures, because they answer two different
+                        questions: how generous is this country's calendar, and
+                        what does one leave day actually buy here. */}
+                    <span class="mt-auto flex flex-wrap items-center gap-1.5">
+                      <span class="tag tag-holiday">
+                        {row.free} free {row.free === 1 ? "break" : "breaks"}
+                      </span>
+                      <span class="tag tag-pto">
+                        1 leave → {row.bestOneLeave} days
+                      </span>
+                      {hasTentativeDates(country) && (
+                        <span
+                          class="tag tag-brand"
+                          title="Some dates follow a moon sighting and can move by a day"
+                        >
+                          moon-set dates
+                        </span>
+                      )}
+                    </span>
+
+                    <span class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+                      <span>
+                        <span class="font-mono font-bold tabular">{row.holidays2026}</span> in
+                        2026
+                      </span>
+                      <span>
+                        <span class="font-mono font-bold tabular">{row.holidays2027}</span> in
+                        2027
+                      </span>
+                      {/* Only where it is not Saturday-Sunday. Printing "Sat-Sun"
+                          on forty-five cards to make two stand out would bury
+                          the two that matter. */}
+                      {weekendLabel(country) !== "Sat–Sun" && (
+                        <span class="font-semibold text-brand-text">
+                          weekend {weekendLabel(country)}
+                        </span>
+                      )}
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))
+    }
+
+    {/* The caveats, in full and in one place. A coverage page that lists
+        forty-seven countries and says nothing about how they were compiled is
+        asking to be trusted rather than earning it. */}
+    <section class="mt-14 max-w-[68ch]">
+      <h2 class="text-lg font-extrabold text-ink sm:text-xl">What these lists are</h2>
+      <div class="mt-4 space-y-4 text-sm leading-relaxed text-body">
+        <p>
+          <strong class="text-ink">Nationwide public holidays.</strong> A day the country's
+          workers are, as a rule, not expected to be at work. Observances, commemorative
+          days and half-days are left out, because a planner that counts them tells you to
+          book a flight on a working Tuesday.
+        </p>
+        <p>
+          <strong class="text-ink">Regional days, where most of the country gets them.</strong>{" "}
+          Federal countries do not have one list. Australia's King's Birthday is a holiday in
+          six states of eight, Germany's Corpus Christi in a minority of its sixteen — so a
+          regional holiday is carried only where at least half the country observes it, and
+          the country page says so. Your state or canton will differ.
+        </p>
+        <p>
+          <strong class="text-ink">Dates that depend on a moon sighting move.</strong> Eid,
+          Diwali, Vesak and Nyepi are set by observation or by a lunar calendar, and can shift
+          by a day even after a government publishes them. Countries with such dates are
+          marked above.
+        </p>
+        <p>
+          <strong class="text-ink">Your employer's list is the one that counts.</strong> Most
+          companies observe fewer days than the government gazettes, and pick different
+          optional ones. If yours publishes a list, the{" "}
+          <a href="/company-optimizer">Company Holiday Optimizer</a> plans around that instead
+          — which is the only way to get an answer that is right for you specifically.
+        </p>
+      </div>
+
+      <h2 class="mt-10 text-lg font-extrabold text-ink sm:text-xl">Where the dates come from</h2>
+      <div class="mt-4 space-y-4 text-sm leading-relaxed text-body">
+        <p>
+          India's list is transcribed from the DoPT gazetted holiday notification with five
+          state lists layered under it, and the US list from the Office of Personnel
+          Management's federal holiday schedule. Both predate the rest and are hand-checked.
+        </p>
+        <p>
+          The other {total - 2} countries are compiled from Google's published public-holiday
+          calendars and cross-checked against Nager.Date, with every disagreement between the
+          two reviewed by hand before shipping. The compiler is in the repository, so the
+          lists can be regenerated when a government publishes its next year.
+        </p>
+        <p>
+          Found something wrong? <a href="/contact">Tell us</a> — a wrong date here is
+          somebody's cancelled trip.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>

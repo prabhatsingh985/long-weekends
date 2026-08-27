@@ -33,7 +33,27 @@ export interface VacationPlan {
   days: PlanDay[];
 }
 
-export type RegionCode = "ALL" | "SOUTH" | "WEST" | "NORTH" | "EAST" | "USA";
+/**
+ * A value the region control can hold.
+ *
+ * Three kinds of string live in here, and the union used to enumerate only the
+ * first two:
+ *   - "ALL" and "USA", the original two choices. They are aliases now, not
+ *     codes, and they survive because the footer links and any URL a visitor
+ *     has already shared still carry them.
+ *   - "SOUTH" | "WEST" | "NORTH" | "EAST", India's state groupings, which
+ *     layer state holidays on top of the national list.
+ *   - an ISO-3166 alpha-2 country code, for each of the countries in
+ *     holidays.json.
+ *
+ * It is a plain `string` rather than a union of all forty-seven codes on
+ * purpose. The codes come from generated data — adding a country means running
+ * scripts/build-holidays.mjs, not editing a type — so a hand-written union
+ * would be a second list to keep in step, and it would go stale silently.
+ * `isKnownRegion()` in src/data/countries.ts is the runtime check that a value
+ * is one the data can actually answer for, and every entry point uses it.
+ */
+export type RegionCode = string;
 
 export interface CalendarDay {
   date: string;

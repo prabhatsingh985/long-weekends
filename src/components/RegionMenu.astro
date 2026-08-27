@@ -1,33 +1,48 @@
 ---
 /**
- * The region switcher, as a real menu instead of a native <select>.
+ * The country picker.
  *
- * It used to be a bare <select>. The trigger could be themed, but the *open*
- * option list is drawn by the operating system: it ignores every design token,
- * stays white in dark mode, and cannot hold the Flag.astro SVG (an <option> is
- * text only). On Windows that made the drop-down look like a stray browser
- * widget sitting inside our own header. This is the same createMenu popover the
- * hero capsule uses, so the list now themes with the rest of the site and can
- * carry a drawn flag beside each choice.
+ * It began as a native <select> with two options. A <select>'s open list is
+ * drawn by the operating system: it ignores every design token, stays white in
+ * dark mode, and cannot hold a drawn flag, so on Windows the drop-down looked
+ * like a stray browser widget sitting inside our own header. It became a
+ * createMenu popover for that reason and stayed one.
  *
- * Two presentations from one component:
+ * What changed at forty-seven countries is that a flat list stopped being
+ * usable. Two options are a toggle; forty-seven are a directory. So the popover
+ * now carries a filter box and continent headings, and reaching Vietnam is
+ * typing "vi" rather than forty presses of ArrowDown. The filter matches names,
+ * ISO codes, the cities in each country's `hub`, and the aliases in
+ * countries.ts — "uk", "holland", "bangalore" all land somewhere sensible.
+ *
+ * Three presentations from one component:
  *   - "bar"  sits inside the desktop control bar and reads as plain text.
  *   - "pill" is the standalone rounded button used on phones.
+ *   - "hero" is the large labelled segment in the search capsule.
  *
- * The word on the trigger differs by variant on purpose — the desktop bar has
- * room for "Pan-India IT", the phone pill does not, so it says "India". Both
- * drive the SAME value ("ALL" / "USA"); only the wording differs, which is why
- * each item carries its own data-label.
+ * ON THE ARIA
+ * A text box inside role="menu" is not in the ARIA content model — the tidy
+ * pattern for this is an editable combobox with a listbox popup. It is not used
+ * here because Navbar.astro drives every one of these through the same
+ * createMenu handle, and three call sites plus the hero would have to move at
+ * once. What is true is that the control is fully operable by keyboard, every
+ * item announces its checked state, and the box is labelled; the gap is
+ * taxonomic rather than functional. Worth closing, and tracked as its own job.
+ *
+ * The trigger holds ONE flag whose <use> target is rewritten on change, rather
+ * than every flag with all but one hidden. That was fine at two countries and
+ * would be forty-six hidden SVGs per trigger at this size.
  */
 import Flag from "./Flag.astro";
+import { COUNTRY_GROUPS, COUNTRY_BY_CODE, searchTextFor } from "../data/countries";
 
 interface Props {
   /** Unique id root, e.g. "navRegionDesktop". The menu becomes `${id}Menu`. */
   id: string;
-  variant: "bar" | "pill";
+  variant: "bar" | "pill" | "hero";
   /**
    * Which edge the menu hangs from. Set it from where the trigger sits in its
-   * row, not from the variant: the menu is up to 20rem wide, so anchoring a
+   * row, not from the variant: the menu is up to 22rem wide, so anchoring a
    * left-hand trigger to its right edge pushes the panel off the screen.
    */
   align: "left" | "right";
@@ -35,40 +50,28 @@ interface Props {
 
 const { id, variant, align } = Astro.props;
 const menuId = `${id}Menu`;
+const searchId = `${id}Search`;
 
-const REGIONS = [
-  {
-    value: "ALL",
-    code: "IN" as const,
-    label: "Pan-India IT",
-    short: "India",
-    hint: "Gazetted public + IT sector holidays",
-  },
-  {
-    value: "USA",
-    code: "US" as const,
-    label: "United States",
-    short: "USA",
-    hint: "US federal public holidays",
-  },
-];
+/** The default selection, and the only one rendered into the trigger. */
+const DEFAULT = COUNTRY_BY_CODE.IN;
 
 const isPill = variant === "pill";
-
-/* The trigger word: full on the desktop bar, abbreviated on the phone pill. */
-const triggerText = isPill ? REGIONS[0].short : REGIONS[0].label;
+const isHero = variant === "hero";
 
 /* The bar variant draws no edge of its own — it lives inside the control bar's
    border and would otherwise read as a box inside a box. Having no border also
    left it with no vertical padding, so its hit area was the 20px of its own
-   text: under the 24px WCAG 2.5.8 floor, and the only control on the site still
-   below it after the stepper and footer-link fixes. `py-1 -my-1` grows the box
-   and pulls the layout back, so the control bar's height is unchanged. */
-const triggerClass = isPill
-  ? "flex items-center gap-1.5 rounded-full border border-hairline bg-surface-soft py-1.5 pl-2 pr-2 text-[0.8125rem] font-bold text-ink cursor-pointer hover:border-hairline-strong transition-colors"
-  : "flex items-center gap-1.5 bg-transparent py-1 -my-1 text-[0.8125rem] font-bold text-ink cursor-pointer hover:text-brand-text transition-colors";
+   text: under the 24px WCAG 2.5.8 floor. `py-1 -my-1` grows the box and pulls
+   the layout back, so the control bar's height is unchanged. */
+const triggerClass = isHero
+  ? "seg w-full"
+  : isPill
+    ? "flex items-center gap-1.5 rounded-full border border-hairline bg-surface-soft py-1.5 pl-2 pr-2 text-[0.8125rem] font-bold text-ink cursor-pointer hover:border-hairline-strong transition-colors"
+    : "flex items-center gap-1.5 bg-transparent py-1 -my-1 text-[0.8125rem] font-bold text-ink cursor-pointer hover:text-brand-text transition-colors";
 
 const menuSide = align === "right" ? "right-0" : "left-0";
+
+const totalCountries = COUNTRY_GROUPS.reduce((n, g) => n + g.countries.length, 0);
 ---
 
 <div class="relative">
@@ -81,57 +84,165 @@ const menuSide = align === "right" ? "right-0" : "left-0";
     aria-expanded="false"
     aria-controls={menuId}
   >
-    {/* Both flags are rendered and one is hidden, rather than swapping an
-        emoji: Flag.astro takes a fixed `code`, and toggling `hidden` avoids
-        rebuilding the SVG on every region change. */}
-    <span data-region-flag="ALL" class="shrink-0"><Flag code="IN" /></span>
-    <span data-region-flag="USA" class="shrink-0" hidden><Flag code="US" /></span>
-    {/* The visible word is "India", not "Region: India" — the prefix is here
-        so the button does not announce as a bare country name out of context. */}
-    <span class="sr-only">Region:</span>
-    <span data-region-display>{triggerText}</span>
-    <svg
-      class="seg-caret h-3 w-3 shrink-0 text-muted"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="3"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6"></path>
-    </svg>
+    {
+      isHero ? (
+        <Fragment>
+          <span class="seg-label">Where you work</span>
+          <span class="flex items-center justify-between gap-1">
+            <span class="flex min-w-0 items-center gap-2">
+              <span data-region-flag class="shrink-0">
+                <Flag code={DEFAULT.code} />
+              </span>
+              <span class="seg-value truncate" data-region-display>
+                {DEFAULT.name}
+              </span>
+            </span>
+            <svg
+              class="seg-caret h-3 w-3 shrink-0 text-muted"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <span data-region-flag class="shrink-0">
+            <Flag code={DEFAULT.code} />
+          </span>
+          {/* The visible word is "India", not "Country: India" — the prefix is
+              here so the button does not announce as a bare country name out
+              of context. */}
+          <span class="sr-only">Country:</span>
+          {/* Capped and truncated because the names are no longer two short
+              ones: "United Arab Emirates" is 20 characters and would push the
+              caret off a 360px phone row on its own. */}
+          <span
+            data-region-display
+            class:list={["truncate", isPill ? "max-w-[7rem]" : "max-w-[10rem]"]}
+          >
+            {DEFAULT.name}
+          </span>
+          <svg
+            class="seg-caret h-3 w-3 shrink-0 text-muted"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </Fragment>
+      )
+    }
   </button>
 
   <div
     id={menuId}
     role="menu"
-    aria-labelledby={id}
+    aria-label="Choose a country"
     hidden
     class:list={[
-      "popover popover-below absolute z-50 w-[min(20rem,calc(100vw-2rem))] p-2 text-left",
+      "popover popover-below absolute z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0 text-left",
       menuSide,
     ]}
   >
-    {
-      REGIONS.map((r, i) => (
-        <button
-          type="button"
-          role="menuitemradio"
-          aria-checked={i === 0 ? "true" : "false"}
-          tabindex={i === 0 ? 0 : -1}
-          class="menu-item"
-          data-region={r.value}
-          data-label={isPill ? r.short : r.label}
+    {/* Pinned above the scroller so the box stays put while the list moves. */}
+    <div class="border-b border-hairline p-2">
+      <div class="relative">
+        <svg
+          class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
         >
-          <Flag code={r.code} class="shrink-0" />
-          <span class="min-w-0">
-            <span class="block text-[0.8125rem] font-bold text-ink">{r.label}</span>
-            <span class="block text-xs text-muted">{r.hint}</span>
-          </span>
-        </button>
-      ))
-    }
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        {/* `type="search"` rather than `type="text"`: it gets the platform's
+            clear affordance, and on iOS the keyboard's return key reads
+            "Search" instead of "Go", which is what the Enter handler does. */}
+        <input
+          type="search"
+          id={searchId}
+          data-region-search
+          class="w-full rounded-control border border-hairline bg-surface-soft py-1.5 pl-8 pr-2 text-[0.8125rem] font-semibold text-ink placeholder:font-normal placeholder:text-muted focus-visible:border-hairline-strong"
+          placeholder={`Search ${totalCountries} countries or cities`}
+          aria-label="Filter countries"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+    </div>
+
+    {/* The scroller, not the popover, carries the height cap. createMenu's
+        place() sets an inline max-height on the popover only when the viewport
+        forces it, so capping here keeps the search row and the footer link
+        pinned in every case rather than only the cramped one. */}
+    <div class="max-h-[19rem] overflow-y-auto overscroll-contain p-1.5">
+      {
+        COUNTRY_GROUPS.map((group) => (
+          <div data-menu-section>
+            <p
+              data-menu-group
+              class="px-2 pb-1 pt-2 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
+            >
+              {group.name}
+            </p>
+            {group.countries.map((country) => (
+              <button
+                type="button"
+                role="menuitemradio"
+                aria-checked={country.code === DEFAULT.code ? "true" : "false"}
+                tabindex={country.code === DEFAULT.code ? 0 : -1}
+                class="menu-item"
+                data-region={country.code}
+                data-country={country.code}
+                data-label={country.name}
+                data-search={searchTextFor(country)}
+              >
+                <Flag code={country.code} class="shrink-0" />
+                <span class="min-w-0">
+                  <span class="block truncate text-[0.8125rem] font-bold text-ink">
+                    {country.name}
+                  </span>
+                  <span class="block truncate text-xs text-muted">{country.hub}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        ))
+      }
+
+      <p
+        data-region-empty
+        hidden
+        class="px-2 py-6 text-center text-[0.8125rem] text-muted"
+      >
+        No country matches that. Try a city, or a two-letter code.
+      </p>
+    </div>
+
+    <div class="border-t border-hairline p-2">
+      <a
+        href="/countries"
+        class="block rounded-control px-2 py-1.5 text-[0.8125rem] font-semibold text-brand-text no-underline hover:bg-surface-soft"
+      >
+        Compare all {totalCountries} calendars <span aria-hidden="true">→</span>
+      </a>
+    </div>
   </div>
 </div>

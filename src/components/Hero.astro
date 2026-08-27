@@ -8,23 +8,19 @@
  * popover. They are now real buttons driving a `menuitemradio` menu.
  *
  * Emits `lw:search` with { region, leaves } when the user presses Search.
+ *
+ * The country control is RegionMenu.astro rather than markup of its own. It
+ * used to be a second copy: the hero declared its own two-entry REGIONS array
+ * and its own popover, and the navbar declared another. Two countries made that
+ * survivable. Forty-seven would mean the country list, its continent headings
+ * and its filter box existing twice in this repo and drifting apart the first
+ * time one of them gained a country — so both now render the same component,
+ * and Navbar.astro's initRegion() binds every instance of it, including this
+ * one. The budget menu beside it is still local, because it is four fixed
+ * options that appear nowhere else.
  */
-import Flag from "./Flag.astro";
-
-const REGIONS = [
-  {
-    value: "ALL",
-    code: "IN" as const,
-    label: "Pan-India IT",
-    hint: "Gazetted public + IT sector holidays",
-  },
-  {
-    value: "USA",
-    code: "US" as const,
-    label: "United States",
-    hint: "US federal public holidays",
-  },
-];
+import RegionMenu from "./RegionMenu.astro";
+import { COUNTRIES } from "../data/countries";
 
 /* Glyphs are picked for what Windows can actually draw. 🆓 was the obvious
    choice for the free tier and the wrong one: Segoe UI Emoji renders it as a
@@ -79,8 +75,11 @@ const BUDGETS = [
       class="group inline-flex max-w-full items-center gap-2 mb-7 pl-3 pr-2.5 py-1.5 rounded-2xl sm:rounded-full bg-surface border border-hairline shadow-soft text-[0.8125rem] font-semibold text-body hover:border-hairline-strong hover:text-ink transition-colors no-underline"
     >
       <span class="dot dot-holiday shrink-0" aria-hidden="true"></span>
+      {/* Replaced on load by renderCountdownBadge() with the visitor's own
+          country and clock. This is the crawler-visible wording, so it makes no
+          claim about a country it cannot yet know. */}
       <span id="heroCountdownBadge" class="text-left"
-        >Every long weekend left in 2026</span
+        >Every long weekend left in 2026 and 2027</span
       >
       <span
         class="shrink-0 text-muted group-hover:translate-x-0.5 transition-transform"
@@ -95,15 +94,19 @@ const BUDGETS = [
     </h1>
 
     <p class="text-base sm:text-lg text-body max-w-[38rem] mb-9 leading-relaxed">
-      Your leave balance is finite. Public holidays are not. Tell us how many
-      days you can spare and we'll show you the longest break each one buys.
+      Your leave balance is finite. Public holidays are not. Pick where you work
+      — {COUNTRIES.length} countries, each on its own calendar — tell us how
+      many days you can spare, and we'll show you the longest break each one
+      buys.
     </p>
 
     <!-- Search capsule ------------------------------------------------------ -->
     {/* Stacks to a column below `sm`. In a row at 360px each `.seg` gets
-        `flex:1 1 0` of ~110px, so "Pan-India IT" truncated to "Pan-India…" and
-        the "Days you can spare" label wrapped to two lines. Stacking gives each
-        control the full width instead of shrinking the type. */}
+        `flex:1 1 0` of ~110px, which truncated the country name and wrapped the
+        "Days you can spare" label onto two lines. Stacking gives each control
+        the full width instead of shrinking the type — and it matters more now
+        than it did, because the names run to "United Arab Emirates" rather than
+        stopping at "India". */}
     <div class="w-full max-w-[42rem]">
       <div
         class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-1 p-2 rounded-3xl sm:rounded-full bg-surface border border-hairline shadow-lift"
@@ -111,66 +114,10 @@ const BUDGETS = [
         {/* Each seg owns a `relative` wrapper so its menu anchors to the seg,
             not to the capsule. Without it `top:100%` measures the whole capsule,
             so once stacked both menus dropped below the entire stack. */}
-        <!-- Region -->
+        <!-- Country. Placement (below by default, flipped only when the
+             viewport demands it) is set by createMenu on every open. -->
         <div class="relative flex-1 min-w-0">
-          <button
-            type="button"
-            id="heroRegionTrigger"
-            class="seg w-full"
-            aria-haspopup="menu"
-            aria-expanded="false"
-            aria-controls="heroRegionMenu"
-          >
-            <span class="seg-label">Where you work</span>
-            <span class="flex items-center justify-between gap-1">
-              <span class="seg-value" id="heroRegionDisplay">Pan-India IT</span>
-              <svg
-                class="seg-caret w-3 h-3 text-muted shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
-            </span>
-          </button>
-
-          <!-- Placement (below by default, flipped only when the viewport
-               demands it) is set by createMenu on every open. `popover-below` is
-               here as the sensible starting point if the script has not run. -->
-          <div
-            id="heroRegionMenu"
-            role="menu"
-            aria-labelledby="heroRegionTrigger"
-            hidden
-            class="popover popover-below absolute left-0 w-[min(22rem,calc(100vw-2rem))] p-2 z-50 text-left"
-          >
-            {
-              REGIONS.map((r, i) => (
-                <button
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={i === 0 ? "true" : "false"}
-                  tabindex={i === 0 ? 0 : -1}
-                  class="menu-item"
-                  data-region={r.value}
-                  data-label={r.label}
-                >
-                  <Flag code={r.code} class="shrink-0" />
-                  <span class="min-w-0">
-                    <span class="block text-[0.8125rem] font-bold text-ink">
-                      {r.label}
-                    </span>
-                    <span class="block text-xs text-muted">{r.hint}</span>
-                  </span>
-                </button>
-              ))
-            }
-          </div>
+          <RegionMenu id="heroRegionTrigger" variant="hero" align="left" />
         </div>
 
         <!-- Divider: only meaningful when the two segments sit side by side. -->
@@ -328,46 +275,32 @@ const BUDGETS = [
     isCalendarExhausted,
     type RegionCode,
   } from "../data/vacation-solver";
-  import { createMenu, type MenuHandle } from "../scripts/menu";
+  import { createMenu } from "../scripts/menu";
   import { nextBreaks } from "../scripts/plan-view";
 
   /* The live region and work week. The badge used to hardcode region "ALL", so
-     a visitor who picked United States was still told the next break was Raksha
-     Bandhan — an Indian festival that is not in the US holiday list at all. */
-  let region: RegionCode = "ALL";
+     a visitor who picked another country was still told the next break was
+     Raksha Bandhan — an Indian festival not in their holiday list at all. */
+  let region: RegionCode = "IN";
   let workWeek = 5;
   let leaves = 0;
-  let regionMenuHandle: MenuHandle | null = null;
 
+  /**
+   * The capsule owns the budget menu only.
+   *
+   * The country picker beside it is a RegionMenu, and Navbar.astro's
+   * initRegion() binds every RegionMenu on the page — including this one — so
+   * building a second createMenu over the same trigger here would install a
+   * duplicate set of document and window listeners that nothing ever removes.
+   * The hero learns about country changes the same way the rest of the page
+   * does: by listening for `lw:region`.
+   */
   function setupCapsule() {
     const el = (id: string) => document.getElementById(id);
-    const regionTrigger = el("heroRegionTrigger");
-    const regionMenu = el("heroRegionMenu");
-    const regionDisplay = el("heroRegionDisplay");
     const budgetTrigger = el("heroBudgetTrigger");
     const budgetMenu = el("heroBudgetMenu");
     const budgetDisplay = el("heroBudgetDisplay");
     const searchBtn = el("heroSearchActionBtn");
-
-    if (regionTrigger && regionMenu && regionDisplay) {
-      regionMenuHandle = createMenu({
-        trigger: regionTrigger,
-        menu: regionMenu,
-        display: regionDisplay,
-        valueAttr: "data-region",
-        onSelect: (v) => {
-          region = (v as RegionCode) || "ALL";
-          // Announce it instead of holding it until "Show plans" is pressed.
-          // Previously this only set a local variable, so the hero and the
-          // navbar could sit there showing two different regions, and the
-          // results grid agreed with neither until the button was clicked.
-          // `lw:region` updates the grid; `lw:setregion` updates the navbar.
-          document.dispatchEvent(new CustomEvent("lw:region", { detail: { region } }));
-          document.dispatchEvent(new CustomEvent("lw:setregion", { detail: { region } }));
-          renderCountdownBadge();
-        },
-      });
-    }
 
     if (budgetTrigger && budgetMenu && budgetDisplay) {
       createMenu({
@@ -445,20 +378,17 @@ const BUDGETS = [
     setupCapsule();
     renderCountdownBadge();
 
-    // The navbar owns these controls on the rest of the page; the hero mirrors
-    // them so the two can never contradict each other.
+    // The navbar owns the region controls; the hero only tracks what they say,
+    // so its badge can never contradict the grid below it.
     //
     // Both channels are listened to on purpose. `lw:region` is a user change
-    // coming from the navbar; `lw:setregion` is a programmatic one, which is
-    // how a deep link such as /?region=USA arrives. Missing the second left the
-    // badge naming an Indian festival on a page already switched to the US.
+    // coming from a picker; `lw:setregion` is a programmatic one, which is how
+    // a deep link such as /?region=DE arrives. Missing the second left the
+    // badge naming an Indian festival on a page already switched to Germany.
     function syncRegion(e: Event) {
       const next = (e as CustomEvent<{ region: string }>).detail?.region;
       if (!next || next === region) return; // our own echo, or a no-op change
-      region = (next as RegionCode) || "ALL";
-      // setValue marks the item without firing onSelect, so this cannot loop
-      // back into another dispatch.
-      regionMenuHandle?.setValue(region);
+      region = next as RegionCode;
       renderCountdownBadge();
     }
 

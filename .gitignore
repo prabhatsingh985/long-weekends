@@ -28,3 +28,7 @@ FIX_PROMPT.md
 
 # wrangler local state
 .wrangler/
+
+# downloaded holiday calendars, re-fetchable with
+# `node scripts/build-holidays.mjs --refresh`
+.cache/

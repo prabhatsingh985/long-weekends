@@ -13,6 +13,7 @@ import Hero from "../components/Hero.astro";
 import Footer from "../components/Footer.astro";
 import { getUpcomingCutoffIso, solveVacationPlans } from "../data/vacation-solver";
 import { escapeHtml, formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
+import { COUNTRIES } from "../data/countries";
 
 /**
  * The brand suffix is deliberately absent from this one title.
@@ -28,17 +29,17 @@ import { escapeHtml, formatDateRange, getBannerTheme, nextBreaks, pluralLeaves }
  * Every other page keeps its suffix; they are not competing for a head term
  * and they are not over the limit.
  *
- * It does not name a region either. It read "India Leave Calculator", which
- * was wrong rather than merely narrow: the region control offers the US
- * federal calendar too, so a title claiming India told half the audience the
- * page was not for them. Naming both would fit — "India & US Leave Calculator"
- * lands at 59 — but the description below already says "India and the US" in
- * full, and a title that stays on the query while the description carries the
- * qualifiers is the better division of the two.
+ * It does not name a region either, and that has gone from a judgement call to
+ * the only option. It read "India Leave Calculator" when the picker offered two
+ * countries, which already told half the audience the page was not for them;
+ * the picker now offers forty-seven, so there is no region small enough to name
+ * and no room to name them. The description carries the coverage claim instead,
+ * which is the right division of the two: the title stays on the query, the
+ * description says who it is for.
  */
 const TITLE = "Next Long Weekend 2026 & 2027 – Leave Calculator";
 const DESCRIPTION =
-  "Find the next long weekend in 2026 or 2027 and the exact leaves needed to turn public holidays into a longer break. Free planner for India and the US.";
+  `Find the next long weekend in 2026 or 2027 and the exact leaves needed to turn public holidays into a longer break. Free planner for ${COUNTRIES.length} countries.`;
 
 /**
  * Server-rendered highlights.
@@ -123,15 +124,23 @@ const FAQ = [
     a: "Most weekends are just two days. A weekend becomes a long weekend when a gazetted holiday lands on the Friday or the Monday beside it, or when one leave day bridges the gap to a holiday sitting midweek. The badge at the top of this page names the nearest one and counts the days, so you can tell at a glance whether the weekend in front of you is one of them.",
   },
   {
-    q: "When is the next long weekend in 2026?",
-    a: "There are nine long weekends in 2026 that cost no leave at all, spread right across the year: 24–26 Jan, 14–16 Feb, 3–5 Apr, 1–3 May, 26–28 Jun, 28–30 Aug, 4–6 Sep, 2–4 Oct and 25–27 Dec. Each is a three-day weekend created by a gazetted holiday falling on a Friday or a Monday. Which one is next depends on today, so the badge at the top of the page names it rather than this answer.",
+    q: "Which countries does this cover?",
+    a: `<strong>${COUNTRIES.length} of them</strong> — every country with a serious software industry, from India, the US and the UK to Japan, Germany, Brazil, Poland, Singapore, Israel and the UAE. Pick yours from the control at the top of the page and every date, every break and every leave calculation on this page switches to that country's calendar. The <a href="/countries">full list</a> shows what each one carries.`,
   },
   {
-    q: "Is there any long weekend in December in 2026?",
+    q: "Does it handle countries that do not rest on Saturday and Sunday?",
+    a: "Yes, and it has to — otherwise the answer is wrong rather than merely incomplete. Israel's working week runs Sunday to Thursday and Egypt's rests on Friday and Saturday, so a holiday falling on their Sunday is a real day off rather than one the weekend already covered. The planner uses each country's own rest days, which is why an Israeli three-day weekend here is Thursday to Saturday. There is also a six-day work-week switch for offices that work Saturdays.",
+  },
+  {
+    q: "When is the next long weekend in India in 2026?",
+    a: "In India there are nine long weekends in 2026 that cost no leave at all, spread right across the year: 24–26 Jan, 14–16 Feb, 3–5 Apr, 1–3 May, 26–28 Jun, 28–30 Aug, 4–6 Sep, 2–4 Oct and 25–27 Dec. Each is a three-day weekend created by a gazetted holiday falling on a Friday or a Monday. Which one is next depends on today, so the badge at the top of the page names it rather than this answer.",
+  },
+  {
+    q: "Is there any long weekend in India in December 2026?",
     a: "Yes, one — and it is well placed. Christmas Day 2026 falls on a Friday, so <strong>Friday 25 to Sunday 27 December</strong> is three days off that cost nothing. December offers no second free long weekend, but a single leave on Thursday 31 December bridges New Year into a four-day run through to Sunday 3 January 2027.",
   },
   {
-    q: "Are there any 4-day long weekends in 2026?",
+    q: "Are there any 4-day long weekends in India in 2026?",
     a: "Not for free: <strong>all nine of the year's no-leave long weekends are exactly three days</strong>. Spend one leave day, though, and 2026 hands you a four-day break 22 times over, across 13 different festivals. The earliest is Republic Day — take Friday 23 January off and you are away until Monday 26 January.",
   },
   {
@@ -143,15 +152,15 @@ const FAQ = [
     a: "<strong>Nine</strong>, if they have to be free — nine three-day weekends on the national calendar that need no leave at all. Widen the budget and the count climbs fast: one leave day unlocks 22 four-day breaks, and two or three days stretch several of them into six- and nine-day runs. State holidays and your own office list add more on top.",
   },
   {
-    q: "Which months have the longest weekends in 2026?",
+    q: "Which months have the longest weekends in India in 2026?",
     a: "Spring wins outright. Mahavir Jayanti and Good Friday fall close enough together that two leave days buy a six-day break from 31 March to 5 April, while every other month tops out at five days on the same budget. The irony is that March, July and November contain no long weekend that is free at all — March is the most generous month of the year and the least generous if you refuse to spend a leave.",
   },
   {
-    q: "How many government holidays fall near weekends in 2026?",
+    q: "How many Indian government holidays fall near weekends in 2026?",
     a: "<strong>Twelve of the 17 gazetted national holidays</strong> touch a weekend in 2026. Nine land on a Friday or a Monday, which makes a three-day break on its own. Three more are swallowed whole — Id-ul-Fitr, Independence Day and Diwali all fall on a Saturday or a Sunday, so they hand you nothing you did not already have. The other five fall midweek, where one well-placed leave day is what turns them into a break.",
   },
   {
-    q: "Which is the most extended possible weekend in 2026?",
+    q: "Which is the most extended possible weekend in India in 2026?",
     a: "The longest one worth taking is an <strong>18-day stretch from Thursday 19 March to Sunday 5 April</strong>, chaining Id-ul-Fitr, Mahavir Jayanti and Good Friday together — though it costs 10 leave days, which is most of an annual balance. Keep spending and the calendar keeps giving: 11 leaves buys 19 days in February, 13 buys 21. None of those are good value. The same spring cluster is far better in smaller bites: nine days off for three leaves, or six for two.",
   },
   {
@@ -159,12 +168,16 @@ const FAQ = [
     a: "There are <strong>17 gazetted national holidays</strong> in 2026, and this planner adds your state list on top of them: seven more for Karnataka, four for Maharashtra, three each for Delhi and West Bengal, and two for Tamil Nadu. Your own office calendar will differ again, which is what the Company Holiday Optimizer is for.",
   },
   {
+    q: "Where do the holiday dates come from?",
+    a: `India's dates are transcribed from the DoPT gazetted notification with five state lists under it, and the US dates from the Office of Personnel Management's federal schedule. The other ${COUNTRIES.length - 2} countries are compiled from Google's published public-holiday calendars and cross-checked against Nager.Date, with every disagreement reviewed by hand. Only nationwide holidays are carried, plus regional ones observed by at least half a federal country's states — so Australia's King's Birthday is in and Bavaria's Corpus Christi is not. Dates set by a moon sighting can still move by a day.`,
+  },
+  {
     q: "Does this cover 2027 as well?",
     a: "Yes. The planner carries the full gazetted list for <strong>2027</strong> alongside 2026, so the results keep going rather than thinning out as the year closes. 2027 is a leaner year for free breaks — five that cost no leave at all, against nine in 2026, because more holidays land on a weekend — but Good Friday on 26 March, Mahavir Jayanti on 19 April, Id-ul-Zuha on 17 May and Diwali on 29 October each give a three-day weekend outright. Dates for 2027 follow the DoPT list published in July 2026; the moon-sighting festivals can still shift by a day.",
   },
   {
     q: "How does the long weekend calculator work?",
-    a: "Pick your leave budget, your region and your work week. The calculator cross-references gazetted public holidays against your weekends to find every bridging opportunity, then ranks them by value — the most days off for the fewest leaves spent.",
+    a: "Pick your country, your leave budget and your work week. The calculator cross-references that country's public holidays against its own weekend to find every bridging opportunity, then ranks them by value — the most days off for the fewest leaves spent. Nothing is sent anywhere; the whole calculation runs in your browser.",
   },
   {
     q: "Can I use this tool for my company's holiday list?",
@@ -549,19 +562,21 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
       <div class="prose-body flex flex-col gap-4">
         <p>
           If you're wondering <strong>when the next long weekend is</strong>,
-          you're in good company — it's among the most-searched questions by
-          working professionals in India every month. The answer keeps moving as
-          holidays pass and new ones approach, which is exactly why this page
-          recalculates it instead of listing it.
+          you're in good company — it is among the most-searched questions by
+          working professionals in every country on this list. The answer keeps
+          moving as holidays pass and new ones approach, which is exactly why
+          this page recalculates it instead of listing it.
         </p>
         <p>
           The calculator identifies the <strong>next long weekend</strong> from
-          today's date, your country (India or the United States) and the
-          official gazetted holiday list, which now runs through
+          today's date, the country you pick — <strong>{COUNTRIES.length} of
+          them</strong>, and each with its own rest days, so an Israeli weekend
+          is Friday and Saturday rather than Saturday and Sunday — and that
+          country's official public holiday list, which runs through
           <strong>2027</strong> so the answer does not thin out as the year
-          closes. Whether that's a three-day
-          Saturday–Sunday–Monday or a nine-day stretch that bridges Diwali into
-          a full week, every option is ranked by value: the most days off for the
+          closes. Whether that is a three-day Saturday–Sunday–Monday, a Golden
+          Week in Tokyo or a nine-day stretch that bridges Diwali into a full
+          week, every option is ranked by value: the most days off for the
           fewest leaves spent.
         </p>
       </div>
@@ -577,9 +592,9 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
         <!-- Rewritten by the client script once it knows the visitor's region
              and clock; this wording is what a crawler sees. -->
         <p id="highlightNote" class="prose-body mb-6">
-          Generated from the gazetted list when this page was built, for a
-          five-day work week, cheapest option first. Change the budget above to
-          see the rest.
+          Generated from India's gazetted list when this page was built, for a
+          five-day work week, cheapest option first. Pick your country above and
+          this list is recalculated for it.
         </p>
 
         <ul
@@ -638,8 +653,8 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
               d: "Zero, one, two, or a custom number of days you're willing to spend on a single trip.",
             },
             {
-              t: "Pick your region and work week",
-              d: "India (pan-India IT) or the United States (federal), on a five- or six-day week.",
+              t: "Pick your country and work week",
+              d: `Any of ${COUNTRIES.length} public holiday calendars, on a five- or six-day week.`,
             },
             {
               t: "Read the strips",
@@ -666,10 +681,11 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
       </h2>
       <div class="prose-body flex flex-col gap-4">
         <p>
-          Most companies in India and the United States offer 15 to 24 paid
-          leaves a year. That sounds generous until it has to cover sick days,
-          emergencies and family obligations. What's left over is often barely a
-          week of actual holiday.
+          Most employers offer somewhere between 15 and 25 paid leaves a year —
+          more in Europe, fewer in the US, around 20 across India's IT sector.
+          Wherever you sit in that range it sounds generous until it has to
+          cover sick days, emergencies and family obligations. What is left over
+          is often barely a week of actual holiday.
         </p>
         <p>
           <strong>Long weekends change the arithmetic.</strong> Placing one to
@@ -749,12 +765,13 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
     solveVacationPlans,
     type RegionCode,
   } from "../data/vacation-solver";
+  import { COUNTRY_BY_CODE, isKnownRegion, resolveCountryCode } from "../data/countries";
   import { mountResults } from "../scripts/results";
   import { formatDateRange, getBannerTheme, nextBreaks, pluralLeaves } from "../scripts/plan-view";
 
   // Region and work week live in the navbar; the results grid listens rather
   // than reaching into the navbar's DOM the way the old code did.
-  let region: RegionCode = "ALL";
+  let region: RegionCode = "IN";
   let workWeek = 5;
   // Two different dates, deliberately. `today` marks the current day in the
   // calendar modal; `cutoff` is what a plan has to start after to be offered.
@@ -809,9 +826,14 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
       // band is empty — late in the year "at most one leave day" would be a
       // claim about the rows above that they no longer satisfy.
       const dearest = Math.max(...rows.map((p) => p.leavesRequired));
+      // The country is named outright rather than mentioned only when it is
+      // not the default. With two choices "on the US federal calendar" was a
+      // sufficient hint; with forty-seven, silence means the reader has to
+      // remember which one they picked to know what they are reading.
+      const country = COUNTRY_BY_CODE[resolveCountryCode(region)];
       note.textContent =
         `The next ${rows.length === 1 ? "break" : `${rows.length} breaks`} starting after today` +
-        `${region === "USA" ? " on the US federal calendar" : ""}, for a ` +
+        `${country ? ` on ${country.name}'s calendar` : ""}, for a ` +
         `${workWeek}-day work week, ` +
         `${dearest === 0 ? "none of which cost a leave day" : `spending at most ${pluralLeaves(dearest)}`}. ` +
         `Change the budget above to see the rest.`;
@@ -897,8 +919,12 @@ const faqJsonLd = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
 
   /** Applies ?region=/?leaves=/?month= — the shape the footer links use. */
   function applyParams(params: URLSearchParams) {
+    /* Any country code, plus the two legacy values ("ALL", "USA") and India's
+       sub-regions. This used to be an equality test against exactly those two
+       strings, so every `?region=` link the country picker can now produce
+       would have been silently ignored and left the visitor on India. */
     const r = params.get("region");
-    if (r === "ALL" || r === "USA") {
+    if (r && isKnownRegion(r)) {
       region = r;
       document.dispatchEvent(new CustomEvent("lw:setregion", { detail: { region } }));
       results?.refresh();

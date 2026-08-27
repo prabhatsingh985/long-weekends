@@ -62,6 +62,13 @@ export const ENTRIES: Entry[] = [
     changefreq: "weekly",
     priority: "0.9",
   },
+  /**
+   * The coverage page. High priority because it is the only crawlable statement
+   * of what the site actually covers — the homepage's results are rendered on
+   * the client, so to a crawler that page is a search form. `monthly` because
+   * its numbers only move when a holiday list is regenerated.
+   */
+  { path: "/countries", lastmod: "2026-08-27", changefreq: "monthly", priority: "0.8" },
   { path: "/about", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.5" },
   { path: "/contact", lastmod: "2026-08-24", changefreq: "yearly", priority: "0.4" },
   { path: "/privacy", lastmod: "2026-08-26", changefreq: "yearly", priority: "0.3" },

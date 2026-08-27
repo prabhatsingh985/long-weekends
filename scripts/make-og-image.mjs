@@ -7,23 +7,25 @@
  * nothing beyond the dependencies already installed (sharp ships with Astro's
  * image pipeline and rasterises the SVG below).
  *
- * Two things were wrong with the file this replaces, and they are the reason
- * this script exists rather than another hand-exported PNG:
+ * WHY THE FLAGS ARE VECTORS AND NOT EMOJI
+ * The card this replaces said "The Long Weekends 🇮🇳". Flag.astro documents why
+ * that sequence is unusable here: it is a pair of Regional Indicator letters,
+ * Segoe UI Emoji ships no flag glyphs, and Windows therefore draws the letters.
+ * Baked into a PNG it was worse than the live site's version of the same bug —
+ * whatever the exporting machine rendered is what every viewer got, forever.
  *
- * 1. It said "The Long Weekends 🇮🇳" — the emoji flag. Flag.astro already
- *    documents why that sequence is unusable here: it is a pair of Regional
- *    Indicator letters, Segoe UI Emoji ships no flag glyphs, and Windows
- *    therefore draws the letters. The old card had the emoji baked in as
- *    pixels, so it was worse than the live site's version of the same bug —
- *    whatever the exporting machine rendered is what every viewer got,
- *    forever. The flags below are drawn as vector geometry, lifted from
- *    Flag.astro so the card and the region menu cannot drift apart.
+ * WHY THE ARTWORK IS IMPORTED RATHER THAN COPIED
+ * It used to be copied: this file carried its own flagIN() and flagUS(), lifted
+ * from Flag.astro, with a comment promising the two would not drift. At two
+ * flags that was a small bet. At forty-seven it is not a bet worth taking, so
+ * the geometry is imported from src/data/flags.ts — the same module the site
+ * renders — and the card cannot show a flag the picker does not.
  *
- * 2. It named India only. The region control offers the US federal calendar
- *    too, and index.astro's own description says "India and the US" — so the
- *    single most-shared image on the site told half the audience the site was
- *    not for them. Both flags are on the card now, and the subtitle carries
- *    both years the solver actually covers.
+ * That import is why this needs a Node with TypeScript type-stripping (23.6 or
+ * newer, or 22.x with --experimental-strip-types). The script is a manual,
+ * occasional one and is not part of `npm run build` or the deploy, so the
+ * requirement costs nothing at release time; it fails with a readable message
+ * below rather than a module-resolution stack trace.
  *
  * Text is typeset in Arial rather than the site's Plus Jakarta Sans: the
  * webfont is fetched from Google Fonts at runtime and is not installed here,
@@ -33,6 +35,21 @@
 import sharp from "sharp";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+
+let FLAGS, COUNTRY_COUNT;
+try {
+  ({ FLAGS } = await import("../src/data/flags.ts"));
+  const data = await import("../holidays.json", { with: { type: "json" } });
+  COUNTRY_COUNT = Object.keys(data.default.countries).length;
+} catch (err) {
+  console.error(
+    "Could not load the flag artwork or the country data.\n" +
+      "This script imports src/data/flags.ts directly, which needs Node 23.6+ " +
+      "(or Node 22 run with --experimental-strip-types).\n" +
+      `Node here is ${process.version}.\n\nUnderlying error: ${err.message}`
+  );
+  process.exit(1);
+}
 
 /** The size every consumer normalises to. Facebook, X and Slack all crop or
  *  letterbox anything else; 1200x630 is the 1.91:1 they agree on. */
@@ -50,77 +67,52 @@ const BRAND_TEXT = "#ff7ba1";
 const FONT = "Arial, 'Segoe UI', Helvetica, sans-serif";
 
 /**
- * Flag geometry, copied from src/components/Flag.astro and drawn into a
- * 20x14 box that the caller scales and positions.
+ * The twelve flags on the card.
  *
- * Same deliberate simplifications as the component: the chakra is a ring
- * rather than 24 spokes and the US canton carries no stars. They are drawn
- * 46px wide here — larger than the menu's 20px, but a 50-star canton at this
- * size still resolves to noise once a chat client thumbnails the card.
+ * Twelve, not forty-seven: at card size forty-seven tiles are a texture rather
+ * than a set of flags, and the point of the row is that a reader recognises
+ * their own. These are picked to span all four continent groups and to lead
+ * with the largest software workforces, so most viewers find one they know in
+ * the first glance. The real number is stated in the subtitle, where it can be
+ * read rather than counted.
  */
-const STRIPE = 14 / 13;
+const SHOWN = ["IN", "US", "GB", "DE", "FR", "PL", "BR", "CA", "JP", "CN", "SG", "AU"];
 
-function flagIN() {
-  return `
-    <rect width="20" height="14" fill="#ff9933"/>
-    <rect y="4.667" width="20" height="4.666" fill="#ffffff"/>
-    <rect y="9.333" width="20" height="4.667" fill="#138808"/>
-    <circle cx="10" cy="7" r="1.7" fill="none" stroke="#0a3d91" stroke-width="0.5"/>
-    <circle cx="10" cy="7" r="0.4" fill="#0a3d91"/>`;
-}
-
-function flagUS() {
-  const stripes = Array.from({ length: 13 }, (_, i) => i)
-    .filter((i) => i % 2 === 0)
-    .map(
-      (i) =>
-        `<rect y="${(i * STRIPE).toFixed(4)}" width="20" height="${STRIPE.toFixed(
-          4,
-        )}" fill="#b22234"/>`,
-    )
-    .join("");
-  return `
-    <rect width="20" height="14" fill="#ffffff"/>
-    ${stripes}
-    <rect width="8.4" height="${(STRIPE * 7).toFixed(4)}" fill="#3c3b6e"/>`;
+const missing = SHOWN.filter((c) => !FLAGS[c]);
+if (missing.length) {
+  console.error(`No artwork for ${missing.join(", ")} in src/data/flags.ts`);
+  process.exit(1);
 }
 
 /**
- * One region chip: rounded well, flag, label.
+ * One flag tile, scaled out of the shared 20x14 artwork.
  *
- * `width` is passed in rather than measured. librsvg gives no text metrics, so
- * the alternative is a font-metrics table for one string each — the widths
- * below were set by rendering and looking at the result, which is the same
- * information for none of the machinery.
+ * The hairline is drawn over the flag rather than around it because several of
+ * these are white at an edge — Poland, Japan, Finland — and on this background
+ * they would otherwise bleed into it and read as a gap in the row.
  */
-function chip({ x, y, width, flag, label }) {
-  const h = 62;
-  const fw = 46; // flag width; height follows the 20:14 ratio
-  const fh = (fw * 14) / 20;
-  const fx = x + 22;
-  const fy = y + (h - fh) / 2;
-  const scale = fw / 20;
-
+function tile(code, x, y, width) {
+  const height = (width * 14) / 20;
+  const scale = width / 20;
   return `
-    <rect x="${x}" y="${y}" width="${width}" height="${h}" rx="${h / 2}"
-          fill="#ffffff" fill-opacity="0.06"
-          stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5"/>
-    <g transform="translate(${fx} ${fy}) scale(${scale})">
-      ${flag}
-      <rect width="20" height="14" fill="none" stroke="#000000" stroke-opacity="0.25" stroke-width="0.4"/>
-    </g>
-    <text x="${fx + fw + 16}" y="${y + h / 2}" dominant-baseline="central"
-          font-family="${FONT}" font-size="27" font-weight="700" fill="${INK}"
-          >${label}</text>`;
+    <g transform="translate(${x} ${y}) scale(${scale})">
+      ${FLAGS[code]}
+      <rect width="20" height="14" fill="none"
+            stroke="#ffffff" stroke-opacity="0.35" stroke-width="0.5"/>
+    </g>`;
 }
 
-/* Chip row: widths tuned to the rendered Arial Bold strings, then the pair is
-   centred as a unit so the row stays balanced if either label changes. */
-const CHIP_IN = 172;
-const CHIP_US = 282;
-const CHIP_GAP = 18;
-const chipRowX = (W - (CHIP_IN + CHIP_US + CHIP_GAP)) / 2;
-const chipRowY = 104;
+/* The row, centred as a unit so it stays balanced if a flag is swapped. */
+const TILE_W = 62;
+const TILE_H = (TILE_W * 14) / 20;
+const TILE_GAP = 16;
+const rowWidth = SHOWN.length * TILE_W + (SHOWN.length - 1) * TILE_GAP;
+const rowX = (W - rowWidth) / 2;
+const rowY = 96;
+
+const flagRow = SHOWN.map((code, i) =>
+  tile(code, rowX + i * (TILE_W + TILE_GAP), rowY, TILE_W)
+).join("");
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
@@ -146,32 +138,30 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" 
   <rect width="${W}" height="${H}" fill="url(#glowCool)"/>
   <rect width="${W}" height="${H}" fill="url(#glowBrand)"/>
 
-  ${chip({ x: chipRowX, y: chipRowY, width: CHIP_IN, flag: flagIN(), label: "India" })}
-  ${chip({
-    x: chipRowX + CHIP_IN + CHIP_GAP,
-    y: chipRowY,
-    width: CHIP_US,
-    flag: flagUS(),
-    label: "United States",
-  })}
+  ${flagRow}
 
-  <text x="${W / 2}" y="308" text-anchor="middle"
+  <text x="${W / 2}" y="${rowY + TILE_H + 46}" text-anchor="middle"
+        font-family="${FONT}" font-size="26" font-weight="700"
+        letter-spacing="2.5" fill="${MUTED}"
+        >AND ${COUNTRY_COUNT - SHOWN.length} MORE</text>
+
+  <text x="${W / 2}" y="352" text-anchor="middle"
         font-family="${FONT}" font-size="94" font-weight="700"
         letter-spacing="-2" fill="${INK}">The Long Weekends</text>
 
-  <text x="${W / 2}" y="378" text-anchor="middle"
+  <text x="${W / 2}" y="422" text-anchor="middle"
         font-family="${FONT}" font-size="35" font-weight="400" fill="${MUTED}"
-        >Every long weekend in 2026 and 2027,</text>
-  <text x="${W / 2}" y="428" text-anchor="middle"
+        >Public holidays in ${COUNTRY_COUNT} countries, 2026 and 2027 —</text>
+  <text x="${W / 2}" y="472" text-anchor="middle"
         font-family="${FONT}" font-size="35" font-weight="400" fill="${MUTED}"
-        >and the exact leaves to book for each one.</text>
+        >and the exact leaves to book for each break.</text>
 
   <!-- Hairline above the domain: gives the lower third an edge to sit on so
        the wordmark does not float in the glow. -->
-  <rect x="${W / 2 - 130}" y="500" width="260" height="1.5"
+  <rect x="${W / 2 - 130}" y="524" width="260" height="1.5"
         fill="#ffffff" fill-opacity="0.14"/>
 
-  <text x="${W / 2}" y="558" text-anchor="middle"
+  <text x="${W / 2}" y="580" text-anchor="middle"
         font-family="${FONT}" font-size="30" font-weight="700"
         letter-spacing="0.5" fill="${BRAND_TEXT}">thelongweekends.com</text>
 </svg>`;
@@ -186,4 +176,4 @@ await sharp(Buffer.from(svg))
   .png({ compressionLevel: 9 })
   .toFile(out);
 
-console.log(`wrote ${out} (${W}x${H})`);
+console.log(`wrote ${out} (${W}x${H}) — ${SHOWN.length} flags, ${COUNTRY_COUNT} countries`);

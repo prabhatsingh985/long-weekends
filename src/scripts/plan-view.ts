@@ -38,6 +38,36 @@ const THEME_RULES: { re: RegExp; theme: BannerTheme }[] = [
     re: /diwali|deepavali|dussehra|dasara|vijay|navami|ayudha|durga|chhath|kanakadasa|bhai|govardhan/i,
     theme: { cls: "bnr-festive", motif: "🪔", season: "Festival of lights" },
   },
+
+  /* -- East and Southeast Asia ------------------------------------------------
+     These sit ABOVE the "new year" rule below, and the order is load-bearing:
+     "Lunar New Year" and "Chinese New Year" both contain the words that rule
+     matches on, so leaving them to it painted the largest holiday in Asia as a
+     midwinter snowflake. They are matched first and get their own motif. */
+  {
+    re: /lunar new year|chinese new year|spring festival|seollal|tet\b|tết|losar/i,
+    theme: { cls: "bnr-festive", motif: "🧧", season: "Lunar new year" },
+  },
+  {
+    // Chuseok and Mid-Autumn are the same harvest moon under two names.
+    re: /mid-autumn|chuseok|moon festival|double ninth|chung yeung/i,
+    theme: { cls: "bnr-harvest", motif: "🌕", season: "Harvest moon" },
+  },
+  {
+    re: /dragon boat|duanwu/i,
+    theme: { cls: "bnr-summer", motif: "🐉", season: "Dragon Boat Festival" },
+  },
+  {
+    // Tomb Sweeping / Qingming: a spring day of remembrance, not a celebration.
+    re: /qing ?ming|tomb sweeping|ching ming/i,
+    theme: { cls: "bnr-spring", motif: "🌿", season: "Day of remembrance" },
+  },
+  {
+    // Songkran and Nyepi are new-year festivals that the spring rule below
+    // would otherwise miss entirely.
+    re: /songkran|nyepi|day of silence|hindu new year/i,
+    theme: { cls: "bnr-spring", motif: "🌸", season: "New year, new season" },
+  },
   {
     // Word-bounded: an unanchored /holi/ also matches "Holiday".
     re: /\bholi\b|dhulandi|rangpanchami/i,
@@ -61,15 +91,49 @@ const THEME_RULES: { re: RegExp; theme: BannerTheme }[] = [
     theme: { cls: "bnr-harvest", motif: "🌾", season: "Harvest season" },
   },
   {
-    re: /memorial|labor day|labour day/i,
+    // Midsummer is the Nordic summer holiday, and the most likely reason a
+    // Swede or a Finn is looking at this page in June.
+    re: /midsummer|midsommar|juhannus|sankt hans/i,
+    theme: { cls: "bnr-summer", motif: "☀️", season: "Midsummer" },
+  },
+  {
+    // Japan's outdoors holidays, which are the shape of its summer calendar.
+    re: /greenery|mountain day|marine day|sea day|showa|shōwa/i,
+    theme: { cls: "bnr-summer", motif: "🌿", season: "Summer break" },
+  },
+  {
+    re: /memorial|labor day|labour day|workers'? day|tourist bridge/i,
     theme: { cls: "bnr-summer", motif: "🌤️", season: "Summer break" },
   },
   {
-    re: /republic|gandhi|ambedkar|netaji|shivaji|rajyotsava|maharashtra|karnataka|patel|king|presidents|juneteenth|veterans|columbus|indigenous|may day/i,
+    /* Britain and Ireland name half their calendar after the banks rather than
+       after anything that happened, so there is nothing for the rules below to
+       match on: "Early May Bank Holiday" is a day off with no subject. */
+    re: /bank holiday/i,
+    theme: { cls: "bnr-summer", motif: "🍃", season: "Bank holiday" },
+  },
+  {
+    // Carnival empties offices across Brazil for the better part of a week.
+    re: /carnival|carnaval|shrove|pancake day|mardi gras|rosenmontag/i,
+    theme: { cls: "bnr-spring", motif: "🎭", season: "Carnival" },
+  },
+  {
+    re: /equinox|vernal/i,
+    theme: { cls: "bnr-spring", motif: "🌱", season: "Turn of the season" },
+  },
+  {
+    /* The civic rule, widened from India and the US to the whole list.
+       `\bnational\b` and not `national`, or every "International Labour Day"
+       in Europe gets filed as somebody's national day. */
+    re: /republic|gandhi|ambedkar|netaji|shivaji|rajyotsava|maharashtra|karnataka|patel|king|presidents|juneteenth|veterans|columbus|indigenous|may day|\bnational\b|constitution|liberation|unification|unity|sovereignty|revolution|victory|armistice|remembrance|anzac|waitangi|australia day|canada day|bastille|foundation|proclamation|emancipation|freedom|heritage|reconciliation|coming of age|culture day|respect for the aged|sports day|children|emperor|queen|monarch|accession|flag day|statehood|hangul|peace memorial|retrocession|teachers|youth day|pancasila|heroes|bonifacio|rizal|valor|aquino|women's day|hispanic|portugal day|ochi|\bhus\b|czechoslovak|matariki|chakri|coronation|chulalongkorn|malaysia day|victoria day|agong|establishment day|liberty|defenders|human rights|democracy|family day|goodwill|armed forces|san mart|güemes|tiradentes|awareness|jamhuri|madaraka|mashujaa|mazingira|solidarity|cultural diversity|haatzmaut|public service/i,
     theme: { cls: "bnr-civic", motif: "🏛️", season: "National holiday" },
   },
   {
-    re: /shivratri|shivaratri|id-ul|eid|ramzan|ramadan|muharram|milad|good friday|easter|palm sunday|buddha|purnima|mahavir|guru|nanak|gurpurab|parsi|navroz|jayanti/i,
+    /* Days of religious observance, across every tradition the list touches.
+       Deliberately the last specific rule: several of these words turn up
+       inside civic and seasonal names too, and the rules above should get
+       first refusal on them. */
+    re: /shivratri|shivaratri|id-ul|idul|eid|hari raya|bayram|sacrifice feast|arafat|hijra|muharram|maulid|mawlid|milad|isra|mi'?raj|ramzan|ramadan|nuzul|good friday|maundy|holy saturday|easter|palm sunday|whit|pentecost|ascension|assumption|corpus christi|epiphany|all saints|all souls|immaculate|annunciation|reformation|st\.? stephen|synaxis|buddha|vesak|wesak|waisak|thaipusam|purnima|mahavir|guru|nanak|gurpurab|parsi|navroz|jayanti|guadalupe|virgin|rosh hashana|yom kippur|sukkot|passover|pesach|shavuot|simchat|purim|hanukkah|independence movement|\bst\.?\s|saint|feast of|dormition|clean monday|holy spirit|holy week|black saturday/i,
     theme: { cls: "bnr-sacred", motif: "🕯️", season: "Day of observance" },
   },
 ];

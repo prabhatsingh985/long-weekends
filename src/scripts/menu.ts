@@ -25,6 +25,22 @@ export interface MenuOptions {
   /** Element whose text shows the current choice. Reads `data-label`. */
   display?: HTMLElement | null;
   onSelect?: (value: string, item: HTMLElement) => void;
+  /**
+   * Optional filter box inside the menu.
+   *
+   * Added for the country picker. Four options are a list you read; forty-seven
+   * are a list you search, and without a box the only way to reach Vietnam is
+   * forty-odd presses of ArrowDown. Supplying it turns the menu into a
+   * type-to-filter list: focus opens in the input, matching is against each
+   * item's `data-search` text, and the arrow keys walk what is left.
+   *
+   * Items are hidden with the `hidden` attribute, which keeps them out of the
+   * accessibility tree as well as out of sight — a screen reader should not be
+   * told there are forty-seven options when three match.
+   */
+  search?: HTMLInputElement | null;
+  /** Shown when the filter matches nothing. */
+  empty?: HTMLElement | null;
 }
 
 export interface MenuHandle {
@@ -36,7 +52,7 @@ export interface MenuHandle {
 }
 
 export function createMenu(options: MenuOptions): MenuHandle | null {
-  const { trigger, menu, valueAttr, display, onSelect } = options;
+  const { trigger, menu, valueAttr, display, onSelect, search, empty } = options;
 
   const items = Array.from(
     menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')
@@ -44,6 +60,19 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
   if (!items.length) return null;
 
   const isOpen = () => !menu.hidden;
+
+  /**
+   * The items the arrow keys can currently reach.
+   *
+   * Every navigation path goes through this rather than through `items`,
+   * because with a filter applied they are different lists — and walking the
+   * full one would move focus onto a hidden element, which browsers handle by
+   * silently dropping the focus somewhere unhelpful.
+   */
+  const visible = () => (search ? items.filter((it) => !it.hidden) : items);
+
+  /** Section headings, hidden when the filter empties the section under them. */
+  const groups = Array.from(menu.querySelectorAll<HTMLElement>("[data-menu-group]"));
 
   /** Matches --popover-gap in global.css. */
   const GAP = 10;
@@ -156,11 +185,49 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
   }
 
   function focusAt(i: number) {
-    const idx = (i + items.length) % items.length;
-    items.forEach((it, n) => {
-      it.tabIndex = n === idx ? 0 : -1;
+    const list = visible();
+    if (!list.length) return;
+    const idx = (i + list.length) % list.length;
+    items.forEach((it) => {
+      it.tabIndex = -1;
     });
-    items[idx].focus();
+    list[idx].tabIndex = 0;
+    list[idx].focus();
+    // A filtered list is taller than the menu, so the match the arrow keys
+    // reached can easily be below the fold.
+    list[idx].scrollIntoView({ block: "nearest" });
+  }
+
+  /**
+   * Applies the filter box to the item list.
+   *
+   * Matching is a plain substring test against `data-search`, which each item
+   * carries pre-lowercased and already holding every string worth typing — the
+   * country name, its code, and the cities that make it recognisable, so
+   * "bangalore" finds India and "kr" finds South Korea.
+   */
+  function applyFilter() {
+    if (!search) return;
+    const q = search.value.trim().toLowerCase();
+    let matches = 0;
+
+    items.forEach((it) => {
+      const hay = it.dataset.search || it.textContent?.toLowerCase() || "";
+      const on = !q || hay.includes(q);
+      it.hidden = !on;
+      if (on) matches++;
+    });
+
+    // A heading with nothing under it reads as a section that failed to load.
+    groups.forEach((g) => {
+      const owned = items.filter((it) => it.closest("[data-menu-section]") === g.parentElement);
+      g.hidden = owned.length > 0 && owned.every((it) => it.hidden);
+    });
+
+    if (empty) empty.hidden = matches > 0;
+    // The list changed height, so where it can hang and how tall it may be
+    // both changed with it.
+    if (isOpen()) place();
   }
 
   function open(where: "selected" | "first" | "last" = "selected") {
@@ -169,16 +236,37 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     menu.classList.add("pop-in");
     trigger.setAttribute("aria-expanded", "true");
 
+    // A filter left over from last time would open the menu already narrowed
+    // to whatever was typed then, which reads as most of the list having
+    // vanished.
+    if (search) {
+      search.value = "";
+      applyFilter();
+    }
+
+    const list = visible();
     let i = 0;
     if (where === "last") {
-      i = items.length - 1;
+      i = list.length - 1;
     } else if (where === "selected") {
-      const found = items.findIndex(
+      const found = list.findIndex(
         (it) => it.getAttribute("aria-checked") === "true"
       );
       i = found < 0 ? 0 : found;
     }
-    focusAt(i);
+
+    if (search) {
+      // Focus goes to the box, not to an item: the point of a filter is that
+      // you can start typing. The selected item is still scrolled to, so the
+      // list opens showing where you are rather than at the top.
+      items.forEach((it) => {
+        it.tabIndex = -1;
+      });
+      list[i]?.scrollIntoView({ block: "center" });
+      search.focus();
+    } else {
+      focusAt(i);
+    }
   }
 
   function close(restoreFocus = true) {
@@ -219,23 +307,41 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
   });
 
   menu.addEventListener("keydown", (e) => {
-    const i = items.indexOf(document.activeElement as HTMLElement);
+    const list = visible();
+    const i = list.indexOf(document.activeElement as HTMLElement);
+    // From the filter box, ArrowDown means "into the results" — so start
+    // before the first item rather than at the last one, which is where an
+    // index of -1 would otherwise wrap to.
+    const inSearch = search && document.activeElement === search;
+
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        focusAt(i + 1);
+        focusAt(inSearch ? 0 : i + 1);
         break;
       case "ArrowUp":
         e.preventDefault();
-        focusAt(i - 1);
+        focusAt(inSearch ? list.length - 1 : i - 1);
         break;
       case "Home":
+        // Inside a text box these are cursor commands and must stay that way.
+        if (inSearch) break;
         e.preventDefault();
         focusAt(0);
         break;
       case "End":
+        if (inSearch) break;
         e.preventDefault();
-        focusAt(items.length - 1);
+        focusAt(list.length - 1);
+        break;
+      case "Enter":
+        // Typing a country and pressing Enter should pick it. Without this the
+        // filter box swallows the key and nothing happens, which reads as the
+        // search having failed.
+        if (inSearch && list.length) {
+          e.preventDefault();
+          select(list[0]);
+        }
         break;
       case "Escape":
         e.preventDefault();
@@ -247,6 +353,8 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
         break;
     }
   });
+
+  search?.addEventListener("input", applyFilter);
 
   items.forEach((it) => it.addEventListener("click", () => select(it)));
 

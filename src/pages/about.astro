@@ -10,10 +10,14 @@
  * to be revisited too. There is a note about that in the verification script.
  */
 import DocPage from "../layouts/DocPage.astro";
+import { COUNTRIES } from "../data/countries";
+
+/** Counted from the shipped data, so the prose below cannot outlive it. */
+const COUNTRY_COUNT = COUNTRIES.length;
 
 const TITLE = "About – How The Long Weekends Works | The Long Weekends";
 const DESCRIPTION =
-  "How The Long Weekends plans your 2026 and 2027 leave: where the holiday dates come from, how the solver picks the cheapest long break, and what it will not do.";
+  `How The Long Weekends plans your 2026 and 2027 leave across ${COUNTRY_COUNT} countries: where the holiday dates come from, how the solver picks the cheapest long break, and what it will not do.`;
 ---
 
 <DocPage
@@ -41,8 +45,8 @@ const DESCRIPTION =
 
   <h2>Where the dates come from</h2>
   <p>
-    Holiday dates are transcribed from official notifications, not aggregated from
-    other calendar sites:
+    India and the United States are transcribed from official notifications, not
+    aggregated from other calendar sites:
   </p>
   <ul>
     <li>
@@ -59,10 +63,23 @@ const DESCRIPTION =
     </li>
   </ul>
   <p>
-    Several Indian festivals are set by lunar observation and a few state
-    notifications land only weeks ahead, so a date can move after publication. If
-    you spot one that has, <a href="/contact">tell us</a> — it is the single most
-    useful thing you can report.
+    The other {COUNTRY_COUNT - 2} countries are compiled from Google’s published
+    public-holiday calendars and cross-checked against Nager.Date, with every
+    disagreement between the two reviewed by hand before it ships. The compiler
+    lives in the repository rather than in someone’s notes, so each list can be
+    regenerated the moment a government publishes its next year. Only nationwide
+    holidays are carried — plus regional ones a majority of a federal country’s
+    states observe, which is how Australia’s King’s Birthday is included and
+    Bavaria’s Corpus Christi is not.
+  </p>
+  <p>
+    Dates set by lunar observation — Eid, Diwali, Vesak, Nyepi — can move by a
+    day even after a government publishes them, and a few national notifications
+    land only weeks ahead. Indonesia’s 2027 is an estimate for exactly that
+    reason: the decree that fixes it is not out yet. If you spot a date that has
+    moved, <a href="/contact">tell us</a> — it is the single most useful thing
+    you can report. The <a href="/countries">country list</a> says which
+    calendars carry sighting-dependent dates.
   </p>
 
   <h2>How the maths works</h2>
@@ -89,13 +106,20 @@ const DESCRIPTION =
     deciding what to do in three weeks.
   </p>
 
-  <h2>Six-day work weeks</h2>
+  <h2>Weekends are not the same everywhere</h2>
   <p>
-    A large share of Indian workplaces run Monday to Saturday, which changes every
-    answer on the page — a Saturday holiday is a real day off if you normally work
-    it, and Friday holidays stop producing three-day weekends. The work-week switch
-    in the header re-solves the whole calendar for a six-day week rather than
-    adjusting the display.
+    Which days a country rests on changes every answer on the page, so the solver
+    uses each country’s own rather than assuming Saturday and Sunday. Israel works
+    Sunday to Thursday and rests Friday and Saturday; Egypt does the same. On
+    those calendars a holiday landing on a Sunday is a real day off rather than
+    one the weekend had already swallowed — get that wrong and every result is
+    shifted by two days.
+  </p>
+  <p>
+    Separately, a large share of Indian workplaces run Monday to Saturday. The
+    work-week switch in the header re-solves the whole calendar for a six-day
+    week rather than adjusting the display: a Saturday holiday becomes a real day
+    off, and Friday holidays stop producing three-day weekends.
   </p>
 
   <h2>Your office holiday list</h2>
@@ -117,8 +141,18 @@ const DESCRIPTION =
   </p>
   <ul>
     <li>
-      It covers <strong>2026 only</strong>, plus the first days of January 2027 so
-      that a New Year bridge can be calculated.
+      It covers <strong>2026 and 2027</strong>, plus the first days of January
+      2028 so that a New Year bridge can be calculated. It stops there.
+    </li>
+    <li>
+      <strong>Sub-national lists exist for India only.</strong> Everywhere else
+      you get the national calendar, so a reader in Bavaria, Queensland or
+      Quebec will have days this does not know about.
+    </li>
+    <li>
+      <strong>China’s make-up workdays are not modelled.</strong> Golden Week is
+      paid for by turning a neighbouring weekend into working days, and the
+      State Council publishes that swap separately each autumn.
     </li>
     <li>
       <strong>Restricted or optional holidays</strong> are not modelled. Those vary
@@ -137,8 +171,10 @@ const DESCRIPTION =
 
   <h2>Who runs it</h2>
   <p>
-    An independent project, built and maintained by one person in India. There is
-    no company behind it, no sign-up, no newsletter and no advertising. If it is
+    An independent project, built and maintained by one person in India — which
+    is why India is the calendar with the most care in it, and why corrections
+    for the other {COUNTRY_COUNT - 1} are especially welcome. There is no company
+    behind it, no sign-up, no newsletter and no advertising. If it is
     useful, the best thanks is to send a correction when a date is wrong — the
     address is on the <a href="/contact">contact page</a>.
   </p>
