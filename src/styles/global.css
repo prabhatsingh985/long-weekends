@@ -1141,28 +1141,31 @@
   border-color: var(--brand-200);
 }
 
-/* The budget menu's stepper row: a `.menu-item` box that is not itself an item.
+/* The budget menu's last row: one choice, plus a stepper that is not one.
    ---------------------------------------------------------------------------
-   It borrows the geometry so it lines up with the four presets above it, and
-   gives back the affordances, because the row is not what you press — the
-   controls inside it are. A hover tint and a pointer cursor on a row that does
-   nothing when clicked is a promise the row cannot keep.
+   The row itself is bare — no padding, no tint, nothing to press. It is a
+   two-column strip holding a `.menu-item` that behaves exactly like the
+   presets above it (hover, tick, brand fill, all inherited) and a stepper that
+   sits outside that item because a button cannot be nested in a button.
 
-   `.is-on` repeats the checked tint by hand for the same reason it has to
-   exist at all: the budget this row holds is chosen with no radio checked, so
-   `[aria-checked]` above can never match it. Written with `:hover` on both
-   selectors rather than relying on source order, so the tint cannot be undone
-   by the reset landing after it. */
-.menu-custom,
-.menu-custom:hover {
-  cursor: default;
-  background-color: transparent;
-  border-color: transparent;
+   `flex: 1 1 0` with `width: auto` is what stops `.menu-item`'s own
+   `width: 100%` from claiming the whole strip and squeezing the stepper into
+   its own overflow. */
+.menu-custom {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
-.menu-custom.is-on,
-.menu-custom.is-on:hover {
-  background-color: var(--brand-50);
-  border-color: var(--brand-200);
+.menu-custom-pick {
+  width: auto;
+  flex: 1 1 0;
+}
+.menu-custom-stepper {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+  padding-right: 0.5rem;
 }
 
 /* The number between the two steppers. Wide enough for two digits and the

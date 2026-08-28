@@ -59,11 +59,11 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
    *
    * Usually that is exactly the radio items. A menu may also hold a control
    * that is not one of the choices, though — the hero's budget menu ends in a
-   * number field for the budgets its four presets do not name — and Tab is no
+   * number field that sets the figure its last choice carries — and Tab is no
    * way to reach it, because Tab closes the menu. Anything marked
-   * `data-menu-stop` joins the ring, so ArrowDown off the last preset walks
-   * into the field instead of wrapping back to the top past a control the
-   * keyboard could otherwise never get to at all.
+   * `data-menu-stop` joins the ring, so ArrowDown off the last row walks into
+   * the field instead of wrapping back to the top past a control the keyboard
+   * could otherwise never get to at all.
    */
   const stops = Array.from(
     menu.querySelectorAll<HTMLElement>('[role="menuitemradio"], [data-menu-stop]')
@@ -421,11 +421,11 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     isOpen,
     setValue(value: string) {
       /* A value no item names unchecks the lot, which is not the same as doing
-         nothing. A menu can legitimately hold a value none of its options
-         carries — the hero's budget menu takes any number up to MAX_LEAVES
-         from the stepper at its foot — and leaving the last preset ticked
-         there would have the open menu claiming the budget is still 3 while
-         the capsule above it reads "7 leaves". */
+         nothing: leaving the previous item ticked would have the open menu
+         asserting a choice the caller has just said is no longer current,
+         directly beneath a trigger that reads otherwise. Every caller today
+         passes a value some item carries, so this is the guard rather than the
+         path — but it is the difference between a stale tick and none. */
       mark(items.find((it) => it.getAttribute(valueAttr) === value) ?? null);
     },
   };
