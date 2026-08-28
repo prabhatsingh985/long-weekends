@@ -1007,6 +1007,37 @@
   animation-name: pop-in-above;
 }
 
+/* The country list is the only scroller that lives inside a popover, and on
+   Windows the platform scrollbar it was getting is a 17px light-grey column —
+   inside a 352px panel that reads as a second border, drawn in a grey that
+   belongs to no theme and stays light when the rest of the panel goes dark.
+   Thin and tokenised so it belongs to the surface it sits on.
+
+   Both syntaxes on purpose: `scrollbar-width` is the standard one and is what
+   Firefox and current Chrome honour, the `::-webkit-` rules are what Safari
+   still needs. The thumb is drawn with `background-clip: content-box` inside a
+   transparent border so it reads as a rounded 4px bar with room around it
+   rather than a full-bleed 8px slab. */
+.menu-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.menu-scroller::-webkit-scrollbar {
+  width: 8px;
+}
+.menu-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+.menu-scroller::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+.menu-scroller::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted);
+}
+
 /* --- Search capsule segment ----------------------------------------------- */
 .seg {
   flex: 1 1 0;

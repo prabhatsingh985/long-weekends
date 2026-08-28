@@ -46,9 +46,24 @@ interface Props {
    * left-hand trigger to its right edge pushes the panel off the screen.
    */
   align: "left" | "right";
+  /**
+   * Which box the menu measures its `left-0` / `top: 100%` against.
+   *
+   * "self" is the trigger's own wrapper, which is right for a trigger that
+   * stands alone. It is wrong for a labelled control: in the desktop bar the
+   * trigger sits AFTER the word "Region", so a self-anchored panel hung from
+   * the flag rather than from the start of the control, leaving the label
+   * stranded above open space and the panel floating mid-bar.
+   *
+   * "container" drops the wrapper's own `relative` so the panel resolves
+   * against the caller's positioned box instead — label included, so its top
+   * left corner lands under the "R" of "Region". A caller passing it MUST be
+   * `relative` itself, or the panel escapes to the next positioned ancestor.
+   */
+  anchor?: "self" | "container";
 }
 
-const { id, variant, align } = Astro.props;
+const { id, variant, align, anchor = "self" } = Astro.props;
 const menuId = `${id}Menu`;
 const searchId = `${id}Search`;
 
@@ -74,7 +89,7 @@ const menuSide = align === "right" ? "right-0" : "left-0";
 const totalCountries = COUNTRY_GROUPS.reduce((n, g) => n + g.countries.length, 0);
 ---
 
-<div class="relative">
+<div class:list={[anchor === "self" && "relative"]}>
   <button
     type="button"
     id={id}
@@ -192,13 +207,21 @@ const totalCountries = COUNTRY_GROUPS.reduce((n, g) => n + g.countries.length, 0
         place() sets an inline max-height on the popover only when the viewport
         forces it, so capping here keeps the search row and the footer link
         pinned in every case rather than only the cramped one. */}
-    <div class="max-h-[19rem] overflow-y-auto overscroll-contain p-1.5">
+    {/* No `pt`: the headings below pin at `top: 0`, and any top padding here
+        is a gap the list scrolls through above them. */}
+    <div class="menu-scroller max-h-[19rem] overflow-y-auto overscroll-contain px-1.5 pb-1.5">
       {
         COUNTRY_GROUPS.map((group) => (
           <div data-menu-section>
+            {/* Sticky, because forty-seven countries is more than one screen
+                and a heading that scrolls away takes with it the only thing
+                telling you whether the row under the cursor is in Europe or
+                the Americas. `-mx-1.5` bleeds it to the panel's edges so the
+                rows pass behind it rather than beside it, and it needs the
+                opaque `bg-surface` for the same reason. */}
             <p
               data-menu-group
-              class="px-2 pb-1 pt-2 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
+              class="sticky top-0 z-10 -mx-1.5 bg-surface px-3.5 pb-1.5 pt-2.5 font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
             >
               {group.name}
             </p>
@@ -215,12 +238,33 @@ const totalCountries = COUNTRY_GROUPS.reduce((n, g) => n + g.countries.length, 0
                 data-search={searchTextFor(country)}
               >
                 <Flag code={country.code} class="shrink-0" />
-                <span class="min-w-0">
+                <span class="min-w-0 grow">
                   <span class="block truncate text-[0.8125rem] font-bold text-ink">
                     {country.name}
                   </span>
                   <span class="block truncate text-xs text-muted">{country.hub}</span>
                 </span>
+                {/* createMenu's mark() already moves a `[data-check]` glyph
+                    between items — the sort menu has had one since it was
+                    written. The country list was relying on its brand tint
+                    alone, which is a 4% wash on white and disappears entirely
+                    under a hover on the row above it. */}
+                <svg
+                  data-check
+                  class:list={[
+                    "h-4 w-4 shrink-0 text-brand-text",
+                    { hidden: country.code !== DEFAULT.code },
+                  ]}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m5 13 4 4L19 7" />
+                </svg>
               </button>
             ))}
           </div>

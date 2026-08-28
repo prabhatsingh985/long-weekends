@@ -114,14 +114,35 @@ const showBrandChip = tools;
         <div class="hidden lg:flex items-center gap-3 rounded-full border border-hairline bg-surface-soft px-4 py-1.5">
           {showRegion && (
             <Fragment>
-              <div class="flex items-center gap-2">
+              {/* This box is the picker's anchor, which is why it carries
+                  three classes that look decorative and are not.
+
+                  `relative` is what `anchor="container"` on the menu below
+                  asks for: the two go together, and the prop without the class
+                  lets the panel escape to the next positioned ancestor. It
+                  puts the panel's top left corner under the "R" of "Region",
+                  where the eye already is when the menu opens, instead of
+                  under the flag two words to its right.
+
+                  `self-stretch -my-1.5 py-1.5` then grows the box to the bar's
+                  padding box — the same padding-and-negative-margin trick the
+                  trigger itself uses, so the bar's height is unchanged. The
+                  panel hangs from `top: 100%`, and without this the box stops
+                  at the text: the panel opened 2px ABOVE the bar's bottom
+                  edge, covering the border it is supposed to hang from. */}
+              <div class="relative flex items-center gap-2 self-stretch -my-1.5 py-1.5">
                 <span
                   id="navRegionLabel"
                   class="font-mono text-[0.625rem] font-bold uppercase tracking-widest text-muted"
                 >
                   Region
                 </span>
-                <RegionMenu id="navRegionDesktop" variant="bar" align="left" />
+                <RegionMenu
+                  id="navRegionDesktop"
+                  variant="bar"
+                  align="left"
+                  anchor="container"
+                />
               </div>
 
               <span class="w-px h-4 bg-hairline-strong" aria-hidden="true" />
