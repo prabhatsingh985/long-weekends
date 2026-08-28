@@ -23,6 +23,7 @@ import {
 } from "./plan-view";
 import { createMenu } from "./menu";
 import { createDialog } from "./dialog";
+import { MAX_LEAVES } from "../data/vacation-solver";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -50,7 +51,7 @@ export interface ResultsOptions {
    */
   monthRange?: { from: string; to: string };
   initialLeaves?: number;
-  /** Highest value the custom stepper will go to. */
+  /** Highest value the custom stepper will go to. Defaults to MAX_LEAVES. */
   maxLeaves?: number;
 }
 
@@ -70,7 +71,7 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
   const grid = el<HTMLElement>("vacationGrid");
   if (!grid) return null;
 
-  const maxLeaves = options.maxLeaves ?? 10;
+  const maxLeaves = options.maxLeaves ?? MAX_LEAVES;
 
   const badge = el<HTMLElement>("resultsBadge");
   const subtext = el<HTMLElement>("resultsSubtext");

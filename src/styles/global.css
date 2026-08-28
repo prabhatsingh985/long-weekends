@@ -1141,6 +1141,62 @@
   border-color: var(--brand-200);
 }
 
+/* The budget menu's stepper row: a `.menu-item` box that is not itself an item.
+   ---------------------------------------------------------------------------
+   It borrows the geometry so it lines up with the four presets above it, and
+   gives back the affordances, because the row is not what you press — the
+   controls inside it are. A hover tint and a pointer cursor on a row that does
+   nothing when clicked is a promise the row cannot keep.
+
+   `.is-on` repeats the checked tint by hand for the same reason it has to
+   exist at all: the budget this row holds is chosen with no radio checked, so
+   `[aria-checked]` above can never match it. Written with `:hover` on both
+   selectors rather than relying on source order, so the tint cannot be undone
+   by the reset landing after it. */
+.menu-custom,
+.menu-custom:hover {
+  cursor: default;
+  background-color: transparent;
+  border-color: transparent;
+}
+.menu-custom.is-on,
+.menu-custom.is-on:hover {
+  background-color: var(--brand-50);
+  border-color: var(--brand-200);
+}
+
+/* The number between the two steppers. Wide enough for two digits and the
+   focus ring, and no wider — it sits at the end of a row that also carries a
+   label and a hint, inside a menu that is only as wide as the control it hangs
+   from on a phone.
+
+   The native spinners are hidden: they are a 12px-wide pair of arrows, well
+   under the 24px pointer target the buttons on either side exist to provide,
+   and two ways to do the same thing an inch apart. The keyboard keeps its own
+   Up and Down regardless, which is the half of the spinner worth having. */
+.budget-input {
+  width: 3rem;
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.budget-input::-webkit-outer-spin-button,
+.budget-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.budget-input:hover {
+  border-color: var(--border-strong);
+}
+
 /* --- Field --------------------------------------------------------------- */
 .field {
   width: 100%;

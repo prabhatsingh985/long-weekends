@@ -45,6 +45,22 @@ export const CALENDAR_START = "2026-01-01";
 export const CALENDAR_END = "2028-01-10";
 
 /**
+ * The largest leave budget either budget control will offer.
+ *
+ * Not a round number picked for looks. solveVacationPlans() only considers
+ * windows of `leaves + 2` to `leaves + 10` days, capped at 21, so past roughly
+ * a dozen leaves every plan it can still build is a long block of PTO with a
+ * holiday somewhere inside it — the opposite of what this site is for — and at
+ * twenty the two bounds cross and it returns nothing at all. Ten is the last
+ * budget that still answers "what do my leaves buy me".
+ *
+ * Exported so the hero capsule and the results rail cannot cap at different
+ * numbers. They already had: the rail's stepper ran to ten while the capsule
+ * offered four fixed options and stopped at three.
+ */
+export const MAX_LEAVES = 10;
+
+/**
  * Today, clamped into the span the holiday data covers.
  *
  * The previous version fell back to a hardcoded "2026-08-20" for any date

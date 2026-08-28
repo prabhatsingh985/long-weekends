@@ -54,22 +54,52 @@ export interface MenuHandle {
 export function createMenu(options: MenuOptions): MenuHandle | null {
   const { trigger, menu, valueAttr, display, onSelect, search, empty } = options;
 
-  const items = Array.from(
-    menu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')
+  /**
+   * Everything the arrow keys can land on, in DOM order.
+   *
+   * Usually that is exactly the radio items. A menu may also hold a control
+   * that is not one of the choices, though — the hero's budget menu ends in a
+   * number field for the budgets its four presets do not name — and Tab is no
+   * way to reach it, because Tab closes the menu. Anything marked
+   * `data-menu-stop` joins the ring, so ArrowDown off the last preset walks
+   * into the field instead of wrapping back to the top past a control the
+   * keyboard could otherwise never get to at all.
+   */
+  const stops = Array.from(
+    menu.querySelectorAll<HTMLElement>('[role="menuitemradio"], [data-menu-stop]')
   );
+
+  /** The subset that is a choice. Only these are filtered, marked or selected. */
+  const items = stops.filter((it) => it.getAttribute("role") === "menuitemradio");
   if (!items.length) return null;
+
+  /**
+   * A region of the menu that owns its own keys.
+   *
+   * Arrow keys mean "move between options" everywhere in a menu except inside
+   * a field that has its own use for them: in the budget menu's number input,
+   * Up and Down step the number and Home and End are cursor commands. Marking
+   * the wrapper `data-menu-freeform` hands those keys back to the browser.
+   *
+   * Escape and Tab are deliberately not included. Dismissing an open menu has
+   * to work from everywhere inside it, and they are also the only way out of
+   * a freeform region — the arrows that would otherwise walk back to the list
+   * belong to the field while the caret is in it.
+   */
+  const freeform = (t: EventTarget | null) =>
+    t instanceof Element && !!t.closest("[data-menu-freeform]");
 
   const isOpen = () => !menu.hidden;
 
   /**
    * The items the arrow keys can currently reach.
    *
-   * Every navigation path goes through this rather than through `items`,
+   * Every navigation path goes through this rather than through `stops`,
    * because with a filter applied they are different lists — and walking the
    * full one would move focus onto a hidden element, which browsers handle by
    * silently dropping the focus somewhere unhelpful.
    */
-  const visible = () => (search ? items.filter((it) => !it.hidden) : items);
+  const visible = () => (search ? stops.filter((it) => !it.hidden) : stops);
 
   /** Section headings, hidden when the filter empties the section under them. */
   const groups = Array.from(menu.querySelectorAll<HTMLElement>("[data-menu-group]"));
@@ -188,7 +218,7 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     const list = visible();
     if (!list.length) return;
     const idx = (i + list.length) % list.length;
-    items.forEach((it) => {
+    stops.forEach((it) => {
       it.tabIndex = -1;
     });
     list[idx].tabIndex = 0;
@@ -259,7 +289,7 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
       // Focus goes to the box, not to an item: the point of a filter is that
       // you can start typing. The selected item is still scrolled to, so the
       // list opens showing where you are rather than at the top.
-      items.forEach((it) => {
+      stops.forEach((it) => {
         it.tabIndex = -1;
       });
       list[i]?.scrollIntoView({ block: "center" });
@@ -277,14 +307,15 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     if (restoreFocus) trigger.focus();
   }
 
-  function mark(item: HTMLElement) {
+  /** `null` unchecks everything; see setValue() for why that is a real case. */
+  function mark(item: HTMLElement | null) {
     items.forEach((it) => {
       const on = it === item;
       it.setAttribute("aria-checked", String(on));
       // Optional tick glyph, used by the sort control.
       it.querySelector("[data-check]")?.classList.toggle("hidden", !on);
     });
-    if (display && item.dataset.label) display.textContent = item.dataset.label;
+    if (display && item?.dataset.label) display.textContent = item.dataset.label;
   }
 
   function select(item: HTMLElement) {
@@ -314,23 +345,28 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     // index of -1 would otherwise wrap to.
     const inSearch = search && document.activeElement === search;
 
+    // A field that brought its own meaning for these keys keeps them.
+    const own = freeform(e.target);
+
     switch (e.key) {
       case "ArrowDown":
+        if (own) break;
         e.preventDefault();
         focusAt(inSearch ? 0 : i + 1);
         break;
       case "ArrowUp":
+        if (own) break;
         e.preventDefault();
         focusAt(inSearch ? list.length - 1 : i - 1);
         break;
       case "Home":
         // Inside a text box these are cursor commands and must stay that way.
-        if (inSearch) break;
+        if (inSearch || own) break;
         e.preventDefault();
         focusAt(0);
         break;
       case "End":
-        if (inSearch) break;
+        if (inSearch || own) break;
         e.preventDefault();
         focusAt(list.length - 1);
         break;
@@ -338,6 +374,7 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
         // Typing a country and pressing Enter should pick it. Without this the
         // filter box swallows the key and nothing happens, which reads as the
         // search having failed.
+        if (own) break;
         if (inSearch && list.length) {
           e.preventDefault();
           select(list[0]);
@@ -383,8 +420,13 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     close,
     isOpen,
     setValue(value: string) {
-      const item = items.find((it) => it.getAttribute(valueAttr) === value);
-      if (item) mark(item);
+      /* A value no item names unchecks the lot, which is not the same as doing
+         nothing. A menu can legitimately hold a value none of its options
+         carries — the hero's budget menu takes any number up to MAX_LEAVES
+         from the stepper at its foot — and leaving the last preset ticked
+         there would have the open menu claiming the budget is still 3 while
+         the capsule above it reads "7 leaves". */
+      mark(items.find((it) => it.getAttribute(valueAttr) === value) ?? null);
     },
   };
 }

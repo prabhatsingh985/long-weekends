@@ -16,13 +16,19 @@
  * and its filter box existing twice in this repo and drifting apart the first
  * time one of them gained a country — so both now render the same component,
  * and Navbar.astro's initRegion() binds every instance of it, including this
- * one. The budget menu beside it is still local, because it is four fixed
- * options that appear nowhere else.
+ * one. The budget menu beside it is still local, because its four presets and
+ * its stepper appear nowhere else.
  */
 import RegionMenu from "./RegionMenu.astro";
 import { COUNTRIES } from "../data/countries";
+import { MAX_LEAVES } from "../data/vacation-solver";
 
-/* Glyphs are picked for what Windows can actually draw. 🆓 was the obvious
+/* Four presets, not four options: every number from 0 to MAX_LEAVES is
+   reachable, and the stepper under them is what the rest of the range is for.
+   These are the four worth naming, because each buys a different KIND of
+   break — which is what the hints say.
+
+   Glyphs are picked for what Windows can actually draw. 🆓 was the obvious
    choice for the free tier and the wrong one: Segoe UI Emoji renders it as a
    system-blue "FREE" chip that reads as a browser badge sitting inside our own
    menu, not as an icon in it. 🎁 carries the same "costs you nothing" meaning
@@ -199,6 +205,83 @@ const BUDGETS = [
                 </button>
               ))
             }
+
+            {/* The rest of the range.
+                ---------------------------------------------------------------
+                The four presets above were the whole control, so a visitor with
+                a week of leave to spend could ask this capsule for at most
+                three days of it. The rail over the results has run to ten since
+                it was written — the capsule was the only place the answer was
+                capped at 3, and it is the place most visitors start.
+
+                A stepper rather than six more rows: the presets earn their
+                space by naming a kind of break, and "7 leaves" names nothing.
+                It is also the same control, in the same words, as the compound
+                pill in the results rail, so the two read as one idea.
+
+                `data-menu-stop` puts the field in the arrow-key ring — Tab
+                closes a menu, so without it the keyboard could not reach this
+                row at all. `data-menu-freeform` hands Up, Down, Home and End
+                back to the field, where they step the number and move the
+                caret. Both are createMenu's, and documented there. */}
+            <div
+              class="mx-1 my-1.5 h-px bg-hairline"
+              role="separator"
+              aria-orientation="horizontal"
+            >
+            </div>
+
+            <div
+              id="heroBudgetCustom"
+              role="group"
+              aria-labelledby="heroBudgetCustomLabel"
+              class="menu-item menu-custom"
+              data-menu-freeform
+            >
+              <span class="text-xl shrink-0" aria-hidden="true">📅</span>
+              <span class="min-w-0 grow">
+                {/* Named by the words on screen rather than by an aria-label of
+                    its own, so what a screen reader announces for this row and
+                    what a sighted visitor reads are the same three syllables. */}
+                <span
+                  id="heroBudgetCustomLabel"
+                  class="block text-[0.8125rem] font-bold text-ink">More leaves</span
+                >
+                <span class="block text-xs text-muted"
+                  >Any number up to {MAX_LEAVES}</span
+                >
+              </span>
+              <span class="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  id="heroBudgetDec"
+                  class="stepper-btn"
+                  aria-label="One leave fewer"><span aria-hidden="true">−</span></button
+                >
+                {/* Typed or stepped, and applied either way as it changes —
+                    there is no OK button in this menu, so a number sitting in
+                    the field unapplied would be read as the budget it is not. */}
+                <input
+                  type="number"
+                  id="heroBudgetInput"
+                  class="budget-input"
+                  data-menu-stop
+                  inputmode="numeric"
+                  min="0"
+                  max={MAX_LEAVES}
+                  step="1"
+                  value="0"
+                  tabindex="-1"
+                  aria-label="Number of leaves"
+                />
+                <button
+                  type="button"
+                  id="heroBudgetInc"
+                  class="stepper-btn"
+                  aria-label="One leave more"><span aria-hidden="true">+</span></button
+                >
+              </span>
+            </div>
           </div>
         </div>
 
@@ -286,10 +369,11 @@ const BUDGETS = [
     solveVacationPlans,
     getUpcomingCutoffIso,
     isCalendarExhausted,
+    MAX_LEAVES,
     type RegionCode,
   } from "../data/vacation-solver";
-  import { createMenu } from "../scripts/menu";
-  import { nextBreaks } from "../scripts/plan-view";
+  import { createMenu, type MenuHandle } from "../scripts/menu";
+  import { nextBreaks, pluralLeaves } from "../scripts/plan-view";
 
   /* The live region and work week. The badge used to hardcode region "ALL", so
      a visitor who picked another country was still told the next break was
@@ -313,19 +397,97 @@ const BUDGETS = [
     const budgetTrigger = el("heroBudgetTrigger");
     const budgetMenu = el("heroBudgetMenu");
     const budgetDisplay = el("heroBudgetDisplay");
+    const customRow = el("heroBudgetCustom");
+    const customInput = el("heroBudgetInput") as HTMLInputElement | null;
+    const btnDec = el("heroBudgetDec") as HTMLButtonElement | null;
+    const btnInc = el("heroBudgetInc") as HTMLButtonElement | null;
     const searchBtn = el("heroSearchActionBtn");
 
+    let budgetHandle: MenuHandle | null = null;
+
+    /** The preset that names a number, for the four that have one. */
+    const presetFor = (n: number) =>
+      budgetMenu?.querySelector(`[role="menuitemradio"][data-leaves="${n}"]`) ??
+      null;
+
+    /**
+     * The single way in for every path that changes the budget.
+     *
+     * The presets, the two steppers and the number field all land here, so the
+     * value in the capsule, the tick in the menu and the figure in the field
+     * cannot end up telling three different stories — which is exactly what a
+     * second `leaves = ...` assignment anywhere else would produce.
+     */
+    function setBudget(n: number) {
+      const wanted = Number.isFinite(n) ? Math.round(n) : 0;
+      leaves = Math.min(MAX_LEAVES, Math.max(0, wanted));
+
+      /* Ticks the preset that owns this number and writes its own label into
+         the capsule — "No leaves", not "0 leaves" — or unticks all four when
+         the number is one only the stepper can reach, which is when the label
+         has to be written here instead. */
+      budgetHandle?.setValue(String(leaves));
+      const named = presetFor(leaves);
+      if (!named && budgetDisplay) budgetDisplay.textContent = pluralLeaves(leaves);
+      customRow?.classList.toggle("is-on", !named);
+
+      /* Never while the caret is in the field: rewriting `value` moves the
+         caret to the end, so the "1" on the way to "10" would be shunted about
+         under the typist. Normalised on blur instead. */
+      if (customInput && document.activeElement !== customInput) {
+        customInput.value = String(leaves);
+      }
+      if (btnDec) btnDec.disabled = leaves <= 0;
+      if (btnInc) btnInc.disabled = leaves >= MAX_LEAVES;
+    }
+
     if (budgetTrigger && budgetMenu && budgetDisplay) {
-      createMenu({
+      budgetHandle = createMenu({
         trigger: budgetTrigger,
         menu: budgetMenu,
         display: budgetDisplay,
         valueAttr: "data-leaves",
-        onSelect: (v) => {
-          leaves = Number(v) || 0;
-        },
+        onSelect: (v) => setBudget(Number(v)),
       });
     }
+
+    btnDec?.addEventListener("click", () => setBudget(leaves - 1));
+    btnInc?.addEventListener("click", () => setBudget(leaves + 1));
+
+    if (customInput) {
+      // Aliased so the listeners below can be written against a field that is
+      // known to exist. `customInput?.addEventListener(...)` narrows the
+      // optional chain but not the body of the callback it is handed.
+      const field = customInput;
+
+      /* An empty field is a half-typed one, not a request for zero, so it
+         waits for a digit rather than snapping the capsule back to "No leaves"
+         in the gap between a delete and a retype. */
+      field.addEventListener("input", () => {
+        if (field.value.trim() === "") return;
+        setBudget(Number(field.value));
+      });
+
+      /* Whatever was typed, the field ends up showing what was applied: "25"
+         and "1e5" leave the budget at MAX_LEAVES and at 0 respectively, and
+         the field has to stop claiming otherwise. */
+      field.addEventListener("blur", () => {
+        field.value = String(leaves);
+      });
+
+      /* Enter is "done". The number is already applied, so there is nothing
+         left to submit — only a menu standing open over the page. */
+      field.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        field.value = String(leaves);
+        budgetHandle?.close();
+      });
+    }
+
+    // Paints the initial state onto controls the markup only guesses at: which
+    // stepper is at its limit, and whether the custom row is the chosen one.
+    setBudget(leaves);
 
     searchBtn?.addEventListener("click", () => {
       document.dispatchEvent(
