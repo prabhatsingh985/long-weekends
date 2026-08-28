@@ -82,6 +82,37 @@ const ogImage = new URL("/og-image.png", Astro.site).href;
  */
 const OG_IMAGE_ALT =
   "The Long Weekends — every long weekend in 2026 and 2027 for India and the United States, with the exact leaves to book for each one.";
+
+/**
+ * The site name Google prints ABOVE the blue link, and nowhere else.
+ *
+ * That line was reading "thelongweekends.com" — the bare host, in flat
+ * lowercase — because nothing on the site declared a site name and Google
+ * falls back to the domain when it has to guess one. It reads the name from
+ * WebSite structured data first, `og:site_name` second, so those two are all
+ * that had to change.
+ *
+ * Deliberately NOT the wordmark. The navbar, the footer and the share card
+ * still say "The Long Weekends", which is the brand as a reader meets it; this
+ * spelling exists for the one place a name and an address sit on top of each
+ * other and the lowercase host looks unnamed. Do not "fix" the mismatch by
+ * pushing this string into the UI — that was tried and reverted.
+ *
+ * The structured data goes on the homepage alone: that is the page Google
+ * derives the name from, and it recomputes on the next crawl of it. Search
+ * Console has no button to hurry that along — days, not minutes.
+ */
+const SITE_NAME = "TheLongWeekends.com";
+
+const siteJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  /* The spellings the site has answered to, so this reads to Google as a name
+     for the site it already knows rather than a different site. */
+  alternateName: ["The Long Weekends", "Long Weekends"],
+  url: new URL("/", Astro.site).href,
+});
 ---
 
 <!doctype html>
@@ -132,7 +163,7 @@ const OG_IMAGE_ALT =
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="The Long Weekends" />
+    <meta property="og:site_name" content={SITE_NAME} />
     {/* The dimensions are declared so a scraper can reserve the right box
         before it has finished fetching the image — without them Facebook and
         LinkedIn draw a small thumbnail on the first share of a URL and only
@@ -235,6 +266,10 @@ const OG_IMAGE_ALT =
         }
       })();
     </script>
+
+    {path === "/" && (
+      <script type="application/ld+json" is:inline set:html={siteJsonLd} />
+    )}
 
     <slot name="head" />
   </head>
