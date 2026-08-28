@@ -153,15 +153,28 @@ const BUDGETS = [
             </span>
           </button>
 
-          {/* `right-0` so the wide menu extends leftward from the seg's right
-              edge on desktop and cannot spill off-screen. When stacked the
-              wrapper is full width, so left and right edges coincide anyway. */}
+          {/* Anchored to the seg's LEFT edge, and full width while stacked.
+              It used to be `right-0` at a fixed 23rem. Both halves of that were
+              wrong once the capsule had two widths. In a row the menu is wider
+              than the seg it belongs to, so pinning its right edge hung 118px
+              of panel out over the COUNTRY control at 1280px — the open menu
+              sat under the wrong half of the capsule. Stacked, the seg is the
+              wider of the two, so the same rule left the panel hugging the
+              right edge with up to 82px of empty control showing beside it.
+
+              `left-0` puts the panel's corner under the label that opened it,
+              which is where the eye already is, and `w-full` below `sm` makes
+              it exactly as wide as its control instead of narrower or (at
+              375px) 17px wider on both sides. From `sm` it takes its natural
+              23rem and grows rightward; createMenu's placeHorizontally() is
+              what keeps that inside the viewport, so the width no longer has
+              to guess with `min(...)`. */}
           <div
             id="heroBudgetMenu"
             role="menu"
             aria-labelledby="heroBudgetTrigger"
             hidden
-            class="popover popover-below absolute right-0 w-[min(23rem,calc(100vw-2rem))] p-2 z-50 text-left"
+            class="popover popover-below absolute left-0 z-50 w-full p-2 text-left sm:w-[23rem] sm:max-w-[calc(100vw-2rem)]"
           >
             {
               BUDGETS.map((b, i) => (

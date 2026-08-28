@@ -86,6 +86,20 @@ const triggerClass = isHero
 
 const menuSide = align === "right" ? "right-0" : "left-0";
 
+/* The panel's width, which is not one number.
+   The bar and pill triggers are small — a flag and a word — so their panel
+   takes its own 22rem and simply hangs off them. The hero seg is not: below
+   `sm` the capsule stacks and the seg becomes the full width of the card, so a
+   fixed 22rem panel sat 29px narrower than the control that opened it at 430px
+   and, once `min()` clamped it to the viewport instead, 18px WIDER than it at
+   375px. Neither reads as the same control. `w-full` below `sm` makes the panel
+   exactly its trigger, and from `sm` it is back to 22rem hanging off a
+   segment; createMenu's placeHorizontally() keeps that inside the viewport, so
+   the `min()` guard is only needed where no script measurement follows. */
+const menuWidth = isHero
+  ? "w-full sm:w-[22rem] sm:max-w-[calc(100vw-2rem)]"
+  : "w-[min(22rem,calc(100vw-2rem))]";
+
 const totalCountries = COUNTRY_GROUPS.reduce((n, g) => n + g.countries.length, 0);
 ---
 
@@ -167,7 +181,8 @@ const totalCountries = COUNTRY_GROUPS.reduce((n, g) => n + g.countries.length, 0
     aria-label="Choose a country"
     hidden
     class:list={[
-      "popover popover-below absolute z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0 text-left",
+      "popover popover-below absolute z-50 overflow-hidden p-0 text-left",
+      menuWidth,
       menuSide,
     ]}
   >
