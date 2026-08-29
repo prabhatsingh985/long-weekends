@@ -135,8 +135,22 @@ export function createMenu(options: MenuOptions): MenuHandle | null {
     const spaceBelow = window.innerHeight - rect.bottom - GAP;
     const spaceAbove = rect.top - GAP;
 
-    // Clear any previous cap before measuring, or the menu's natural height is
-    // read as whatever it was constrained to last time.
+    /* Measured in the BELOW state, whichever one it is currently in, and both
+       halves of that matter.
+
+       Clearing the cap is the older half: a menu still constrained to what it
+       was given last time measures as that constraint rather than as its own
+       height. Forcing the below class is the newer one, and it is there
+       because a menu is allowed to hold a row that only one placement renders
+       — the hero's budget menu carries a phone-only action button that exists
+       solely because hanging below covers the capsule's own. Measure the
+       shrunken above version and the two decisions chase each other: the flip
+       drops the button, the shorter menu now fits below, hanging below puts it
+       back, and the next scroll frame flips again. Sizing always from the
+       taller of the two keeps placement a function of where the trigger sits,
+       which is the only input it should have. */
+    menu.classList.add("popover-below");
+    menu.classList.remove("popover-above");
     menu.style.maxHeight = "";
     const needed = menu.offsetHeight;
 

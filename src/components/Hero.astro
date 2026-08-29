@@ -317,10 +317,22 @@ const CUSTOM_MIN = Number(BUDGETS[BUDGETS.length - 1].value) + 1;
 
                 So the action comes to the panel rather than the panel moving
                 out of its way. On a desktop row nothing is ever covered, and
-                this button is not rendered at all. */}
+                this button is not rendered at all.
+
+                `data-menu-below-only` is the other half of that sentence, and
+                the reason there is a rule about it in global.css rather than a
+                class here: the menu is not always below. Near the bottom of a
+                short viewport createMenu flips it above the trigger, where it
+                covers the COUNTRY control and leaves the capsule's own button
+                fully visible underneath — and then this twin is not a rescue,
+                it is the same button offered twice, one panel edge apart. On a
+                343px screen that is exactly how it read. The attribute hides
+                this row whenever the panel is not the thing standing in the
+                way. */}
             <button
               type="button"
               id="heroBudgetGo"
+              data-menu-below-only
               class="btn btn-brand mt-1.5 w-full sm:hidden"
             >
               <svg

@@ -1105,6 +1105,22 @@
   top: auto;
 }
 
+/* A row that exists only because the panel is in the way.
+   ---------------------------------------------------------------------------
+   The hero's budget menu ends, on phones, in its own "Show plans" button. That
+   button is not a second way to search; it is the capsule's own button brought
+   inside the panel for the one case where the panel is sitting on top of it —
+   hanging below, over a stacked capsule whose action is the row underneath.
+
+   Flip the menu above and that case is gone: the panel now covers the country
+   control instead, and the capsule's button is in plain sight below it, so the
+   twin stops being a rescue and starts being two identical buttons a thumb's
+   width apart, which is what it looked like on a 343px screen. Nothing is
+   covered, so nothing needs replacing. */
+.popover-above [data-menu-below-only] {
+  display: none;
+}
+
 /* CSS animations do run when an element goes from display:none to displayed,
    which is why popovers can keep using the `hidden` attribute (and so stay
    out of the tab order and the accessibility tree) and still animate in. */
