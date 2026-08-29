@@ -185,23 +185,88 @@ export function parseIso(iso: string): Date {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
+/** Short weekday names, indexed by `Date.getDay()`.
+ *
+ *  Derived from the parsed date rather than read off `PlanDay.dayName`, so the
+ *  ends of a range and the cells of the ribbon cannot disagree about a
+ *  weekday — the range is built from ISO strings and the ribbon from the
+ *  solver's own labels. */
+const DOW_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 /**
- * "7 – 10 Nov 2026" | "30 Oct – 2 Nov 2026" | "30 Dec 2026 – 2 Jan 2027"
- * Repeats the month or year only when it actually changes.
+ * The two ends of a break, each as "3" | "30 Oct" | "30 Dec 2026", plus the
+ * weekday each one falls on.
+ *
+ * Month and year are repeated on the left only when they actually change,
+ * which is what keeps "3 – 6 Sep 2026" from reading as two unrelated dates
+ * while still spelling "30 Dec 2026 – 2 Jan 2027" out in full.
  */
-export function formatDateRange(startIso: string, endIso: string): string {
+export function rangeEndpoints(
+  startIso: string,
+  endIso: string
+): { from: string; to: string; fromDow: string; toDow: string } {
   const s = parseIso(startIso);
   const e = parseIso(endIso);
   const sameYear = s.getFullYear() === e.getFullYear();
   const sameMonth = sameYear && s.getMonth() === e.getMonth();
 
-  const left = sameMonth
-    ? `${s.getDate()}`
-    : sameYear
-      ? `${s.getDate()} ${MONTHS_SHORT[s.getMonth()]}`
-      : `${s.getDate()} ${MONTHS_SHORT[s.getMonth()]} ${s.getFullYear()}`;
+  return {
+    from: sameMonth
+      ? `${s.getDate()}`
+      : sameYear
+        ? `${s.getDate()} ${MONTHS_SHORT[s.getMonth()]}`
+        : `${s.getDate()} ${MONTHS_SHORT[s.getMonth()]} ${s.getFullYear()}`,
+    to: `${e.getDate()} ${MONTHS_SHORT[e.getMonth()]} ${e.getFullYear()}`,
+    fromDow: DOW_SHORT[s.getDay()],
+    toDow: DOW_SHORT[e.getDay()],
+  };
+}
 
-  return `${left} – ${e.getDate()} ${MONTHS_SHORT[e.getMonth()]} ${e.getFullYear()}`;
+/**
+ * "7 – 10 Nov 2026" | "30 Oct – 2 Nov 2026" | "30 Dec 2026 – 2 Jan 2027"
+ * Repeats the month or year only when it actually changes.
+ */
+export function formatDateRange(startIso: string, endIso: string): string {
+  const { from, to } = rangeEndpoints(startIso, endIso);
+  return `${from} – ${to}`;
+}
+
+/**
+ * How far off a break is, in the words a person would use: "In 6 days",
+ * "In 3 weeks", "In 2 months".
+ *
+ * A card carrying only a date makes the reader do the subtraction against
+ * today before they know whether it is worth planning around, and that is the
+ * first thing anyone wants from it. The precision decays on purpose — days up
+ * to a fortnight, then weeks, then months — because "In 47 days" is a number
+ * you have to think about and "In 7 weeks" is not.
+ *
+ * Null for a break that has already finished, so a grid left open overnight
+ * shows no countdown rather than a negative one.
+ */
+export function countdownLabel(
+  startIso: string,
+  endIso: string,
+  todayIso: string
+): string | null {
+  if (!todayIso) return null;
+  const today = parseIso(todayIso);
+  // Rounded, not floored: both sides are local midnights, so a DST boundary
+  // between them leaves a 23- or 25-hour remainder that would otherwise shift
+  // every countdown across the change by a day.
+  const daysFromToday = (iso: string) =>
+    Math.round((parseIso(iso).getTime() - today.getTime()) / 86400000);
+
+  if (daysFromToday(endIso) < 0) return null;
+
+  const away = daysFromToday(startIso);
+  if (away < 0) return "Happening now";
+  if (away === 0) return "Starts today";
+  if (away === 1) return "Tomorrow";
+  if (away <= 13) return `In ${away} days`;
+  if (away <= 70) return `In ${Math.round(away / 7)} weeks`;
+  const months = Math.round(away / 30.44);
+  return `In ${months} month${months === 1 ? "" : "s"}`;
 }
 
 export function pluralLeaves(n: number): string {
@@ -213,13 +278,6 @@ export function efficiency(plan: VacationPlan): string | null {
   if (!plan.leavesRequired) return null;
   return `${(plan.totalDaysOff / plan.leavesRequired).toFixed(1)}× per leave`;
 }
-
-const STRATEGY_COPY: Record<VacationPlan["strategy"], string> = {
-  zero: "Costs you nothing",
-  pre: "Take leave before",
-  post: "Take leave after",
-  bridge: "Bridge the gap",
-};
 
 /** Holiday names are interpolated into HTML, so escape defensively even though
  *  they currently all originate from the bundled JSON. */
@@ -288,11 +346,82 @@ function renderDayStrip(plan: VacationPlan): string {
 
 /* ==========================================================================
    Card
-   ========================================================================== */
-export function renderPlanCard(plan: VacationPlan, index: number): string {
+   ==========================================================================
+   Top to bottom the card answers, in order: which festival, how long, which
+   dates, which days, and where that total came from.
+
+   The last of those is what used to be missing. The banner announced "4 days
+   off" and the ribbon showed four coloured cells, and a reader had to count
+   the cells themselves to see that three of the four were free — the whole
+   point of the plan. It is now written out as the sum it is.
+*/
+
+/** The dates, with the weekday each end falls on and how far off it is.
+ *
+ *  "3 – 6 Sep" alone does not say whether the break touches a weekend, which
+ *  is most of what makes one legible at a glance, and it does not say whether
+ *  it is next week or next year. */
+function renderWhen(plan: VacationPlan, todayIso: string): string {
+  const { from, to, fromDow, toDow } = rangeEndpoints(plan.startDate, plan.endDate);
+  const eta = countdownLabel(plan.startDate, plan.endDate, todayIso);
+  // The three labels that mean "this changes what you do this week".
+  const soon =
+    eta === "Happening now" || eta === "Starts today" || eta === "Tomorrow";
+
+  return `<div class="plan-when">
+    <p class="plan-when-dates">
+      <span class="plan-when-dow">${fromDow}</span> ${from}
+      <span class="plan-when-arrow" aria-hidden="true">→</span>
+      <span class="plan-when-dow">${toDow}</span> ${to}
+    </p>
+    ${eta ? `<span class="plan-eta${soon ? " plan-eta-soon" : ""}">${eta}</span>` : ""}
+  </div>`;
+}
+
+/** The total as the sum it is: what the calendar gives you, then what you pay,
+ *  then the answer. Dots match the legend above the grid and the ribbon
+ *  colours, so the row is readable without re-learning anything. */
+function renderMath(plan: VacationPlan): string {
+  const counts = { holiday: 0, weekend: 0, leave: 0 };
+  plan.days.forEach((d) => (counts[d.type] += 1));
+
+  const chip = (dot: string, text: string) =>
+    `<span class="math-chip"><span class="dot ${dot}" aria-hidden="true"></span>${text}</span>`;
+
+  const terms = [
+    counts.holiday &&
+      chip("dot-holiday", `${counts.holiday} holiday${counts.holiday === 1 ? "" : "s"}`),
+    counts.weekend &&
+      chip("dot-weekend", `${counts.weekend} weekend day${counts.weekend === 1 ? "" : "s"}`),
+    counts.leave && chip("dot-pto", pluralLeaves(counts.leave)),
+  ].filter(Boolean) as string[];
+
+  return `<p class="plan-math">
+    ${terms.join(`<span class="math-op" aria-hidden="true">+</span>`)}
+    <span class="math-total">= ${plan.totalDaysOff} days off</span>
+  </p>`;
+}
+
+/* Drawn rather than set as an emoji: 🗓️ is the one glyph on this card that
+   would sit inside a line of UI text, and Windows renders it at a different
+   weight and baseline from the label beside it. */
+const CALENDAR_ICON =
+  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" ` +
+  `stroke-width="2.2" stroke-linecap="round" aria-hidden="true">` +
+  `<rect x="3" y="5.5" width="18" height="15.5" rx="3"></rect>` +
+  `<path d="M8 2.5v5M16 2.5v5M3 11h18"></path></svg>`;
+
+export function renderPlanCard(
+  plan: VacationPlan,
+  index: number,
+  todayIso = ""
+): string {
   const theme = getBannerTheme(plan);
   const start = parseIso(plan.startDate);
-  const eyebrow = `${MONTHS_SHORT[start.getMonth()].toUpperCase()} · ${theme.season}`;
+  // The year belongs in the eyebrow now that the data spans two of them: "SEP"
+  // on its own left the reader to guess which September they were being
+  // offered, and the answer was sometimes eighteen months away.
+  const eyebrow = `${MONTHS_SHORT[start.getMonth()].toUpperCase()} ${start.getFullYear()} · ${theme.season}`;
   const ratio = efficiency(plan);
   const range = formatDateRange(plan.startDate, plan.endDate);
 
@@ -300,45 +429,46 @@ export function renderPlanCard(plan: VacationPlan, index: number): string {
     ? `<span class="tag tag-pto"><span class="dot dot-pto" aria-hidden="true"></span>${pluralLeaves(plan.leavesRequired)}</span>`
     : `<span class="tag tag-holiday"><span class="dot dot-holiday" aria-hidden="true"></span>No leave</span>`;
 
-  return `<article class="card card-interactive flex flex-col overflow-hidden">
+  return `<article class="card card-interactive plan-card flex flex-col overflow-hidden">
     <div class="banner ${theme.cls}">
       <span class="banner-motif" aria-hidden="true">${theme.motif}</span>
       <div class="min-w-0">
         <p class="banner-eyebrow truncate">${escapeHtml(eyebrow)}</p>
-        <p class="mt-1 text-[0.8125rem] font-bold">${STRATEGY_COPY[plan.strategy]}</p>
+        <h3 class="banner-title">${escapeHtml(plan.title)}</h3>
       </div>
-      <div class="shrink-0 text-right">
+      <div class="banner-count shrink-0">
         <p class="banner-figure">${plan.totalDaysOff}</p>
         <p class="banner-figure-label">days off</p>
       </div>
     </div>
 
-    <div class="flex grow flex-col gap-3 p-4">
-      <div>
-        <h3 class="text-[0.9375rem] font-extrabold leading-snug">${escapeHtml(plan.title)}</h3>
-        <p class="mt-1 font-mono text-xs font-semibold text-muted tabular">${escapeHtml(range)}</p>
-      </div>
+    <div class="flex grow flex-col gap-2.5 p-4">
+      ${renderWhen(plan, todayIso)}
 
       ${renderDayStrip(plan)}
 
-      <div class="mt-auto flex items-center justify-between gap-2 pt-1">
+      ${renderMath(plan)}
+
+      <div class="mt-auto flex items-center justify-between gap-2 pt-0.5">
         <div class="flex min-w-0 items-center gap-2">
           ${costTag}
           ${ratio ? `<span class="truncate font-mono text-[0.6875rem] font-semibold text-muted">${ratio}</span>` : ""}
         </div>
         <button
           type="button"
-          class="btn btn-ghost btn-sm btn-open-cal shrink-0"
+          class="btn btn-ghost btn-sm btn-open-cal shrink-0 gap-1.5"
           data-idx="${index}"
           aria-label="See ${escapeHtml(plan.title)} on a calendar, ${escapeHtml(range)}"
-        >Calendar</button>
+        >${CALENDAR_ICON}Calendar</button>
       </div>
     </div>
   </article>`;
 }
 
-export function renderPlanGrid(plans: VacationPlan[]): string {
-  return plans.map((plan, i) => renderPlanCard(plan, i)).join("");
+/** `todayIso` is optional so a caller with no clock still renders a card; it
+ *  loses only the countdown. */
+export function renderPlanGrid(plans: VacationPlan[], todayIso = ""): string {
+  return plans.map((plan, i) => renderPlanCard(plan, i, todayIso)).join("");
 }
 
 /* ==========================================================================

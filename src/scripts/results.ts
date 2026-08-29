@@ -319,7 +319,7 @@ export function mountResults(options: ResultsOptions): ResultsHandle | null {
   }
 
   function paint() {
-    grid.innerHTML = renderPlanGrid(visible);
+    grid.innerHTML = renderPlanGrid(visible, options.todayIso);
     bindCardButtons();
     paintPills();
     paintSummary();
