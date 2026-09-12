@@ -23,7 +23,7 @@ const {
         "inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full text-xs font-bold bg-[#FFDD00] text-zinc-950 hover:bg-[#ffe338] active:scale-95 transition-all duration-150 shadow-sm no-underline shrink-0 group",
         className,
       ]}
-      aria-label="Support the project — Buy me a coffee"
+      aria-label="Support the project"
       title="Support The Long Weekends"
     >
       <svg
@@ -42,8 +42,8 @@ const {
         <line x1="10" y1="2" x2="10" y2="4" />
         <line x1="14" y1="2" x2="14" y2="4" />
       </svg>
-      <span class="hidden sm:inline">Buy me a coffee</span>
-      <span class="inline sm:hidden">Coffee</span>
+      <span class="hidden sm:inline">Support us</span>
+      <span class="inline sm:hidden">Support</span>
     </a>
   )
 }
@@ -58,7 +58,7 @@ const {
         "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold bg-[#FFDD00] text-zinc-950 hover:bg-[#ffe338] shadow-sm hover:shadow transition-all duration-150 active:scale-95 no-underline w-fit group",
         className,
       ]}
-      aria-label="Support the project — Buy me a coffee"
+      aria-label="Support the project"
     >
       <svg
         class="w-4 h-4 text-zinc-950 shrink-0 group-hover:rotate-12 transition-transform duration-200"
@@ -76,7 +76,7 @@ const {
         <line x1="10" y1="2" x2="10" y2="4" />
         <line x1="14" y1="2" x2="14" y2="4" />
       </svg>
-      <span>Buy me a coffee</span>
+      <span>Support us ☕</span>
     </a>
   )
 }
@@ -90,7 +90,7 @@ const {
         className,
       ]}
       role="region"
-      aria-label="Buy me a coffee floating widget"
+      aria-label="Support us floating widget"
     >
       {/* Payment Link with Coffee Cup & Text */}
       <a
@@ -99,7 +99,7 @@ const {
         target="_blank"
         rel="noopener noreferrer"
         class="flex items-center gap-2 pl-3.5 pr-1 py-2.5 text-zinc-950 font-bold text-xs no-underline shrink-0"
-        aria-label="Support the project — Buy me a coffee"
+        aria-label="Support the project"
         title="Support The Long Weekends"
       >
         <svg
@@ -119,7 +119,7 @@ const {
           <line x1="14" y1="2" x2="14" y2="4" />
         </svg>
         <span id="bmc-pill-label" class="whitespace-nowrap">
-          Buy me a coffee
+          Support us
         </span>
       </a>
 
@@ -150,7 +150,7 @@ const {
       <div
         id="bmc-pill-collapsed-icon"
         class="hidden w-10 h-10 items-center justify-center text-zinc-950"
-        title="Click to show Buy me a coffee"
+        title="Click to show Support us"
       >
         <svg
           class="w-4 h-4 text-zinc-950"
@@ -190,7 +190,7 @@ const {
               closeBtn.classList.add("hidden");
               collapsedIcon.classList.remove("hidden");
               collapsedIcon.classList.add("flex");
-              pill.setAttribute("title", "Click to show Buy me a coffee");
+              pill.setAttribute("title", "Click to show Support us");
             } else {
               // Show full pill with text & close button
               link.classList.remove("hidden");
