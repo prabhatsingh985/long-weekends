@@ -1,0 +1,237 @@
+---
+interface Props {
+  /** The full Razorpay Payment Page URL */
+  paymentUrl?: string;
+  variant?: "navbar" | "footer" | "floating";
+  class?: string;
+}
+
+const {
+  paymentUrl = "https://rzp.io/rzp/WHmAHJjv",
+  variant = "navbar",
+  class: className = "",
+} = Astro.props;
+---
+
+{
+  variant === "navbar" && (
+    <a
+      href={paymentUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class:list={[
+        "inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3 rounded-full text-xs font-bold bg-[#FFDD00] text-zinc-950 hover:bg-[#ffe338] active:scale-95 transition-all duration-150 shadow-sm no-underline shrink-0 group",
+        className,
+      ]}
+      aria-label="Support the project — Buy me a coffee"
+      title="Support The Long Weekends"
+    >
+      <svg
+        class="w-3.5 h-3.5 text-zinc-950 shrink-0 group-hover:rotate-12 transition-transform duration-200"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+        <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+        <line x1="6" y1="2" x2="6" y2="4" />
+        <line x1="10" y1="2" x2="10" y2="4" />
+        <line x1="14" y1="2" x2="14" y2="4" />
+      </svg>
+      <span class="hidden sm:inline">Buy me a coffee</span>
+      <span class="inline sm:hidden">Coffee</span>
+    </a>
+  )
+}
+
+{
+  variant === "footer" && (
+    <a
+      href={paymentUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class:list={[
+        "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold bg-[#FFDD00] text-zinc-950 hover:bg-[#ffe338] shadow-sm hover:shadow transition-all duration-150 active:scale-95 no-underline w-fit group",
+        className,
+      ]}
+      aria-label="Support the project — Buy me a coffee"
+    >
+      <svg
+        class="w-4 h-4 text-zinc-950 shrink-0 group-hover:rotate-12 transition-transform duration-200"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+        <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+        <line x1="6" y1="2" x2="6" y2="4" />
+        <line x1="10" y1="2" x2="10" y2="4" />
+        <line x1="14" y1="2" x2="14" y2="4" />
+      </svg>
+      <span>Buy me a coffee</span>
+    </a>
+  )
+}
+
+{
+  variant === "floating" && (
+    <div
+      id="bmc-floating-pill"
+      class:list={[
+        "fixed bottom-5 right-5 z-40 flex items-center bg-[#FFDD00] hover:bg-[#ffe338] text-zinc-950 font-bold text-xs rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border border-amber-400/60 select-none group cursor-pointer",
+        className,
+      ]}
+      role="region"
+      aria-label="Buy me a coffee floating widget"
+    >
+      {/* Payment Link with Coffee Cup & Text */}
+      <a
+        id="bmc-pill-link"
+        href={paymentUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-2 pl-3.5 pr-1 py-2.5 text-zinc-950 font-bold text-xs no-underline shrink-0"
+        aria-label="Support the project — Buy me a coffee"
+        title="Support The Long Weekends"
+      >
+        <svg
+          class="w-4 h-4 text-zinc-950 shrink-0 group-hover:rotate-12 transition-transform duration-200"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+          <line x1="6" y1="2" x2="6" y2="4" />
+          <line x1="10" y1="2" x2="10" y2="4" />
+          <line x1="14" y1="2" x2="14" y2="4" />
+        </svg>
+        <span id="bmc-pill-label" class="whitespace-nowrap">
+          Buy me a coffee
+        </span>
+      </a>
+
+      {/* Dismiss (X) button inside the pill to collapse into the icon mark */}
+      <button
+        type="button"
+        id="bmc-pill-close-btn"
+        class="flex items-center justify-center w-5 h-5 mr-2 ml-1 rounded-full hover:bg-black/15 active:scale-90 text-zinc-800 hover:text-zinc-950 transition-all cursor-pointer"
+        aria-label="Hide text"
+        title="Hide text (show icon only)"
+      >
+        <svg
+          class="w-3 h-3"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      {/* Collapsed icon view (shown when text is dismissed) */}
+      <div
+        id="bmc-pill-collapsed-icon"
+        class="hidden w-10 h-10 items-center justify-center text-zinc-950"
+        title="Click to show Buy me a coffee"
+      >
+        <svg
+          class="w-4 h-4 text-zinc-950"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+          <line x1="6" y1="2" x2="6" y2="4" />
+          <line x1="10" y1="2" x2="10" y2="4" />
+          <line x1="14" y1="2" x2="14" y2="4" />
+        </svg>
+      </div>
+    </div>
+
+    <script is:inline>
+      (function () {
+        function initBmcPill() {
+          const pill = document.getElementById("bmc-floating-pill");
+          const link = document.getElementById("bmc-pill-link");
+          const closeBtn = document.getElementById("bmc-pill-close-btn");
+          const collapsedIcon = document.getElementById("bmc-pill-collapsed-icon");
+
+          if (!pill || !link || !closeBtn || !collapsedIcon) return;
+
+          let isCollapsed = sessionStorage.getItem("lw_bmc_collapsed") === "1";
+
+          function updateView() {
+            if (isCollapsed) {
+              // Hide text link & close button, show only the circular coffee icon
+              link.classList.add("hidden");
+              closeBtn.classList.add("hidden");
+              collapsedIcon.classList.remove("hidden");
+              collapsedIcon.classList.add("flex");
+              pill.setAttribute("title", "Click to show Buy me a coffee");
+            } else {
+              // Show full pill with text & close button
+              link.classList.remove("hidden");
+              closeBtn.classList.remove("hidden");
+              collapsedIcon.classList.add("hidden");
+              collapsedIcon.classList.remove("flex");
+              pill.removeAttribute("title");
+            }
+          }
+
+          // Initial render
+          updateView();
+
+          // Close button: collapse to icon mark
+          closeBtn.onclick = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isCollapsed = true;
+            sessionStorage.setItem("lw_bmc_collapsed", "1");
+            updateView();
+          };
+
+          // Clicking pill when collapsed: expands it back to show text
+          pill.onclick = function (e) {
+            if (isCollapsed) {
+              e.preventDefault();
+              e.stopPropagation();
+              isCollapsed = false;
+              sessionStorage.removeItem("lw_bmc_collapsed");
+              updateView();
+            }
+          };
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", initBmcPill);
+        } else {
+          initBmcPill();
+        }
+        document.addEventListener("astro:page-load", initBmcPill);
+      })();
+    </script>
+  )
+}

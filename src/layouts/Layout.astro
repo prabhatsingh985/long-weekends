@@ -15,6 +15,7 @@ import "../styles/global.css";
  * once. Every `<Flag>` anywhere on the page is a `<use>` pointing here.
  */
 import FlagSprite from "../components/FlagSprite.astro";
+import BuyMeACoffee from "../components/BuyMeACoffee.astro";
 
 interface Props {
   title: string;
@@ -280,5 +281,6 @@ const siteJsonLd = JSON.stringify({
     <FlagSprite />
     <a class="skip-link" href="#main">Skip to results</a>
     <slot />
+    <BuyMeACoffee variant="floating" />
   </body>
 </html>

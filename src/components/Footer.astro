@@ -7,6 +7,7 @@
  * Removed rather than wired up — the footer has no place for it.
  */
 import Flag from "./Flag.astro";
+import BuyMeACoffee from "./BuyMeACoffee.astro";
 import { COUNTRIES } from "../data/countries";
 
 const year = new Date().getFullYear();
@@ -104,6 +105,9 @@ const siteLinks = [
           Your leave balance is finite. Public holidays are not. We line the two
           up so you spend the fewest days for the longest break.
         </p>
+        <div class="mt-4">
+          <BuyMeACoffee variant="footer" />
+        </div>
       </div>
 
       {/* Four columns, but only above lg. gap-10 at 320px left ~124px per column,
